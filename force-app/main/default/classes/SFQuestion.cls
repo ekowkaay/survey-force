@@ -23,6 +23,7 @@ public inherited sharing class SFQuestion {
 	public Boolean renderRadioVertical { get; set; }
 	public Boolean renderMultiCheckboxes { get; set; }
 	public Boolean renderRadioHorizontal { get; set; }
+	public Boolean hideOnSurvey { get; set; }
 	//public Boolean renderInput                {get; set;}
 
 	public Boolean noData { get; set; }
@@ -42,6 +43,7 @@ public inherited sharing class SFQuestion {
 		choices = sq.Choices__c;
 		required = sq.Required__c;
 		questionType = sq.Type__c;
+		hideOnSurvey = sq.Hide_on_Survey__c;
 		selectedOption = '';
 		selectedOptions = new List<String>();
 		renderMultiCheckboxes = false;

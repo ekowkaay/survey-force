@@ -32,47 +32,49 @@
 			<apex:outputPanel rendered="{!thankYouRendered == false}">
 				<div class="slds-form_stacked">
 					<apex:repeat value="{!allQuestions}" var="surveyQuestion" id="aQPreview">
-						<div class="slds-box slds-theme_default">
-							<div class="slds-form-element">
-								<label class="slds-form-element__label">
-									<apex:outputText value="{!surveyQuestion.orderNumber + ':'}" styleClass="slds-text-heading_small" /> &nbsp;
-									<apex:outputText escape="true" value="{!surveyQuestion.question}" styleClass="slds-text-body_regular" /> &nbsp;
-									<apex:outputText rendered="{!surveyQuestion.required}" value="({!$Label.LABS_SF_Required})" styleClass="slds-text-body_small slds-text-color_error" />
-								</label>
-							</div>
-							<apex:outputPanel rendered="{!surveyQuestion.renderRadioVertical}">
-								<apex:selectRadio styleClass="convertToLDS" layout="pageDirection" rendered="{!surveyQuestion.renderRadioVertical}" value="{!surveyQuestion.selectedOption}">
-									<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
-								</apex:selectRadio>
-							</apex:outputPanel>
-
-							<apex:outputPanel rendered="{!surveyQuestion.renderMultiCheckboxes}">
-								<apex:selectCheckboxes
-									styleClass="convertToLDS"
-									layout="pageDirection"
-									rendered="{!surveyQuestion.renderMultiCheckboxes}"
-									value="{!surveyQuestion.selectedOptions}">
-									<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
-								</apex:selectCheckboxes>
-							</apex:outputPanel>
-							<apex:outputPanel rendered="{!surveyQuestion.renderFreeText}">
+						<apex:outputPanel rendered="{!surveyQuestion.hideOnSurvey == false}">
+							<div class="slds-box slds-theme_default">
 								<div class="slds-form-element">
-									<div class="slds-form-element__control">
-										<apex:inputTextArea
-											styleClass="slds-textarea"
-											cols=""
-											rows="{!surveyQuestion.noOfRowsForTextArea}"
-											rendered="{!surveyQuestion.renderFreeText}"
-											value="{!surveyQuestion.inputText}" />
-									</div>
+									<label class="slds-form-element__label">
+										<apex:outputText value="{!surveyQuestion.orderNumber + ':'}" styleClass="slds-text-heading_small" /> &nbsp;
+										<apex:outputText escape="true" value="{!surveyQuestion.question}" styleClass="slds-text-body_regular" /> &nbsp;
+										<apex:outputText rendered="{!surveyQuestion.required}" value="({!$Label.LABS_SF_Required})" styleClass="slds-text-body_small slds-text-color_error" />
+									</label>
 								</div>
-							</apex:outputPanel>
-							<apex:outputPanel rendered="{!surveyQuestion.renderRadioHorizontal}">
-								<apex:selectRadio styleClass="convertToLDS" rendered="{!surveyQuestion.renderRadioHorizontal}" value="{!surveyQuestion.selectedOption}">
-									<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
-								</apex:selectRadio>
-							</apex:outputPanel>
-						</div>
+								<apex:outputPanel rendered="{!surveyQuestion.renderRadioVertical}">
+									<apex:selectRadio styleClass="convertToLDS" layout="pageDirection" rendered="{!surveyQuestion.renderRadioVertical}" value="{!surveyQuestion.selectedOption}">
+										<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
+									</apex:selectRadio>
+								</apex:outputPanel>
+
+								<apex:outputPanel rendered="{!surveyQuestion.renderMultiCheckboxes}">
+									<apex:selectCheckboxes
+										styleClass="convertToLDS"
+										layout="pageDirection"
+										rendered="{!surveyQuestion.renderMultiCheckboxes}"
+										value="{!surveyQuestion.selectedOptions}">
+										<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
+									</apex:selectCheckboxes>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!surveyQuestion.renderFreeText}">
+									<div class="slds-form-element">
+										<div class="slds-form-element__control">
+											<apex:inputTextArea
+												styleClass="slds-textarea"
+												cols=""
+												rows="{!surveyQuestion.noOfRowsForTextArea}"
+												rendered="{!surveyQuestion.renderFreeText}"
+												value="{!surveyQuestion.inputText}" />
+										</div>
+									</div>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!surveyQuestion.renderRadioHorizontal}">
+									<apex:selectRadio styleClass="convertToLDS" rendered="{!surveyQuestion.renderRadioHorizontal}" value="{!surveyQuestion.selectedOption}">
+										<apex:selectOptions value="{!surveyQuestion.responseOptions}" />
+									</apex:selectRadio>
+								</apex:outputPanel>
+							</div>
+						</apex:outputPanel>
 					</apex:repeat>
 				</div>
 			</apex:outputPanel>

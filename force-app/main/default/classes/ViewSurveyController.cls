@@ -136,7 +136,7 @@ global virtual with sharing class ViewSurveyController {
 		//};
 		//SurveyForceUtil.AccessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), fields);
 		List<Survey_Question__c> allQuestionsObject = [
-			SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c
+			SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c
 			FROM Survey_Question__c
 			WHERE Survey__c = :surveyId
 			WITH USER_MODE
@@ -182,6 +182,9 @@ global virtual with sharing class ViewSurveyController {
 				System.debug('Question type ' + q.questionType);
 				System.debug('options ' + q.responseOptions);
 				System.debug('survey answer ' + q.selectedOption);
+				if(q.hideOnSurvey == true ){
+					continue;
+				}
 
 				SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
 
