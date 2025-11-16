@@ -55,10 +55,8 @@ Make sure that you check access for Force.com site guest user if you plan to emb
    - SurveySitesUtil
    - ViewSurveyController
    - ViewSurveyControllerWithoutSharing
-1. Create a Sharing Rule for "Survey" in Setup->Sharing Settings. Allow Read access to "Guest" user where "Publicly Available" (Field:Survey\_\_c.Share_with_Guest_User\_\_c) is true (or any other criteria)
-   - Without this, Guest user cannot see Survey object becasue of new Guest user restrictions
-   - See below for details
-1. **Important**: For each survey you want to make publicly available, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
+1. ~~Create a Sharing Rule for "Survey" in Setup->Sharing Settings~~ **No longer required!** As of the latest version, guest users can access surveys via direct link without requiring sharing rules. Simply check the "Publicly Available" field on the Survey record to enable guest access.
+1. **Important**: For each survey you want to make publicly available to guest users, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
 
 ## Survey Connecting to Contact or Case Records
 
@@ -82,17 +80,15 @@ Following notes were posted by "Cynthia Chen" on https://appexchange.salesforce.
 
 3. "Secure guest user record access": Enabling this will stop Guest user access to Salesforce org data. Enabling this may result in Guest user not having access to Survey Force records. More details are at: https://help.salesforce.com/articleView?id=networks_secure_guest_user_sharing.htm&type=5. Be careful when enabling this feature.
    - For this to work, DML code for Guest user has been moved to a without sharing class (ViewSurveyControllerWithoutSharing.cls)
-   - Create a sharing rule to allow read access to Survey object (and all child objects that includes Survey Questions)
-     - This is for the Guest user to be able to view Survey and Survey Questions
-       ![SurveyForce Guest User Sharing Rule](assets/images/SurveyForce_GuestUser_SharingRule.png)
-   - This sharing rule is based on a field on the Survey\_\_c object called "Publicly Available" (Share_with_Guest_User\_\_c) which is false by default for security. To enable Guest user access for a specific survey, check this field on the Survey record
-   - Do NOT assign Guest user as Owner of Sharing rule (only sharing rule is needed)
+   - **New in latest version**: Sharing rules are no longer required! Guest users can now access surveys via direct link without needing to configure sharing rules. Simply check the "Publicly Available" (Share_with_Guest_User\_\_c) field on each Survey record you want to make available to guest users.
+   - The "Publicly Available" field is false by default for security. To enable Guest user access for a specific survey, check this field on the Survey record.
 
 ## Latest Changes
 
 1. After updating to latest version on the main branch, the ONLY SurveyForce static resources needed are the SurveyForce folder and the UserGuide pdf. All other resources have been removed.
 2. A new field has been added to allow hiding a specific question on the survey. This allows you to modify and "remove" questions without losing response data.
 3. **Security Update**: The "Publicly Available" (Share_with_Guest_User\_\_c) field now defaults to `false` for new surveys. This means surveys are NOT shared with guest users by default. To make a survey publicly available, you must explicitly check this field on the Survey record.
+4. **Usability Improvement**: Guest users can now access surveys via direct link without requiring sharing rules! When a survey is marked as "Publicly Available", guest users can view and submit it directly. This simplifies setup and eliminates the need for complex sharing rule configuration.
 
 ## Upgrade Options
 
