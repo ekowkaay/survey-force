@@ -37,7 +37,7 @@ global virtual with sharing class ViewSurveyController {
 	public ViewSurveyController(ApexPages.StandardController stdController) {
 		// Get url parameters and validate as proper Salesforce Id to prevent SOQL injection
 		String rawSurveyId = Apexpages.currentPage().getParameters().get('id');
-		
+
 		// Validate and sanitize the surveyId parameter
 		if (String.isNotBlank(rawSurveyId)) {
 			try {
