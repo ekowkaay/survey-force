@@ -1,0 +1,15 @@
+{
+	"packageDirectories": [
+		{
+			"path": "force-app-lwc",
+			"default": true,
+			"package": "Survey Force LWC",
+			"versionName": "LWC Components Only",
+			"versionNumber": "1.0.0.NEXT"
+		}
+	],
+	"name": "Survey Force LWC Components",
+	"namespace": "",
+	"sfdcLoginUrl": "https://login.salesforce.com",
+	"sourceApiVersion": "58.0"
+}
