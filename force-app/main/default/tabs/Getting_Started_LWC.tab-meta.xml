@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+	<description>Lightning Web Component tab for getting started</description>
+	<flexiPage>Getting_Started_Page</flexiPage>
+	<label>Getting Started LWC</label>
+	<motif>Custom48:Flag</motif>
+</CustomTab>
