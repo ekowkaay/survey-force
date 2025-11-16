@@ -35,12 +35,40 @@ global virtual with sharing class ViewSurveyController {
 	*/
 	//------------------------------------------------------------------------------//
 	public ViewSurveyController(ApexPages.StandardController stdController) {
-		// Get url parameters
-		if (!Test.isRunningTest()) {
-			stdController.addFields(new List<String>{ 'Thank_You_Link__c', 'Thank_You_Text__c', 'All_Responses_Anonymous__c' });
+		// Get url parameters and validate as proper Salesforce Id to prevent SOQL injection
+		String rawSurveyId = Apexpages.currentPage().getParameters().get('id');
+		
+		// Validate and sanitize the surveyId parameter
+		if (String.isNotBlank(rawSurveyId)) {
+			try {
+				// Type cast to Id validates it's a proper Salesforce ID format
+				Id validatedId = (Id) rawSurveyId;
+				surveyId = validatedId;
+			} catch (Exception e) {
+				// Invalid ID format - prevent SOQL injection
+				ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Invalid survey identifier.'));
+				return;
+			}
 		}
-		mySurvey = (Survey__c) stdController.getRecord();
-		surveyId = mySurvey.Id != null ? mySurvey.Id : Apexpages.currentPage().getParameters().get('id');
+
+		// For guest users, bypass sharing rules and query directly
+		if (System.UserInfo.getUserType() == 'Guest' && surveyId != null) {
+			mySurvey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(surveyId);
+			if (mySurvey == null) {
+				// Survey not found or not marked as publicly available
+				ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'This survey is not available. Please contact the survey administrator.'));
+				return;
+			}
+		} else {
+			// For internal users, use standard controller with sharing rules
+			if (!Test.isRunningTest()) {
+				stdController.addFields(new List<String>{ 'Thank_You_Link__c', 'Thank_You_Text__c', 'All_Responses_Anonymous__c' });
+			}
+			mySurvey = (Survey__c) stdController.getRecord();
+			if (surveyId == null && mySurvey.Id != null) {
+				surveyId = mySurvey.Id;
+			}
+		}
 		init();
 	}
 
@@ -61,7 +89,7 @@ global virtual with sharing class ViewSurveyController {
 		if (contactId == null || !(contactId instanceof Id)) {
 			contactId = 'none';
 		}
-		surveyId = String.escapeSingleQuotes(surveyId);
+		// surveyId is already validated as Id type in constructor - no need to escape
 		caseId = String.escapeSingleQuotes(caseId); //NOPMD
 		contactId = String.escapeSingleQuotes(contactId); //NOPMD
 
@@ -127,21 +155,22 @@ global virtual with sharing class ViewSurveyController {
 	 */
 	public List<SFQuestion> getAQuestion() {
 		System.debug('Accessible field: ' + Schema.Survey_Question__c.fields.Required__c.getDescribe().isAccessible());
-		//qQuestion = '';
-		//qChoices ='';
-		//List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
-		//	Schema.Survey_Question__c.fields.Type__c,Schema.Survey_Question__c.fields.Survey__c,
-		//	Schema.Survey_Question__c.fields.Required__c,Schema.Survey_Question__c.fields.Question__c,
-		//	Schema.Survey_Question__c.fields.OrderNumber__c,Schema.Survey_Question__c.fields.Choices__c
-		//};
-		//SurveyForceUtil.AccessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), fields);
-		List<Survey_Question__c> allQuestionsObject = [
-			SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c
-			FROM Survey_Question__c
-			WHERE Survey__c = :surveyId
-			WITH USER_MODE
-			ORDER BY OrderNumber__c ASC NULLS LAST
-		];
+
+		List<Survey_Question__c> allQuestionsObject;
+
+		// For guest users, query without sharing rules
+		if (System.UserInfo.getUserType() == 'Guest') {
+			allQuestionsObject = ViewSurveyControllerWithoutSharing.getSurveyQuestionsForGuestUser(surveyId);
+		} else {
+			// For internal users, use WITH USER_MODE
+			allQuestionsObject = [
+				SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+				ORDER BY OrderNumber__c ASC NULLS LAST
+			];
+		}
 
 		allQuestions = new List<SFQuestion>();
 
@@ -182,7 +211,7 @@ global virtual with sharing class ViewSurveyController {
 				System.debug('Question type ' + q.questionType);
 				System.debug('options ' + q.responseOptions);
 				System.debug('survey answer ' + q.selectedOption);
-				if(q.hideOnSurvey == true ){
+				if (q.hideOnSurvey == true) {
 					continue;
 				}
 

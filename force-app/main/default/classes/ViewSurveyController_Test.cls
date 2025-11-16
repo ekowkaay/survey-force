@@ -290,6 +290,41 @@ private class ViewSurveyController_Test {
 			System.assertEquals(null, pr);
 			System.assertEquals(true, vsc.ThankYouRendered);
 		}
+	}
 
+	@IsTest
+	static void testGuestUserAccessWithPubliclyAvailableSurvey() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+			// Mark survey as publicly available
+			tu.survey.Share_with_Guest_User__c = true;
+			update tu.survey;
+
+			Test.startTest();
+			// Test the without sharing methods directly since we can't simulate guest user context
+			Survey__c retrievedSurvey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(tu.surveyId);
+			System.assertNotEquals(null, retrievedSurvey, 'Survey marked as publicly available should be retrievable');
+			System.assertEquals(tu.surveyId, retrievedSurvey.Id);
+
+			List<Survey_Question__c> questions = ViewSurveyControllerWithoutSharing.getSurveyQuestionsForGuestUser(tu.surveyId);
+			System.assertEquals(SurveyTestingUtil.QUESTION_TYPES, questions.size(), 'Should retrieve all questions for the survey');
+			Test.stopTest();
+		}
+	}
+
+	@IsTest
+	static void testGuestUserAccessWithNonPublicSurvey() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+			// Survey is NOT marked as publicly available (Share_with_Guest_User__c = false by default)
+
+			Test.startTest();
+			// Test the without sharing methods directly
+			Survey__c retrievedSurvey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(tu.surveyId);
+			System.assertEquals(null, retrievedSurvey, 'Survey not marked as publicly available should not be retrievable');
+			Test.stopTest();
+		}
 	}
 }
