@@ -58,6 +58,7 @@ Make sure that you check access for Force.com site guest user if you plan to emb
 1. Create a Sharing Rule for "Survey" in Setup->Sharing Settings. Allow Read access to "Guest" user where "Publicly Available" (Field:Survey\_\_c.Share_with_Guest_User\_\_c) is true (or any other criteria)
    - Without this, Guest user cannot see Survey object becasue of new Guest user restrictions
    - See below for details
+1. **Important**: For each survey you want to make publicly available, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
 
 ## Survey Connecting to Contact or Case Records
 
@@ -73,11 +74,9 @@ Make sure that you check access for Force.com site guest user if you plan to emb
 Following notes were posted by "Cynthia Chen" on https://appexchange.salesforce.com/listingDetail?listingId=a0N30000003I2gDEAS&revId=a0S3A00000Jk9SvUAJ&tab=r
 
 1. Error on viewing the report results of the survey: error messages "The report ID and the developer name are not defined. Provide either the report ID or the developer name for the report that contains the chart." and "List has no rows for assignment to SObject"
-
    - It is because the user has no permission to see the report "Survey with Questions and Responses“, share the report folder to the user will solve this error. If want to share this report to all internal users, create a Public Group and add All Internal Users will be OK. (Enable automatic access to records using role hierarchies for public groups by selecting Grant Access Using Hierarchies when creating the group. However, don’t use this option if you’re creating a public group with All Internal Users as members.) (The all internal user group is created only after portals/community are enabled.)
 
 2. If want to put an image in the survey title and let the survey taker see the image,
-
    - Sites > [PublicSiteName] > Public Access Settings > Field-Level Security > look for the survey object > view > give reading permissions to the header： Survey Header
      (This permission is included in the Guest permission set, so if you use that, this step is not necessary.)
 
@@ -86,13 +85,14 @@ Following notes were posted by "Cynthia Chen" on https://appexchange.salesforce.
    - Create a sharing rule to allow read access to Survey object (and all child objects that includes Survey Questions)
      - This is for the Guest user to be able to view Survey and Survey Questions
        ![SurveyForce Guest User Sharing Rule](assets/images/SurveyForce_GuestUser_SharingRule.png)
-   - This sharing rule is based on a new field added to Survey\_\_c object which is true by default. To remove access from Guest user, you can change the default value option OR create a Process Builder process, Flow, or trigger to remove it conditionally based on data
+   - This sharing rule is based on a field on the Survey\_\_c object called "Publicly Available" (Share_with_Guest_User\_\_c) which is false by default for security. To enable Guest user access for a specific survey, check this field on the Survey record
    - Do NOT assign Guest user as Owner of Sharing rule (only sharing rule is needed)
 
 ## Latest Changes
 
 1. After updating to latest version on the main branch, the ONLY SurveyForce static resources needed are the SurveyForce folder and the UserGuide pdf. All other resources have been removed.
 2. A new field has been added to allow hiding a specific question on the survey. This allows you to modify and "remove" questions without losing response data.
+3. **Security Update**: The "Publicly Available" (Share_with_Guest_User\_\_c) field now defaults to `false` for new surveys. This means surveys are NOT shared with guest users by default. To make a survey publicly available, you must explicitly check this field on the Survey record.
 
 ## Upgrade Options
 
