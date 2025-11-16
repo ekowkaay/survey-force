@@ -1,0 +1,56 @@
+//Adding 2 DML statements here so Guest user can submit these 2 DMLs
+//Without this, Guest user will not be able to submit these records becasue of new Guest user security
+//
+public without sharing class ViewSurveyControllerWithoutSharing {
+	//this method is ONLY to do DML in without sharing mode
+	//Make sure to try/catch any errors in the calling method
+	public static void createSurveyTaken(SurveyTaker__c st) {
+		insert st;
+	}
+	//this method is ONLY to do DML in without sharing mode
+	//Make sure to try/catch any errors in the calling method
+	public static void createSurveyQuestionResponse(List<SurveyQuestionResponse__c> sqrList) {
+		insert sqrList;
+	}
+
+	/**
+	 * Query Survey without sharing rules enforcement, but only if it's marked as publicly available
+	 * This allows guest users to access surveys via direct link without requiring sharing rules
+	 * @param surveyId The ID of the survey to query
+	 * @return The Survey record if it exists and is marked as publicly available, null otherwise
+	 */
+	public static Survey__c getSurveyForGuestUser(Id surveyId) {
+		try {
+			List<Survey__c> surveys = [
+				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Hide_Survey_Name__c, Survey_Container_CSS__c, Share_with_Guest_User__c
+				FROM Survey__c
+				WHERE Id = :surveyId AND Share_with_Guest_User__c = TRUE
+				LIMIT 1
+			];
+			return surveys.isEmpty() ? null : surveys[0];
+		} catch (Exception e) {
+			System.debug('Error querying survey: ' + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Query Survey Questions without sharing rules enforcement for surveys marked as publicly available
+	 * This allows guest users to view survey questions via direct link without requiring sharing rules
+	 * @param surveyId The ID of the survey whose questions to query
+	 * @return List of Survey Question records for the specified survey
+	 */
+	public static List<Survey_Question__c> getSurveyQuestionsForGuestUser(Id surveyId) {
+		try {
+			return [
+				SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :surveyId
+				ORDER BY OrderNumber__c ASC NULLS LAST
+			];
+		} catch (Exception e) {
+			System.debug('Error querying survey questions: ' + e.getMessage());
+			return new List<Survey_Question__c>();
+		}
+	}
+}

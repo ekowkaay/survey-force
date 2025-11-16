@@ -1,0 +1,55 @@
+<template>
+	<div class="slds-box slds-theme_default slds-m-bottom_medium">
+		<!-- Question Label -->
+		<div class="slds-form-element">
+			<label class="slds-form-element__label slds-text-heading_small">
+				<span class="slds-text-color_default">{question.orderNumber}:</span>
+				<span class="slds-m-left_x-small">{question.question}</span>
+				<template if:true={isRequired}>
+					<abbr class="slds-required slds-m-left_x-small" title="required">*</abbr>
+				</template>
+			</label>
+		</div>
+
+		<!-- Question Response Input -->
+		<div class="slds-form-element slds-m-top_small">
+			<div class="slds-form-element__control">
+				<!-- Free Text -->
+				<template if:true={isFreeText}>
+					<lightning-textarea name={question.id} data-question-id={question.id} rows={question.rowsForTextArea} onchange={handleResponseChange}></lightning-textarea>
+				</template>
+
+				<!-- Single Select (Radio Buttons) -->
+				<template if:true={isSingleSelect}>
+					<template if:true={hasChoices}>
+						<lightning-radio-group
+							name={question.id}
+							options={question.choices}
+							data-question-id={question.id}
+							type="radio"
+							onchange={handleResponseChange}></lightning-radio-group>
+					</template>
+				</template>
+
+				<!-- Multi-Select (Checkboxes) -->
+				<template if:true={isMultiSelect}>
+					<template if:true={hasChoices}>
+						<template for:each={question.choices} for:item="choice">
+							<div key={choice.value} class="slds-form-element slds-m-bottom_x-small">
+								<div class="slds-form-element__control">
+									<div class="slds-checkbox">
+										<input type="checkbox" id={choice.value} value={choice.value} data-question-id={question.id} onchange={handleResponseChange} />
+										<label class="slds-checkbox__label" for={choice.value}>
+											<span class="slds-checkbox_faux"></span>
+											<span class="slds-form-element__label">{choice.label}</span>
+										</label>
+									</div>
+								</div>
+							</div>
+						</template>
+					</template>
+				</template>
+			</div>
+		</div>
+	</div>
+</template>

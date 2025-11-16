@@ -1,0 +1,75 @@
+<template>
+	<lightning-card title="Getting Started with Survey Force" icon-name="standard:product">
+		<div class="slds-m-around_medium">
+			<!-- Welcome Section -->
+			<div class="slds-box slds-theme_shade slds-m-bottom_medium">
+				<h1 class="slds-text-heading_large slds-m-bottom_small">{welcomeMessage}</h1>
+				<h2 class="slds-text-heading_medium slds-m-bottom_x-small">{nextStepsMessage}</h2>
+				<p class="slds-text-body_regular">{instructionsMessage}</p>
+			</div>
+
+			<!-- Steps Section -->
+			<div class="slds-box slds-theme_default slds-m-bottom_medium">
+				<!-- Step 1: Create Sample Survey -->
+				<div class="slds-m-bottom_large">
+					<h3 class="slds-text-heading_small slds-m-bottom_small">1. Create a sample survey</h3>
+					<template if:false={sampleSurveyCreated}>
+						<lightning-button variant="brand" label="Make a Sample Survey" onclick={handleCreateSampleSurvey} disabled={isCreatingSample}></lightning-button>
+					</template>
+					<template if:true={sampleSurveyCreated}>
+						<lightning-button variant="brand" label="View Sample Survey" onclick={handleViewSampleSurvey}></lightning-button>
+					</template>
+				</div>
+
+				<!-- Step 2: External Setup -->
+				<div class="slds-m-bottom_large">
+					<h3 class="slds-text-heading_small slds-m-bottom_small">2. Setup External Site (Optional)</h3>
+					<p class="slds-text-body_regular">
+						If you plan to share surveys with external users, configure a Force.com Site or Experience Cloud site. See documentation for details.
+					</p>
+				</div>
+
+				<!-- Step 3: Create First Survey -->
+				<div class="slds-m-bottom_large">
+					<h3 class="slds-text-heading_small slds-m-bottom_small">3. Start creating your first survey</h3>
+					<lightning-button variant="brand" label="Create New Survey" onclick={handleNavigateToCreateSurvey}></lightning-button>
+				</div>
+			</div>
+
+			<!-- Resources Section -->
+			<div class="slds-box slds-theme_shade slds-m-bottom_medium">
+				<h2 class="slds-text-heading_medium slds-m-bottom_medium">Resources</h2>
+				<ul class="slds-list_dotted">
+					<li>
+						<a href="https://github.com/SalesforceLabs/survey-force/wiki" target="_blank" rel="noopener noreferrer">Installation Guide</a>
+					</li>
+					<li>User Guide (see static resources)</li>
+				</ul>
+			</div>
+
+			<!-- Getting Help Section -->
+			<div class="slds-box slds-theme_shade slds-m-bottom_medium">
+				<h2 class="slds-text-heading_medium slds-m-bottom_medium">Getting Help</h2>
+				<p class="slds-text-body_regular slds-m-bottom_small">
+					Survey Force is unsupported. For community assistance with Survey Force, please visit
+					<a href="https://trailblazers.salesforce.com/" target="_blank" rel="noopener noreferrer">Salesforce Trailblazer Community</a>.
+				</p>
+				<p class="slds-text-body_regular">
+					To submit ideas or issues, please visit
+					<a href="https://github.com/SalesforceLabs/survey-force" target="_blank" rel="noopener noreferrer">Survey Force on Github</a>.
+				</p>
+			</div>
+
+			<!-- Community Section -->
+			<div class="slds-box slds-theme_shade">
+				<h2 class="slds-text-heading_medium slds-m-bottom_medium">Community</h2>
+				<p class="slds-text-body_regular">
+					Survey Force is an open source project. Contributions are welcome!
+					<a href="http://blogs.developerforce.com/labs/2011/08/howto-contribute-to-milestones-pm-code-not-required-opensource.html" target="_blank" rel="noopener noreferrer"
+						>Learn More</a
+					>
+				</p>
+			</div>
+		</div>
+	</lightning-card>
+</template>
