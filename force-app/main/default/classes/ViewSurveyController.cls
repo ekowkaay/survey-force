@@ -35,8 +35,21 @@ global virtual with sharing class ViewSurveyController {
 	*/
 	//------------------------------------------------------------------------------//
 	public ViewSurveyController(ApexPages.StandardController stdController) {
-		// Get url parameters
-		surveyId = Apexpages.currentPage().getParameters().get('id');
+		// Get url parameters and validate as proper Salesforce Id to prevent SOQL injection
+		String rawSurveyId = Apexpages.currentPage().getParameters().get('id');
+		
+		// Validate and sanitize the surveyId parameter
+		if (String.isNotBlank(rawSurveyId)) {
+			try {
+				// Type cast to Id validates it's a proper Salesforce ID format
+				Id validatedId = (Id) rawSurveyId;
+				surveyId = validatedId;
+			} catch (Exception e) {
+				// Invalid ID format - prevent SOQL injection
+				ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Invalid survey identifier.'));
+				return;
+			}
+		}
 
 		// For guest users, bypass sharing rules and query directly
 		if (System.UserInfo.getUserType() == 'Guest' && surveyId != null) {
@@ -76,7 +89,7 @@ global virtual with sharing class ViewSurveyController {
 		if (contactId == null || !(contactId instanceof Id)) {
 			contactId = 'none';
 		}
-		surveyId = String.escapeSingleQuotes(surveyId);
+		// surveyId is already validated as Id type in constructor - no need to escape
 		caseId = String.escapeSingleQuotes(caseId); //NOPMD
 		contactId = String.escapeSingleQuotes(contactId); //NOPMD
 
