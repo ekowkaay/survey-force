@@ -16,6 +16,22 @@ See the [LWC Migration Guide](./LWC_MIGRATION_GUIDE.md) for details on the new c
 
 ## Installation & Setup
 
+### Option 1: LWC Components Only (Minimal Package)
+
+**New!** Install just the Lightning Web Components without legacy Visualforce pages:
+
+```bash
+# Deploy using SFDX
+sfdx force:source:deploy -p force-app-lwc -u your-org-alias
+
+# Or use the deployment script
+./deploy-lwc-package.sh
+```
+
+See [LWC Package README](./LWC_PACKAGE_README.md) for details and [Package Comparison](./PACKAGE_COMPARISON.md) to understand the differences.
+
+### Option 2: Full Package (Complete Application)
+
 - ["Install Survey Force"](https://appexchange.salesforce.com/appxListingDetail?listingId=a0N30000003I2gDEAS)
 - Assign "Survey Force - SuperAdmin" permission set to system administrator
 - Assign "Survey Force - Admin" to anyone who will administer specific surveys

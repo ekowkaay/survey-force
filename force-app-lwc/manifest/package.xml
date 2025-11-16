@@ -7,9 +7,11 @@
 		<members>SFDCAccessController</members>
 		<members>SFDCAccessControlException</members>
 		<members>ViewSurveyControllerWithoutSharing</members>
+		<members>SurveyTestingUtil</members>
 		<members>SurveyTakerController_Test</members>
 		<members>SurveyCreationController_Test</members>
 		<members>SFDCAccessControllerTest</members>
+		<members>SurveyTestingUtil_Test</members>
 		<name>ApexClass</name>
 	</types>
 	<types>

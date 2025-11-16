@@ -5,37 +5,45 @@ This package contains only the Lightning Web Components (LWC) and their minimal 
 ## What's Included
 
 ### Lightning Web Components (4 components)
+
 - **surveyTaker** - Modern survey-taking interface
 - **surveyQuestion** - Reusable question renderer component
 - **surveyCreator** - Survey creation component
 - **gettingStarted** - Onboarding component
 
-### Apex Controllers (6 classes)
+### Apex Controllers (7 classes)
+
 - **SurveyTakerController** - Backend for survey taking
 - **SurveyCreationController** - Backend for survey creation
 - **SurveyForceUtil** - Utility methods
 - **SFDCAccessController** - Field-level security controller
 - **SFDCAccessControlException** - Security exception handler
 - **ViewSurveyControllerWithoutSharing** - Guest user access controller
+- **SurveyTestingUtil** - Test data factory for unit tests
 
-### Test Classes (3 classes)
+### Test Classes (4 classes)
+
 - **SurveyTakerController_Test** - 100% coverage
 - **SurveyCreationController_Test** - 100% coverage
 - **SFDCAccessControllerTest** - 100% coverage
+- **SurveyTestingUtil_Test** - 100% coverage
 
 ### Custom Objects (4 objects with all fields)
-- **Survey__c** - Survey records
-- **Survey_Question__c** - Survey questions
-- **SurveyTaker__c** - Survey responses/takers
-- **SurveyQuestionResponse__c** - Individual question responses
+
+- **Survey\_\_c** - Survey records
+- **Survey_Question\_\_c** - Survey questions
+- **SurveyTaker\_\_c** - Survey responses/takers
+- **SurveyQuestionResponse\_\_c** - Individual question responses
 
 ### Custom Labels (2 labels)
+
 - **LABS_SF_Survey_Submitted_Thank_you** - Thank you message
 - **LABS_SF_You_have_already_taken_this_survey** - Duplicate response message
 
 ## Installation
 
 ### Using SFDX
+
 ```bash
 # Deploy to your org
 sfdx force:source:deploy -p force-app-lwc -u your-org-alias
@@ -45,6 +53,7 @@ sfdx force:source:deploy -x force-app-lwc/manifest/package.xml -u your-org-alias
 ```
 
 ### Using Metadata API
+
 ```bash
 # Create deployment package
 sfdx force:source:convert -r force-app-lwc -d mdapi-output
@@ -62,8 +71,8 @@ sfdx force:mdapi:deploy -d mdapi-output -u your-org-alias -w 10
 2. **Configure Guest User Access** (if using in Experience Sites):
    - Enable "Survey Force - Guest" permission set for site guest user
    - Or manually grant object and field permissions:
-     - Read: Survey__c, Survey_Question__c
-     - Read + Create: SurveyTaker__c, SurveyQuestionResponse__c
+     - Read: Survey**c, Survey_Question**c
+     - Read + Create: SurveyTaker**c, SurveyQuestionResponse**c
 
 3. **Add Components to Pages**:
    - Use Lightning App Builder to add components to pages
@@ -80,6 +89,7 @@ Add to Lightning pages or Experience Sites:
 ```
 
 **Properties**:
+
 - `recordId` (required): Survey record ID
 - `caseId` (optional): Associated Case ID
 - `contactId` (optional): Associated Contact ID
@@ -103,6 +113,7 @@ Add to onboarding pages:
 ## What's NOT Included
 
 This package does NOT include:
+
 - Visualforce pages (all legacy UI)
 - Visualforce controllers
 - Static resources
@@ -168,6 +179,7 @@ gettingStarted
 ## Security
 
 All controllers implement proper security:
+
 - Field-level security checks via SFDCAccessController
 - Object-level security via WITH USER_MODE
 - Guest user access controlled via ViewSurveyControllerWithoutSharing
@@ -185,16 +197,19 @@ All controllers implement proper security:
 ## Troubleshooting
 
 ### Components Not Visible
+
 - Check object and field-level security
 - Verify component is added to page correctly
 - Check browser console for errors
 
 ### Guest Users Can't Submit Surveys
+
 - Verify "Survey Force - Guest" permissions
 - Check "Publicly Available" checkbox on Survey record
 - Verify ViewSurveyControllerWithoutSharing class is deployed
 
 ### Surveys Not Loading
+
 - Verify Survey record ID is correct
 - Check user has read access to Survey objects
 - Review debug logs for error messages
