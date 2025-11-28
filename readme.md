@@ -21,8 +21,8 @@ See the [LWC Migration Guide](./LWC_MIGRATION_GUIDE.md) for details on the new c
 **New!** Install just the Lightning Web Components without legacy Visualforce pages:
 
 ```bash
-# Deploy using SFDX
-sfdx force:source:deploy -p force-app-lwc -u your-org-alias
+# Deploy using Salesforce CLI
+sf project deploy start --source-dir force-app-lwc --target-org your-org-alias
 
 # Or use the deployment script
 ./deploy-lwc-package.sh
