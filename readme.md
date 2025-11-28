@@ -51,8 +51,27 @@ Survey Force now includes modern Lightning Web Components:
 - Modern survey-taking experience
 - Supports all question types (Free Text, Single/Multi Select)
 - Anonymous response option
+- Real-time validation
 - Mobile responsive
 - **Use**: Add to Lightning pages or Experience Sites
+
+### surveyBuilder ✨ NEW
+
+- Visual survey template editor
+- Add, edit, delete, and reorder questions
+- Configure survey settings (name, header, thank you message)
+- Toggle required fields and anonymous responses
+- Manage guest user access
+- **Use**: Available on Survey record pages
+
+### surveyTemplateList ✨ NEW
+
+- Dashboard view of all survey templates
+- Statistics overview (total surveys, responses)
+- Create, clone, edit, and delete surveys
+- Sortable data table with actions
+- Quick navigation to survey builder
+- **Use**: "Survey Dashboard" tab in Lightning App
 
 ### surveyCreator
 
@@ -68,12 +87,12 @@ Survey Force now includes modern Lightning Web Components:
 - Resource links
 - **Use**: "Getting Started LWC" tab
 
-### surveyManager (Coming Soon)
+### surveyQuestion
 
-- Manage survey settings
-- Share surveys
-- View analytics
-- Edit questions
+- Reusable question renderer component
+- Supports Free Text, Single Select, Multi-Select
+- Event-driven response handling
+- **Use**: Internal component used by surveyTaker
 
 For migration from Visualforce to LWC, see the [LWC Migration Guide](./LWC_MIGRATION_GUIDE.md).
 
@@ -165,6 +184,31 @@ Following notes were posted by "Cynthia Chen" on https://appexchange.salesforce.
    - The "Publicly Available" field is false by default for security. To enable Guest user access for a specific survey, check this field on the Survey record.
 
 ## Latest Changes
+
+### Version 2.1 - Modernized Architecture (2024)
+
+1. **NEW: Survey Builder Component**
+   - `surveyBuilder` - Visual survey template editor
+   - Add, edit, delete, and reorder questions
+   - Configure all survey settings in one place
+   - Real-time preview capability
+
+2. **NEW: Survey Dashboard**
+   - `surveyTemplateList` - Dashboard view of all surveys
+   - Statistics cards for quick insights
+   - Sortable data table with row actions
+   - Create, clone, edit, delete surveys
+
+3. **NEW: Additional Apex Controllers**
+   - `SurveyBuilderController` - Question CRUD operations
+   - `SurveyTemplateController` - Survey listing and management
+   - Full test coverage for all new controllers
+
+4. **Completed `surveyTaker` Component**
+   - Full implementation with all features
+   - Real-time validation
+   - Anonymous response option
+   - Mobile-responsive design
 
 ### Version 2.0 - Lightning Web Components (2024)
 
