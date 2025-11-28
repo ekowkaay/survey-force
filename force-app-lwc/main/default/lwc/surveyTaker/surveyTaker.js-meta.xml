@@ -9,11 +9,4 @@
 		<target>lightningCommunity__Page</target>
 		<target>lightningCommunity__Default</target>
 	</targets>
-	<targetConfigs>
-		<targetConfig targets="lightning__RecordPage,lightning__AppPage,lightning__HomePage,lightningCommunity__Page,lightningCommunity__Default">
-			<property name="recordId" type="String" label="Survey ID" description="The ID of the Survey record to display" />
-			<property name="caseId" type="String" label="Case ID" description="Optional Case ID to associate with response" />
-			<property name="contactId" type="String" label="Contact ID" description="Optional Contact ID to associate with response" />
-		</targetConfig>
-	</targetConfigs>
 </LightningComponentBundle>
