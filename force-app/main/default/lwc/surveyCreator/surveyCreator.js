@@ -7,18 +7,28 @@ import createSurveyQuestions from '@salesforce/apex/SurveyCreationController.cre
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
 
 export default class SurveyCreator extends NavigationMixin(LightningElement) {
+	// Survey properties
+	@track surveyId = null;
 	@track surveyName = '';
 	@track surveyHeader = '';
 	@track thankYouText = '';
 	@track thankYouLink = '';
 	@track hideSurveyName = false;
 	@track allResponsesAnonymous = false;
+
+	// UI state
 	@track hasExistingSite = true;
 	@track isLoading = true;
 	@track isCreating = false;
+	@track activeTab = 'build';
+	@track showSettings = true;
+
+	// Data
 	@track recentSurveys = [];
 	@track showRecentSurveys = false;
 	@track questions = [];
+
+	// Question modal state
 	@track showQuestionModal = false;
 	@track currentQuestion = {
 		id: null,
@@ -27,8 +37,12 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		required: false,
 		choicesText: ''
 	};
-	
 	@track editingQuestionIndex = null;
+
+	// Results placeholders
+	@track totalResponses = 0;
+	@track completionRate = '0%';
+	@track averageTime = 'N/A';
 
 	connectedCallback() {
 		this.loadInitialData();
@@ -48,8 +62,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			});
 	}
 
+	// Computed properties
 	get canCreate() {
-		// Allow creation based solely on a valid name; site is recommended but not required
 		return this.surveyName && this.surveyName.trim().length > 0;
 	}
 
@@ -57,19 +71,78 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		return 'Please create a Force.com Site before creating surveys for external users.';
 	}
 
+	get showSiteWarning() {
+		return !this.hasExistingSite;
+	}
+
+	get displaySurveyName() {
+		return this.surveyName || 'New Survey';
+	}
+
+	get surveyStatusText() {
+		return this.surveyId ? 'Saved' : 'Draft - Not saved';
+	}
+
+	get createButtonLabel() {
+		return this.surveyId ? 'Update Survey' : 'Create Survey';
+	}
+
+	get questionCount() {
+		return this.questions.length;
+	}
+
+	get hasQuestions() {
+		return this.questions.length > 0;
+	}
+
+	get questionsWithIndex() {
+		return this.questions.map((q, index) => ({
+			...q,
+			index: index,
+			orderNumber: index + 1
+		}));
+	}
+
+	get settingsToggleIcon() {
+		return this.showSettings ? 'utility:chevronup' : 'utility:chevrondown';
+	}
+
+	get anonymousText() {
+		return this.allResponsesAnonymous ? 'Yes' : 'No';
+	}
+
+	get hideNameText() {
+		return this.hideSurveyName ? 'Yes' : 'No';
+	}
+
+	get surveyLink() {
+		return this.surveyId ? window.location.origin + '/survey/' + this.surveyId : '';
+	}
+
+	get questionModalTitle() {
+		return this.editingQuestionIndex !== null ? 'Edit Question' : 'Add Question';
+	}
+
 	get questionTypeOptions() {
 		return [
 			{ label: 'Free Text', value: 'Free Text' },
-			{ label: 'Single Select--Vertical', value: 'Single Select--Vertical' },
-			{ label: 'Single Select--Horizontal', value: 'Single Select--Horizontal' },
-			{ label: 'Multi-Select--Vertical', value: 'Multi-Select--Vertical' }
+			{ label: 'Single Select - Vertical', value: 'Single Select--Vertical' },
+			{ label: 'Single Select - Horizontal', value: 'Single Select--Horizontal' },
+			{ label: 'Multi-Select - Vertical', value: 'Multi-Select--Vertical' }
 		];
 	}
 
 	get showChoices() {
-		return this.currentQuestion.questionType === 'Single Select--Vertical' ||
-			   this.currentQuestion.questionType === 'Single Select--Horizontal' ||
-			   this.currentQuestion.questionType === 'Multi-Select--Vertical';
+		return (
+			this.currentQuestion.questionType === 'Single Select--Vertical' ||
+			this.currentQuestion.questionType === 'Single Select--Horizontal' ||
+			this.currentQuestion.questionType === 'Multi-Select--Vertical'
+		);
+	}
+
+	// Event handlers
+	handleToggleSettings() {
+		this.showSettings = !this.showSettings;
 	}
 
 	handleNameChange(event) {
@@ -96,6 +169,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.allResponsesAnonymous = event.target.checked;
 	}
 
+	// Question handlers
 	handleAddQuestion() {
 		this.editingQuestionIndex = null;
 		this.currentQuestion = {
@@ -109,9 +183,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	handleEditQuestion(event) {
-		const index = event.target.dataset.questionIndex;
+		const index = parseInt(event.target.dataset.questionIndex, 10);
 		const question = this.questions[index];
-		
+
 		this.editingQuestionIndex = index;
 		this.currentQuestion = {
 			id: question.id,
@@ -123,25 +197,44 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.showQuestionModal = true;
 	}
 
+	handleDuplicateQuestion(event) {
+		const index = parseInt(event.target.dataset.questionIndex, 10);
+		const question = this.questions[index];
+
+		const duplicatedQuestion = {
+			id: 'temp_' + Date.now(),
+			question: question.question + ' (Copy)',
+			questionType: question.questionType,
+			required: question.required,
+			choices: question.choices ? [...question.choices] : [],
+			choicesText: question.choicesText || '',
+			orderNumber: this.questions.length + 1
+		};
+
+		this.questions = [...this.questions, duplicatedQuestion];
+		this.showToast('Success', 'Question duplicated', 'success');
+	}
+
 	handleDeleteQuestion(event) {
-		const index = event.target.dataset.questionIndex;
-		this.questions.splice(index, 1);
+		const index = parseInt(event.target.dataset.questionIndex, 10);
+		this.questions = this.questions.filter((_, i) => i !== index);
+		this.showToast('Success', 'Question deleted', 'success');
 	}
 
 	handleQuestionChange(event) {
-		this.currentQuestion.question = event.target.value;
+		this.currentQuestion = { ...this.currentQuestion, question: event.target.value };
 	}
 
 	handleQuestionTypeChange(event) {
-		this.currentQuestion.questionType = event.detail.value;
+		this.currentQuestion = { ...this.currentQuestion, questionType: event.detail.value };
 	}
 
 	handleRequiredChange(event) {
-		this.currentQuestion.required = event.target.checked;
+		this.currentQuestion = { ...this.currentQuestion, required: event.target.checked };
 	}
 
 	handleChoicesChange(event) {
-		this.currentQuestion.choicesText = event.target.value;
+		this.currentQuestion = { ...this.currentQuestion, choicesText: event.target.value };
 	}
 
 	handleCancelQuestion() {
@@ -149,22 +242,21 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	handleSaveQuestion() {
-		// Validate question
 		if (!this.currentQuestion.question.trim()) {
 			this.showToast('Error', 'Question text is required', 'error');
 			return;
 		}
 
-		// Process choices if they exist
 		let choices = [];
 		if (this.currentQuestion.choicesText) {
-			choices = this.currentQuestion.choicesText.split('\n')
-				.map(choice => choice.trim())
-				.filter(choice => choice);
+			choices = this.currentQuestion.choicesText
+				.split('\n')
+				.map((choice) => choice.trim())
+				.filter((choice) => choice);
 		}
 
 		const questionData = {
-			id: this.currentQuestion.id,
+			id: this.currentQuestion.id || 'temp_' + Date.now(),
 			question: this.currentQuestion.question,
 			questionType: this.currentQuestion.questionType,
 			required: this.currentQuestion.required,
@@ -172,21 +264,29 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			choicesText: this.currentQuestion.choicesText
 		};
 
-		// If editing existing question
 		if (this.editingQuestionIndex !== null) {
-			this.questions[this.editingQuestionIndex] = questionData;
+			const updatedQuestions = [...this.questions];
+			updatedQuestions[this.editingQuestionIndex] = questionData;
+			this.questions = updatedQuestions;
 		} else {
-			// Add new question
 			questionData.orderNumber = this.questions.length + 1;
-			questionData.id = 'temp_' + Date.now(); // Temporary ID for UI
-			this.questions.push(questionData);
+			this.questions = [...this.questions, questionData];
 		}
 
 		this.showQuestionModal = false;
+		this.showToast('Success', 'Question saved', 'success');
+	}
+
+	// Survey actions
+	handlePreview() {
+		if (this.surveyId) {
+			window.open('/apex/TakeSurvey?id=' + this.surveyId + '&preview=true', '_blank');
+		} else {
+			this.showToast('Info', 'Please save the survey first to preview', 'info');
+		}
 	}
 
 	handleCreateSurvey() {
-		// Validate survey name
 		if (!this.surveyName || this.surveyName.trim().length === 0) {
 			this.showToast('Error', 'Please enter a survey name', 'error');
 			return;
@@ -194,7 +294,6 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 		this.isCreating = true;
 
-		// Prepare survey data
 		const surveyData = {
 			surveyName: this.surveyName,
 			surveyHeader: this.surveyHeader,
@@ -204,11 +303,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			allResponsesAnonymous: this.allResponsesAnonymous
 		};
 
-		// Create the survey first
 		createSurveyWithDetails(surveyData)
 			.then((result) => {
 				if (result.success) {
-					// Now create questions if any exist
+					this.surveyId = result.surveyId;
+
 					if (this.questions.length > 0) {
 						const questionData = this.questions.map((q, index) => ({
 							question: q.question,
@@ -218,21 +317,20 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							orderNumber: index + 1
 						}));
 
-						createSurveyQuestions({
+						return createSurveyQuestions({
 							surveyId: result.surveyId,
 							questions: questionData
 						})
-						.then(() => {
-							this.showToast('Success', 'Survey template created successfully', 'success');
-							this.navigateToSurvey(result.surveyId);
-						})
-						.catch((error) => {
-							this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
-							this.isCreating = false;
-						});
+							.then(() => {
+								this.showToast('Success', 'Survey created successfully', 'success');
+								this.navigateToSurvey(result.surveyId);
+							})
+							.catch((error) => {
+								this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
+								this.isCreating = false;
+							});
 					} else {
-						// No questions, just navigate to survey
-						this.showToast('Success', 'Survey template created successfully', 'success');
+						this.showToast('Success', 'Survey created successfully', 'success');
 						this.navigateToSurvey(result.surveyId);
 					}
 				} else {
@@ -244,6 +342,48 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				this.showToast('Error', 'Error creating survey: ' + (error.body?.message || error.message), 'error');
 				this.isCreating = false;
 			});
+	}
+
+	// Share tab handlers
+	handleCopyLink() {
+		if (this.surveyLink) {
+			navigator.clipboard
+				.writeText(this.surveyLink)
+				.then(() => {
+					this.showToast('Success', 'Link copied to clipboard', 'success');
+				})
+				.catch(() => {
+					this.showToast('Error', 'Failed to copy link', 'error');
+				});
+		}
+	}
+
+	handleComposeEmail() {
+		if (this.surveyLink) {
+			const subject = encodeURIComponent('Survey: ' + this.surveyName);
+			const body = encodeURIComponent('Please take our survey: ' + this.surveyLink);
+			window.open('mailto:?subject=' + subject + '&body=' + body, '_blank');
+		}
+	}
+
+	// Results tab handlers
+	handleViewResults() {
+		if (this.surveyId) {
+			this[NavigationMixin.Navigate]({
+				type: 'standard__recordPage',
+				attributes: {
+					recordId: this.surveyId,
+					objectApiName: 'Survey__c',
+					actionName: 'view'
+				}
+			});
+		}
+	}
+
+	// Navigation handlers
+	handleViewSurvey(event) {
+		const surveyId = event.target.dataset.surveyId;
+		this.navigateToSurvey(surveyId);
 	}
 
 	navigateToSurvey(surveyId) {

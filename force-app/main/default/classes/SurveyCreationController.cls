@@ -169,24 +169,24 @@ public with sharing class SurveyCreationController {
 
 			// Check if survey exists
 			Survey__c survey = [SELECT Id FROM Survey__c WHERE Id = :surveyId LIMIT 1];
-			
+
 			List<Survey_Question__c> newQuestions = new List<Survey_Question__c>();
-			
+
 			for (Integer i = 0; i < questions.size(); i++) {
 				SurveyQuestionData q = questions[i];
-				
+
 				Survey_Question__c newQuestion = new Survey_Question__c();
 				newQuestion.Survey__c = surveyId;
 				newQuestion.Question__c = q.question;
 				newQuestion.Type__c = q.questionType;
 				newQuestion.Required__c = q.required;
 				newQuestion.OrderNumber__c = q.orderNumber;
-				
+
 				// Handle choices if provided
 				if (q.choices != null && !q.choices.isEmpty()) {
 					newQuestion.Choices__c = String.join(q.choices, '\n'); // Store as newline-separated string
 				}
-				
+
 				newQuestions.add(newQuestion);
 			}
 

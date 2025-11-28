@@ -93,6 +93,126 @@ public with sharing class SurveyCreationController {
 	}
 
 	/**
+	 * Create a new survey with full details
+	 * @param surveyName Name of the new survey
+	 * @param surveyHeader Header text for the survey
+	 * @param thankYouText Thank you message text
+	 * @param thankYouLink Thank you link URL
+	 * @param hideSurveyName Whether to hide survey name
+	 * @param allResponsesAnonymous Whether responses are anonymous
+	 * @return CreationResult with success status and survey ID
+	 */
+	@AuraEnabled
+	public static CreationResult createSurveyWithDetails(
+		String surveyName,
+		String surveyHeader,
+		String thankYouText,
+		String thankYouLink,
+		Boolean hideSurveyName,
+		Boolean allResponsesAnonymous
+	) {
+		CreationResult result = new CreationResult();
+		result.success = false;
+
+		try {
+			if (String.isBlank(surveyName)) {
+				result.message = 'Survey name is required';
+				return result;
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.Survey__c.fields.Name,
+				Schema.Survey__c.fields.Survey_Header__c,
+				Schema.Survey__c.fields.Thank_You_Text__c,
+				Schema.Survey__c.fields.Thank_You_Link__c,
+				Schema.Survey__c.fields.Hide_Survey_Name__c,
+				Schema.Survey__c.fields.All_Responses_Anonymous__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey__c.getSobjectType(), fields);
+
+			Survey__c newSurvey = new Survey__c();
+			newSurvey.Name = surveyName;
+			newSurvey.Survey_Header__c = surveyHeader;
+			newSurvey.Thank_You_Text__c = thankYouText;
+			newSurvey.Thank_You_Link__c = thankYouLink;
+			newSurvey.Hide_Survey_Name__c = hideSurveyName != null ? hideSurveyName : false;
+			newSurvey.All_Responses_Anonymous__c = allResponsesAnonymous != null ? allResponsesAnonymous : false;
+
+			insert newSurvey;
+
+			result.success = true;
+			result.message = 'Survey created successfully';
+			result.surveyId = newSurvey.Id;
+			result.redirectUrl = '/' + newSurvey.Id;
+
+			return result;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:createSurveyWithDetails():' + e.getMessage());
+			result.message = 'Error creating survey: ' + e.getMessage();
+			return result;
+		}
+	}
+
+	/**
+	 * Create survey questions for a given survey
+	 * @param surveyId The survey to add questions to
+	 * @param questions List of question data maps
+	 */
+	@AuraEnabled
+	public static void createSurveyQuestions(Id surveyId, List<Map<String, Object>> questions) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			if (questions == null || questions.isEmpty()) {
+				return;
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.Survey_Question__c.fields.Survey__c,
+				Schema.Survey_Question__c.fields.Question__c,
+				Schema.Survey_Question__c.fields.Type__c,
+				Schema.Survey_Question__c.fields.Required__c,
+				Schema.Survey_Question__c.fields.Choices__c,
+				Schema.Survey_Question__c.fields.OrderNumber__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
+
+			List<Survey_Question__c> questionRecords = new List<Survey_Question__c>();
+
+			for (Map<String, Object> q : questions) {
+				Survey_Question__c sq = new Survey_Question__c();
+				sq.Survey__c = surveyId;
+				sq.Question__c = (String) q.get('question');
+				sq.Type__c = (String) q.get('questionType');
+				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
+				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+
+				// Handle choices
+				Object choicesObj = q.get('choices');
+				if (choicesObj != null && choicesObj instanceof List<Object>) {
+					List<Object> choicesList = (List<Object>) choicesObj;
+					List<String> choicesStrings = new List<String>();
+					for (Object choice : choicesList) {
+						choicesStrings.add(String.valueOf(choice));
+					}
+					sq.Choices__c = String.join(choicesStrings, '\n');
+				}
+
+				questionRecords.add(sq);
+			}
+
+			if (!questionRecords.isEmpty()) {
+				insert questionRecords;
+			}
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:createSurveyQuestions():' + e.getMessage());
+			throw new AuraHandledException('Error creating questions: ' + e.getMessage());
+		}
+	}
+
+	/**
 	 * Get recent surveys for display
 	 * @return List of recent surveys
 	 */
