@@ -42,24 +42,24 @@ This package contains only the Lightning Web Components (LWC) and their minimal 
 
 ## Installation
 
-### Using SFDX
+### Using Salesforce CLI
 
 ```bash
 # Deploy to your org
-sfdx force:source:deploy -p force-app-lwc -u your-org-alias
+sf project deploy start --source-dir force-app-lwc --target-org your-org-alias
 
 # Or deploy using manifest
-sfdx force:source:deploy -x force-app-lwc/manifest/package.xml -u your-org-alias
+sf project deploy start --manifest force-app-lwc/manifest/package.xml --target-org your-org-alias
 ```
 
 ### Using Metadata API
 
 ```bash
 # Create deployment package
-sfdx force:source:convert -r force-app-lwc -d mdapi-output
+sf project convert source --root-dir force-app-lwc --output-dir mdapi-output
 
 # Deploy to org
-sfdx force:mdapi:deploy -d mdapi-output -u your-org-alias -w 10
+sf project deploy start --metadata-dir mdapi-output --target-org your-org-alias --wait 10
 ```
 
 ## Post-Installation Steps

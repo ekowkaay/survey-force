@@ -25,14 +25,14 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if SFDX is installed
-if ! command -v sfdx &> /dev/null; then
-    print_error "Salesforce CLI (sfdx) is not installed. Please install it first."
-    echo "Visit: https://developer.salesforce.com/tools/sfdxcli"
+# Check if Salesforce CLI is installed
+if ! command -v sf &> /dev/null; then
+    print_error "Salesforce CLI (sf) is not installed. Please install it first."
+    echo "Visit: https://developer.salesforce.com/tools/salesforcecli"
     exit 1
 fi
 
-print_info "Salesforce CLI found: $(sfdx --version)"
+print_info "Salesforce CLI found: $(sf --version)"
 
 # Get org alias
 echo ""
@@ -41,14 +41,17 @@ read -r ORG_ALIAS
 
 if [ -z "$ORG_ALIAS" ]; then
     print_info "No alias provided. Please authenticate to your org..."
-    sfdx auth:web:login -a survey-force-lwc
+    sf org login web --alias survey-force-lwc
     ORG_ALIAS="survey-force-lwc"
 fi
 
 # Verify org connection
 print_info "Verifying connection to org: $ORG_ALIAS"
-if ! sfdx force:org:display -u "$ORG_ALIAS" &> /dev/null; then
+if ! sf org display --target-org "$ORG_ALIAS" &> /dev/null; then
     print_error "Cannot connect to org '$ORG_ALIAS'. Please check the alias or authenticate again."
+    echo ""
+    echo "To list authenticated orgs, run: sf org list"
+    echo "To authenticate, run: sf org login web --alias $ORG_ALIAS"
     exit 1
 fi
 
@@ -66,15 +69,15 @@ read -rp "Enter choice (1-3): " DEPLOY_METHOD
 case $DEPLOY_METHOD in
     1)
         print_info "Deploying LWC package from source..."
-        sfdx force:source:deploy -p force-app-lwc -u "$ORG_ALIAS" -w 10
+        sf project deploy start --source-dir force-app-lwc --target-org "$ORG_ALIAS" --wait 10
         ;;
     2)
         print_info "Deploying LWC package using manifest..."
-        sfdx force:source:deploy -x force-app-lwc/manifest/package.xml -u "$ORG_ALIAS" -w 10
+        sf project deploy start --manifest force-app-lwc/manifest/package.xml --target-org "$ORG_ALIAS" --wait 10
         ;;
     3)
         print_info "Validating LWC package..."
-        sfdx force:source:deploy -p force-app-lwc -u "$ORG_ALIAS" -w 10 --checkonly
+        sf project deploy start --source-dir force-app-lwc --target-org "$ORG_ALIAS" --wait 10 --dry-run
         ;;
     *)
         print_error "Invalid choice. Exiting."
@@ -104,7 +107,7 @@ if [ $? -eq 0 ]; then
     echo "   - Mark surveys as 'Publicly Available'"
     echo ""
     echo "4. Run tests to verify installation:"
-    echo "   sfdx force:apex:test:run -u $ORG_ALIAS -r human"
+    echo "   sf apex run test --target-org $ORG_ALIAS --result-format human"
     echo ""
     echo "For detailed instructions, see: LWC_PACKAGE_README.md"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
