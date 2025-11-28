@@ -25,7 +25,7 @@ For detailed SFDX installation instructions that do not require installing a pac
 
 ## Getting Started
 
-### Using Lightning Web Components (Recommended)
+### Using Lightning Web Components
 
 1. Go to "Survey Force App"
 2. Click the "Getting Started LWC" tab
@@ -33,18 +33,9 @@ For detailed SFDX installation instructions that do not require installing a pac
 4. Click "View Sample Survey"
 5. Explore the modern LWC interface
 
-### Using Classic Interface
-
-1. Go to "Survey Force App"
-   ![Survey Force App](assets/images/SF_App.png)
-2. Open "Getting Started" page
-   ![Getting Started Page](assets/images/SF_Page_GettingStarted.png)
-3. Click "Make a Sample Survey"
-4. Click "View Sample Survey"
-
 ## LWC Components
 
-Survey Force now includes modern Lightning Web Components:
+Survey Force includes modern Lightning Web Components:
 
 ### surveyTaker
 
@@ -55,22 +46,13 @@ Survey Force now includes modern Lightning Web Components:
 - Mobile responsive
 - **Use**: Add to Lightning pages or Experience Sites
 
-### surveyBuilder ✨ NEW
-
-- Visual survey template editor
-- Add, edit, delete, and reorder questions
-- Configure survey settings (name, header, thank you message)
-- Toggle required fields and anonymous responses
-- Manage guest user access
-- **Use**: Available on Survey record pages
-
-### surveyTemplateList ✨ NEW
+### surveyTemplateList
 
 - Dashboard view of all survey templates
 - Statistics overview (total surveys, responses)
 - Create, clone, edit, and delete surveys
 - Sortable data table with actions
-- Quick navigation to survey builder
+- Quick navigation to survey records
 - **Use**: "Survey Dashboard" tab in Lightning App
 
 ### surveyCreator
@@ -99,15 +81,11 @@ For migration from Visualforce to LWC, see the [LWC Migration Guide](./LWC_MIGRA
 ## General Surveys
 
 1. Go to "Survey Force App"
-   ![Survey Force App](assets/images/SF_App.png)
-1. Open "Getting Started" page
-   ![Getting Started Page](assets/images/SF_Page_GettingStarted.png)
-1. Click "Make a Sample Survey"
-1. Click "View Sample Survey"
+2. Click the "Getting Started LWC" tab
+3. Click "Make a Sample Survey"
+4. Click "View Sample Survey"
 
-You should be able to see the survey, add questions, edit CSS, share survey with users and see results. Test this survey by sending it to users. In case of errors, check user permissions to appropriate survey objects. There are 4 Survey objets that you need to check.
-
-Make sure that you check access for Force.com site guest user if you plan to embed this survey in Force.com site.
+You should be able to see the survey, add questions, and view results. Test this survey by sending it to users. In case of errors, check user permissions to appropriate survey objects. There are 4 Survey objects that you need to check.
 
 - Survey
 - Survey Question Response
@@ -115,8 +93,6 @@ Make sure that you check access for Force.com site guest user if you plan to emb
 - Survey Question
 
 ## Surveys in Experience Sites and Communities
-
-### Using LWC Components (Recommended)
 
 1. Create an Experience Site [Details](https://help.salesforce.com/articleView?id=networks_overview.htm&type=5)
 2. Assign "Survey Force - Guest" permission set to the site's guest user
@@ -126,37 +102,7 @@ Make sure that you check access for Force.com site guest user if you plan to emb
    - Configure the Survey ID property
    - Publish the site
 4. Share the survey URL with external users
-
-### Using Visualforce (Legacy)
-
-1. Create a Force.com Site. [Details, including "Creating a Force.com Site"](https://help.salesforce.com/articleView?id=sites_setup_overview.htm&type=5)
-1. You can assign "Survey Force - Guest" permission set to this site's guest user
-   - You need to activate the Site otherwise guest user will not be activated and you cannot assign permission set
-   - You will get "Your account has been disabled" error
-   1. Go to the Sites list (https://yourdomain.lightning.force.com/lightning/setup/CustomDomain/home)
-   1. Click on the Site Label
-   1. Click Public Access Settings
-   1. Click View Users
-   1. Click the Site user
-   1. Add the Survey Force - Guest permission set to that user
-   1. If desired, rename the user to something more user-friendly. Do not change other fields.
-1. OR you can manually assign all the permission to Guest user profile or create a new permission set
-   1. Modify your Site's ["Public Access Settings"](https://help.salesforce.com/articleView?id=sites_public_access_settings.htm&type=5)
-   1. Check "Read" access to "Survey" and "Survey Question" object.
-   1. Check "Read" and "Create" access for "Surveys Taken" and "Survey Question Responses"
-   1. Check "Read" and "Create" access for "Surveys Taken" and "Survey Question Responses"
-   1. Make sure to provide Read/Edit access (as applicable) to all fields in above objects. Otherwise guest users may see "Unauthorized Error" because of field access violation.
-1. Add the Visualforce page, "Take Survey" to the list of enabled Visualforce pages.
-1. Add the Apex Classes
-   - SFDCAccessControlException
-   - SFDCAccessController
-   - SFMessage
-   - SFQuestion
-   - SurveySitesUtil
-   - ViewSurveyController
-   - ViewSurveyControllerWithoutSharing
-1. ~~Create a Sharing Rule for "Survey" in Setup->Sharing Settings~~ **No longer required!** As of the latest version, guest users can access surveys via direct link without requiring sharing rules. Simply check the "Publicly Available" field on the Survey record to enable guest access.
-1. **Important**: For each survey you want to make publicly available to guest users, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
+5. **Important**: For each survey you want to make publicly available to guest users, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
 
 ## Survey Connecting to Contact or Case Records
 
@@ -185,60 +131,35 @@ Following notes were posted by "Cynthia Chen" on https://appexchange.salesforce.
 
 ## Latest Changes
 
-### Version 2.1 - Modernized Architecture (2024)
-
-1. **NEW: Survey Builder Component**
-   - `surveyBuilder` - Visual survey template editor
-   - Add, edit, delete, and reorder questions
-   - Configure all survey settings in one place
-   - Real-time preview capability
-
-2. **NEW: Survey Dashboard**
-   - `surveyTemplateList` - Dashboard view of all surveys
-   - Statistics cards for quick insights
-   - Sortable data table with row actions
-   - Create, clone, edit, delete surveys
-
-3. **NEW: Additional Apex Controllers**
-   - `SurveyBuilderController` - Question CRUD operations
-   - `SurveyTemplateController` - Survey listing and management
-   - Full test coverage for all new controllers
-
-4. **Completed `surveyTaker` Component**
-   - Full implementation with all features
-   - Real-time validation
-   - Anonymous response option
-   - Mobile-responsive design
-
 ### Version 2.0 - Lightning Web Components (2024)
 
-1. **NEW: Lightning Web Components** - Modern survey experience with LWC
+1. **Lightning Web Components** - Modern survey experience with LWC
    - `surveyTaker` - Take surveys with modern UI
    - `surveyCreator` - Create surveys quickly
+   - `surveyTemplateList` - Dashboard view of all surveys
    - `gettingStarted` - Improved onboarding
    - See [LWC Migration Guide](./LWC_MIGRATION_GUIDE.md) for details
 
-2. **NEW: LWC-Compatible Apex Controllers**
+2. **LWC-Compatible Apex Controllers**
    - `SurveyTakerController` - Survey taking logic with @AuraEnabled methods
-   - `SurveyManagementController` - Survey management and sharing
    - `SurveyCreationController` - Survey creation and cloning
-   - Full test coverage for all new controllers
+   - `SurveyTemplateController` - Survey listing and management
+   - Full test coverage for all controllers
 
-3. **NEW: Lightning Pages and Tabs**
+3. **Lightning Pages and Tabs**
    - "Create Survey" tab for quick survey creation
    - "Getting Started LWC" tab for onboarding
+   - "Survey Dashboard" tab for template management
    - Flexible Lightning pages for easy deployment
 
 4. **Improved Performance** - 50% faster with LWC components
 
-5. **Backward Compatible** - All Visualforce pages still work
-
 ### Previous Updates
 
-1. After updating to latest version on the main branch, the ONLY SurveyForce static resources needed are the SurveyForce folder and the UserGuide pdf. All other resources have been removed.
-2. A new field has been added to allow hiding a specific question on the survey. This allows you to modify and "remove" questions without losing response data.
-3. **Security Update**: The "Publicly Available" (Share_with_Guest_User\_\_c) field now defaults to `false` for new surveys. This means surveys are NOT shared with guest users by default. To make a survey publicly available, you must explicitly check this field on the Survey record.
-4. **Usability Improvement**: Guest users can now access surveys via direct link without requiring sharing rules! When a survey is marked as "Publicly Available", guest users can view and submit it directly. This simplifies setup and eliminates the need for complex sharing rule configuration.
+1. The ONLY SurveyForce static resources needed are the SurveyForce folder and the UserGuide pdf.
+2. A new field has been added to allow hiding a specific question on the survey.
+3. **Security Update**: The "Publicly Available" (Share_with_Guest_User\_\_c) field now defaults to `false` for new surveys.
+4. **Usability Improvement**: Guest users can now access surveys via direct link without requiring sharing rules!
 
 ## Upgrade Options
 
