@@ -9,19 +9,11 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SFMessage</apexClass>
+        <apexClass>SurveyForceUtil</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SFQuestion</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SurveySitesUtil</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ViewSurveyController</apexClass>
+        <apexClass>SurveyTakerController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -162,8 +154,4 @@
         <object>Survey__c</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
-    <pageAccesses>
-        <apexPage>TakeSurvey</apexPage>
-        <enabled>true</enabled>
-    </pageAccesses>
 </PermissionSet>
