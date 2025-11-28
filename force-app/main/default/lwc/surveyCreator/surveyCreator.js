@@ -320,10 +320,15 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 						return createSurveyQuestions({
 							surveyId: result.surveyId,
 							questions: questionData
-						}).then(() => {
-							this.showToast('Success', 'Survey created successfully', 'success');
-							this.navigateToSurvey(result.surveyId);
-						});
+						})
+							.then(() => {
+								this.showToast('Success', 'Survey created successfully', 'success');
+								this.navigateToSurvey(result.surveyId);
+							})
+							.catch((error) => {
+								this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
+								this.isCreating = false;
+							});
 					} else {
 						this.showToast('Success', 'Survey created successfully', 'success');
 						this.navigateToSurvey(result.surveyId);
