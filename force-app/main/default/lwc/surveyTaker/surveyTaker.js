@@ -5,92 +5,109 @@ import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submit
 
 export default class SurveyTaker extends LightningElement {
 	@api recordId;
-	@api caseId;
-	@api contactId;
+	@api caseId = null;
+	@api contactId = null;
 
-	@track survey;
-	@track surveyName;
-	@track surveyHeader;
-	@track showSurveyName = true;
-	@track questions = [];
-	@track visibleQuestions = [];
-	@track thankYouText = '';
 	@track isLoading = true;
 	@track isSubmitting = false;
 	@track isSubmitted = false;
-	@track error;
-	@track responses = new Map();
-	@track canChooseAnonymous = false;
-	@track anonymousValue = 'User';
-	@track anonymousOptions = [
-		{ label: 'Identified', value: 'User' },
-		{ label: 'Anonymous', value: 'Anonymous' }
-	];
+	@track error = null;
 
-	connectedCallback() {
-		this.loadSurvey();
+	@track surveyName = '';
+	@track surveyHeader = '';
+	@track showSurveyName = true;
+	@track thankYouText = '';
+	@track questions = [];
+	@track responses = {};
+	@track isInternal = true;
+	@track anonymousOption = 'User';
+	@track anonymousValue = 'named';
+	@track canChooseAnonymous = false;
+
+	get visibleQuestions() {
+		return this.questions.filter((q) => !q.hideOnSurvey);
 	}
 
-	loadSurvey() {
+	get anonymousOptions() {
+		return [
+			{ label: 'Submit with my name', value: 'named' },
+			{ label: 'Submit anonymously', value: 'anonymous' }
+		];
+	}
+
+	connectedCallback() {
+		this.loadSurveyData();
+	}
+
+	loadSurveyData() {
 		this.isLoading = true;
 		this.error = null;
 
 		getSurveyData({
 			surveyId: this.recordId,
-			caseId: this.caseId || null,
-			contactId: this.contactId || null
+			caseId: this.caseId,
+			contactId: this.contactId
 		})
-			.then((data) => {
-				this.survey = data.survey;
-				this.surveyName = data.survey.Name;
-				this.surveyHeader = data.survey.Survey_Header__c;
-				this.showSurveyName = !data.survey.Hide_Survey_Name__c;
-				this.questions = data.questions;
-				this.visibleQuestions = this.questions.filter((q) => !q.hideOnSurvey);
+			.then((result) => {
+				if (result && result.survey) {
+					this.surveyName = result.survey.Name;
+					this.surveyHeader = result.survey.Survey_Header__c || '';
+					this.showSurveyName = !result.survey.Hide_Survey_Name__c;
+					this.thankYouText = result.survey.Thank_You_Text__c || 'Your survey response has been recorded. Thank you!';
+					this.questions = result.questions || [];
+					this.isInternal = result.isInternal;
+					this.anonymousOption = result.anonymousOption;
 
-				// Set anonymous options
-				if (data.isInternal && !data.survey.All_Responses_Anonymous__c) {
-					this.canChooseAnonymous = true;
-					this.anonymousValue = 'User';
+					// Can choose anonymous only if internal user and survey allows non-anonymous
+					this.canChooseAnonymous = this.isInternal && this.anonymousOption !== 'Anonymous';
+
+					// Initialize responses map
+					this.initializeResponses();
 				} else {
-					this.canChooseAnonymous = false;
-					this.anonymousValue = 'Anonymous';
+					this.error = 'Survey not found or not available';
 				}
-
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = this.getErrorMessage(error);
+				this.error = error.body?.message || error.message || 'Error loading survey';
 				this.isLoading = false;
 			});
 	}
 
-	handleResponseChange(event) {
-		const detail = event.detail;
-		const questionId = detail.questionId;
+	initializeResponses() {
+		this.responses = {};
+		this.questions.forEach((q) => {
+			if (q.questionType === 'Multi-Select--Vertical') {
+				this.responses[q.id] = { questionId: q.id, response: '', responses: [] };
+			} else {
+				this.responses[q.id] = { questionId: q.id, response: '', responses: null };
+			}
+		});
+	}
 
-		if (!this.responses.has(questionId)) {
-			this.responses.set(questionId, {
-				questionId: questionId,
-				response: '',
-				responses: []
-			});
+	handleResponseChange(event) {
+		const { questionId, value, checked, questionType } = event.detail;
+
+		if (!this.responses[questionId]) {
+			this.responses[questionId] = { questionId, response: '', responses: [] };
 		}
 
-		const response = this.responses.get(questionId);
+		if (questionType === 'Multi-Select--Vertical') {
+			// Handle checkbox changes
+			if (!this.responses[questionId].responses) {
+				this.responses[questionId].responses = [];
+			}
 
-		if (detail.questionType === 'Multi-Select--Vertical') {
-			// Handle multi-select
-			if (detail.checked) {
-				if (!response.responses.includes(detail.value)) {
-					response.responses.push(detail.value);
+			if (checked) {
+				if (!this.responses[questionId].responses.includes(value)) {
+					this.responses[questionId].responses.push(value);
 				}
 			} else {
-				response.responses = response.responses.filter((v) => v !== detail.value);
+				this.responses[questionId].responses = this.responses[questionId].responses.filter((v) => v !== value);
 			}
 		} else {
-			// Handle single select and free text
-			response.response = detail.value;
+			// Handle single value changes (free text, single select)
+			this.responses[questionId].response = value;
 		}
 	}
 
@@ -100,58 +117,62 @@ export default class SurveyTaker extends LightningElement {
 
 	handleSubmit() {
 		// Validate required fields
-		const requiredQuestions = this.visibleQuestions.filter((q) => q.required);
-		const missingResponses = [];
-
-		for (const question of requiredQuestions) {
-			const response = this.responses.get(question.id);
-			if (!response || (!response.response && (!response.responses || response.responses.length === 0))) {
-				missingResponses.push(question);
-			}
-		}
-
-		if (missingResponses.length > 0) {
-			this.showToast('Error', 'Please answer all required questions', 'error');
+		const validationError = this.validateResponses();
+		if (validationError) {
+			this.showToast('Validation Error', validationError, 'error');
 			return;
 		}
 
 		this.isSubmitting = true;
 
-		// Convert map to array for Apex
-		const responsesArray = Array.from(this.responses.values());
+		// Convert responses object to array
+		const responseArray = Object.values(this.responses).filter((r) => r.response || (r.responses && r.responses.length > 0));
+
+		const isAnonymous = this.anonymousValue === 'anonymous' || this.anonymousOption === 'Anonymous';
 
 		submitSurveyResponses({
 			surveyId: this.recordId,
-			responses: responsesArray,
-			caseId: this.caseId || null,
-			contactId: this.contactId || null,
-			isAnonymous: this.anonymousValue === 'Anonymous'
+			responses: responseArray,
+			caseId: this.caseId,
+			contactId: this.contactId,
+			isAnonymous: isAnonymous
 		})
 			.then((result) => {
 				if (result.success) {
+					this.thankYouText = result.thankYouText || this.thankYouText;
 					this.isSubmitted = true;
-					this.thankYouText = result.thankYouText;
-					this.showToast('Success', result.message, 'success');
+					this.showToast('Success', 'Survey submitted successfully!', 'success');
 				} else {
-					this.showToast('Error', result.message, 'error');
-					this.isSubmitting = false;
+					this.showToast('Error', result.message || 'Error submitting survey', 'error');
 				}
+				this.isSubmitting = false;
 			})
 			.catch((error) => {
-				this.showToast('Error', this.getErrorMessage(error), 'error');
+				this.showToast('Error', error.body?.message || 'Error submitting survey', 'error');
 				this.isSubmitting = false;
 			});
 	}
 
-	getErrorMessage(error) {
-		if (error.body && error.body.message) {
-			return error.body.message;
-		} else if (error.message) {
-			return error.message;
-		} else if (typeof error === 'string') {
-			return error;
+	validateResponses() {
+		for (const question of this.visibleQuestions) {
+			if (question.required) {
+				const response = this.responses[question.id];
+				if (!response) {
+					return `Please answer question ${question.orderNumber}: ${question.question}`;
+				}
+
+				if (question.questionType === 'Multi-Select--Vertical') {
+					if (!response.responses || response.responses.length === 0) {
+						return `Please answer question ${question.orderNumber}: ${question.question}`;
+					}
+				} else {
+					if (!response.response || response.response.trim() === '') {
+						return `Please answer question ${question.orderNumber}: ${question.question}`;
+					}
+				}
+			}
 		}
-		return 'An unexpected error occurred';
+		return null;
 	}
 
 	showToast(title, message, variant) {

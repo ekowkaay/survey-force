@@ -1,0 +1,127 @@
+<template>
+	<lightning-card title="Survey Templates" icon-name="standard:survey">
+		<!-- Loading State -->
+		<template if:true={isLoading}>
+			<div class="slds-is-relative" style="min-height: 300px">
+				<lightning-spinner alternative-text="Loading surveys..." size="medium"></lightning-spinner>
+			</div>
+		</template>
+
+		<!-- Error State -->
+		<template if:true={error}>
+			<div class="slds-box slds-theme_error slds-m-around_medium">
+				<p class="slds-text-heading_small">{error}</p>
+			</div>
+		</template>
+
+		<!-- Main Content -->
+		<template if:false={isLoading}>
+			<template if:false={error}>
+				<!-- Header Actions -->
+				<div slot="actions">
+					<lightning-button-group>
+						<lightning-button label="Refresh" icon-name="utility:refresh" onclick={handleRefresh}></lightning-button>
+						<lightning-button variant="brand" label="New Survey" icon-name="utility:add" onclick={handleOpenCreateModal}></lightning-button>
+					</lightning-button-group>
+				</div>
+
+				<div class="slds-m-around_medium">
+					<!-- Stats Cards -->
+					<div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
+						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+							<div class="slds-box slds-theme_shade slds-text-align_center">
+								<p class="slds-text-heading_large">{totalSurveys}</p>
+								<p class="slds-text-body_small slds-text-color_weak">Total Surveys</p>
+							</div>
+						</div>
+						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+							<div class="slds-box slds-theme_shade slds-text-align_center">
+								<p class="slds-text-heading_large">{totalResponses}</p>
+								<p class="slds-text-body_small slds-text-color_weak">Total Responses</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Surveys Table -->
+					<template if:true={hasSurveys}>
+						<lightning-datatable
+							key-field="Id"
+							data={surveys}
+							columns={columns}
+							sorted-by={sortedBy}
+							sorted-direction={sortedDirection}
+							onsort={handleSort}
+							onrowaction={handleRowAction}
+							hide-checkbox-column></lightning-datatable>
+					</template>
+
+					<!-- Empty State -->
+					<template if:false={hasSurveys}>
+						<div class="slds-box slds-theme_default slds-text-align_center slds-p-vertical_large">
+							<lightning-icon icon-name="utility:survey" size="large" class="slds-m-bottom_medium"></lightning-icon>
+							<h3 class="slds-text-heading_medium slds-m-bottom_small">No Surveys Yet</h3>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">Create your first survey to get started.</p>
+							<lightning-button variant="brand" label="Create Your First Survey" icon-name="utility:add" onclick={handleOpenCreateModal}></lightning-button>
+						</div>
+					</template>
+				</div>
+			</template>
+		</template>
+	</lightning-card>
+
+	<!-- Create Survey Modal -->
+	<template if:true={showCreateModal}>
+		<section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true">
+			<div class="slds-modal__container">
+				<header class="slds-modal__header">
+					<lightning-button-icon
+						icon-name="utility:close"
+						alternative-text="Close"
+						onclick={handleCloseCreateModal}
+						class="slds-modal__close"
+						variant="bare-inverse"></lightning-button-icon>
+					<h2 class="slds-text-heading_medium">Create New Survey</h2>
+				</header>
+				<div class="slds-modal__content slds-p-around_medium">
+					<lightning-input label="Survey Name" value={newSurveyName} onchange={handleNewSurveyNameChange} required placeholder="Enter survey name"></lightning-input>
+				</div>
+				<footer class="slds-modal__footer">
+					<lightning-button label="Cancel" onclick={handleCloseCreateModal}></lightning-button>
+					<lightning-button variant="brand" label="Create Survey" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
+				</footer>
+			</div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+	</template>
+
+	<!-- Clone Survey Modal -->
+	<template if:true={showCloneModal}>
+		<section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true">
+			<div class="slds-modal__container">
+				<header class="slds-modal__header">
+					<lightning-button-icon
+						icon-name="utility:close"
+						alternative-text="Close"
+						onclick={handleCloseCloneModal}
+						class="slds-modal__close"
+						variant="bare-inverse"></lightning-button-icon>
+					<h2 class="slds-text-heading_medium">Clone Survey</h2>
+				</header>
+				<div class="slds-modal__content slds-p-around_medium">
+					<lightning-input
+						label="New Survey Name"
+						value={cloneSurveyName}
+						onchange={handleCloneSurveyNameChange}
+						required
+						placeholder="Enter name for cloned survey"></lightning-input>
+					<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">This will create a copy of the survey including all questions.</p>
+				</div>
+				<footer class="slds-modal__footer">
+					<lightning-button label="Cancel" onclick={handleCloseCloneModal}></lightning-button>
+					<lightning-button variant="brand" label="Clone Survey" onclick={handleCloneSurvey} disabled={isCloning}></lightning-button>
+				</footer>
+			</div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+	</template>
+</template>
