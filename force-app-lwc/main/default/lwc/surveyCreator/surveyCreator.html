@@ -1,5 +1,5 @@
 <template>
-	<lightning-card title="Create a New Survey" icon-name="standard:survey">
+	<lightning-card title="Create Survey Template" icon-name="standard:survey">
 		<!-- Loading State -->
 		<template if:true={isLoading}>
 			<div class="slds-is-relative" style="min-height: 200px">
@@ -21,7 +21,7 @@
 
 				<!-- Survey Creation Form -->
 				<div class="slds-box slds-theme_default">
-					<h3 class="slds-text-heading_small slds-m-bottom_medium">Make a New Survey</h3>
+					<h3 class="slds-text-heading_small slds-m-bottom_medium">Survey Details</h3>
 
 					<lightning-input
 						label="Survey Name"
@@ -32,7 +32,93 @@
 						placeholder="Enter survey name"
 						class="slds-m-bottom_medium"></lightning-input>
 
-					<lightning-button variant="brand" label="Create New Survey" onclick={handleCreateSurvey} disabled={isCreating} class="slds-m-top_small"></lightning-button>
+					<lightning-input
+						label="Survey Header (Optional)"
+						value={surveyHeader}
+						onchange={handleHeaderChange}
+						type="textarea"
+						disabled={isCreating}
+						placeholder="Enter header text for your survey"
+						class="slds-m-bottom_medium"></lightning-input>
+
+					<lightning-input
+						label="Thank You Text (Optional)"
+						value={thankYouText}
+						onchange={handleThankYouTextChange}
+						type="textarea"
+						disabled={isCreating}
+						placeholder="Enter thank you message for respondents"
+						class="slds-m-bottom_medium"></lightning-input>
+
+					<lightning-input
+						label="Thank You Link (Optional)"
+						value={thankYouLink}
+						onchange={handleThankYouLinkChange}
+						disabled={isCreating}
+						placeholder="Enter link for thank you message"
+						class="slds-m-bottom_medium"></lightning-input>
+
+					<lightning-input
+						type="checkbox"
+						label="Hide Survey Name"
+						checked={hideSurveyName}
+						onchange={handleHideSurveyNameChange}
+						disabled={isCreating}
+						class="slds-m-bottom_medium">
+					</lightning-input>
+
+					<lightning-input
+						type="checkbox"
+						label="All Responses Anonymous"
+						checked={allResponsesAnonymous}
+						onchange={handleAllResponsesAnonymousChange}
+						disabled={isCreating}
+						class="slds-m-bottom_medium">
+					</lightning-input>
+
+					<lightning-button variant="brand" label="Create Survey Template" onclick={handleCreateSurvey} disabled={isCreating} class="slds-m-top_small"></lightning-button>
+				</div>
+
+				<!-- Questions Section -->
+				<div class="slds-box slds-theme_shade slds-m-top_medium">
+					<h3 class="slds-text-heading_small slds-m-bottom_medium">Questions</h3>
+
+					<template if:true={questions.length}>
+						<div class="slds-grid slds-gutters slds-wrap">
+							<template for:each={questions} for:item="question" for:index="index">
+								<div key={question.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-p-around_small">
+									<lightning-card>
+										<lightning-button-icon
+											icon-name="utility:delete"
+											size="small"
+											variant="border-filled"
+											alternative-text="Delete question"
+											onclick={handleDeleteQuestion}
+											data-question-index={index}
+											class="slds-float_right">
+										</lightning-button-icon>
+										<div slot="title">{question.orderNumber}: {question.question}</div>
+										<div slot="footer">
+											<lightning-button
+												label="Edit"
+												variant="neutral"
+												onclick={handleEditQuestion}
+												data-question-index={index}>
+											</lightning-button>
+										</div>
+									</lightning-card>
+								</div>
+							</template>
+						</div>
+					</template>
+
+					<lightning-button
+						label="Add Question"
+						variant="brand"
+						onclick={handleAddQuestion}
+						disabled={isCreating}
+						class="slds-m-top_small">
+					</lightning-button>
 				</div>
 
 				<!-- Recent Surveys -->
@@ -42,38 +128,38 @@
 
 						<table class="slds-table slds-table_cell-buffer slds-table_bordered">
 							<thead>
-								<tr class="slds-line-height_reset">
-									<th class="slds-text-heading_label" scope="col">
-										<div class="slds-truncate" title="Survey Name">Survey Name</div>
-									</th>
-									<th class="slds-text-heading_label" scope="col">
-										<div class="slds-truncate" title="Questions">Questions</div>
-									</th>
-									<th class="slds-text-heading_label" scope="col">
-										<div class="slds-truncate" title="Responses">Responses</div>
-									</th>
-									<th class="slds-text-heading_label" scope="col">
-										<div class="slds-truncate" title="Actions">Actions</div>
-									</th>
-								</tr>
+							<tr class="slds-line-height_reset">
+								<th class="slds-text-heading_label" scope="col">
+									<div class="slds-truncate" title="Survey Name">Survey Name</div>
+								</th>
+								<th class="slds-text-heading_label" scope="col">
+									<div class="slds-truncate" title="Questions">Questions</div>
+								</th>
+								<th class="slds-text-heading_label" scope="col">
+									<div class="slds-truncate" title="Responses">Responses</div>
+								</th>
+								<th class="slds-text-heading_label" scope="col">
+									<div class="slds-truncate" title="Actions">Actions</div>
+								</th>
+							</tr>
 							</thead>
 							<tbody>
-								<template for:each={recentSurveys} for:item="survey">
-									<tr key={survey.Id} class="slds-hint-parent">
-										<td data-label="Survey Name">
-											<div class="slds-truncate" title={survey.Name}>{survey.Name}</div>
-										</td>
-										<td data-label="Questions">
-											<div class="slds-truncate">{survey.Questions__c}</div>
-										</td>
-										<td data-label="Responses">
-											<div class="slds-truncate">{survey.Completed_Surveys__c}</div>
-										</td>
-										<td data-label="Actions">
-											<lightning-button variant="base" label="View" data-survey-id={survey.Id} onclick={handleViewSurvey}></lightning-button>
-										</td>
-									</tr>
-								</template>
+							<template for:each={recentSurveys} for:item="survey">
+								<tr key={survey.Id} class="slds-hint-parent">
+									<td data-label="Survey Name">
+										<div class="slds-truncate" title={survey.Name}>{survey.Name}</div>
+									</td>
+									<td data-label="Questions">
+										<div class="slds-truncate">{survey.Questions__c}</div>
+									</td>
+									<td data-label="Responses">
+										<div class="slds-truncate">{survey.Completed_Surveys__c}</div>
+									</td>
+									<td data-label="Actions">
+										<lightning-button variant="base" label="View" data-survey-id={survey.Id} onclick={handleViewSurvey}></lightning-button>
+									</td>
+								</tr>
+							</template>
 							</tbody>
 						</table>
 					</div>
@@ -81,4 +167,59 @@
 			</div>
 		</template>
 	</lightning-card>
+
+	<!-- Question Modal -->
+	<template if:true={showQuestionModal}>
+		<section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+			<div class="slds-modal__overlay slds-modal__overlay--transparent"></div>
+			<div class="slds-modal__container">
+				<header class="slds-modal__header">
+					<h2 id="modal-heading-01" class="slds-text-heading_medium">Question Details</h2>
+				</header>
+				<div class="slds-modal__content slds-p-around_medium">
+					<lightning-input
+						label="Question"
+						value={currentQuestion.question}
+						onchange={handleQuestionChange}
+						required
+						type="textarea"
+						class="slds-m-bottom_medium">
+					</lightning-input>
+
+					<lightning-combobox
+						label="Question Type"
+						value={currentQuestion.questionType}
+						options={questionTypeOptions}
+						onchange={handleQuestionTypeChange}
+						required
+						class="slds-m-bottom_medium">
+					</lightning-combobox>
+
+					<lightning-input
+						type="checkbox"
+						label="Required"
+						checked={currentQuestion.required}
+						onchange={handleRequiredChange}
+						class="slds-m-bottom_medium">
+					</lightning-input>
+
+					<template if:true={showChoices}>
+						<lightning-input
+							label="Choices (One per line)"
+							value={currentQuestion.choicesText}
+							onchange={handleChoicesChange}
+							type="textarea"
+							placeholder="Choice 1&#10;Choice 2&#10;Choice 3"
+							class="slds-m-bottom_medium">
+						</lightning-input>
+					</template>
+				</div>
+				<footer class="slds-modal__footer">
+					<lightning-button label="Cancel" variant="neutral" onclick={handleCancelQuestion}></lightning-button>
+					<lightning-button label="Save" variant="brand" onclick={handleSaveQuestion}></lightning-button>
+				</footer>
+			</div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+	</template>
 </template>
