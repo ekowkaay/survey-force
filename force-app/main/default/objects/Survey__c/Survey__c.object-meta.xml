@@ -58,9 +58,7 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>Edit</actionName>
-        <content>GSurveys</content>
-        <skipRecordTypeSelect>false</skipRecordTypeSelect>
-        <type>Visualforce</type>
+        <type>Default</type>
     </actionOverrides>
     <actionOverrides>
         <actionName>Edit</actionName>
