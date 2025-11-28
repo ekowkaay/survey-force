@@ -71,7 +71,7 @@ Make sure to start from a brand-new environment to avoid conflicts with previous
 1. Authorize your Sandbox, Trailhead Playground, or Developer org and provide it with an alias (**mysurveyorg** in the command below):
 
    ```
-   sf org login web --set-default-dev-hub --alias mysurveyorg
+   sf org login web --set-default --alias mysurveyorg
    ```
 
 1. Clone this repository:
