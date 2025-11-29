@@ -359,7 +359,7 @@ public with sharing class SurveyCreationController {
 	 * @param surveyId The survey ID to fetch
 	 * @return SurveyViewData with survey and questions
 	 */
-	@AuraEnabled(cacheable=true)
+	@AuraEnabled
 	public static SurveyViewData getSurveyWithQuestions(Id surveyId) {
 		try {
 			if (surveyId == null) {

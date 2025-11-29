@@ -88,28 +88,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		Promise.all([checkSiteAvailability(), getSurveyWithQuestions({ surveyId: this.recordId })])
 			.then(([siteInfo, surveyData]) => {
 				this.hasExistingSite = siteInfo.hasExistingSite;
-
-				// Populate survey data
-				this.surveyId = surveyData.survey.Id;
-				this.surveyName = surveyData.survey.Name;
-				this.surveyHeader = surveyData.survey.Survey_Header__c || '';
-				this.thankYouText = surveyData.survey.Thank_You_Text__c || '';
-				this.thankYouLink = surveyData.survey.Thank_You_Link__c || '';
-				this.hideSurveyName = surveyData.survey.Hide_Survey_Name__c || false;
-				this.allResponsesAnonymous = surveyData.survey.All_Responses_Anonymous__c || false;
-				this.totalResponses = surveyData.totalResponses || 0;
-				this.surveyCreatedDate = surveyData.survey.CreatedDate;
-
-				// Populate questions
-				this.questions = surveyData.questions.map((q) => ({
-					id: q.id,
-					question: q.question,
-					questionType: q.questionType,
-					required: q.required,
-					choices: q.choices || [],
-					choicesText: q.choicesText || '',
-					orderNumber: q.orderNumber
-				}));
+				this.populateSurveyData(surveyData);
 
 				// Set to view mode
 				this.isViewMode = true;
@@ -129,6 +108,33 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				this.showToast('Error', 'Error loading survey: ' + (error.body?.message || error.message), 'error');
 				this.isLoading = false;
 			});
+	}
+
+	/**
+	 * Populate survey data from server response
+	 * @param {Object} surveyData - Survey data from getSurveyWithQuestions
+	 */
+	populateSurveyData(surveyData) {
+		this.surveyId = surveyData.survey.Id;
+		this.surveyName = surveyData.survey.Name;
+		this.surveyHeader = surveyData.survey.Survey_Header__c || '';
+		this.thankYouText = surveyData.survey.Thank_You_Text__c || '';
+		this.thankYouLink = surveyData.survey.Thank_You_Link__c || '';
+		this.hideSurveyName = surveyData.survey.Hide_Survey_Name__c || false;
+		this.allResponsesAnonymous = surveyData.survey.All_Responses_Anonymous__c || false;
+		this.totalResponses = surveyData.totalResponses || 0;
+		this.surveyCreatedDate = surveyData.survey.CreatedDate;
+
+		// Populate questions
+		this.questions = surveyData.questions.map((q) => ({
+			id: q.id,
+			question: q.question,
+			questionType: q.questionType,
+			required: q.required,
+			choices: q.choices || [],
+			choicesText: q.choicesText || '',
+			orderNumber: q.orderNumber
+		}));
 	}
 
 	/**
@@ -167,27 +173,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 		getSurveyWithQuestions({ surveyId: surveyIdToLoad })
 			.then((surveyData) => {
-				// Populate survey data
-				this.surveyId = surveyData.survey.Id;
-				this.surveyName = surveyData.survey.Name;
-				this.surveyHeader = surveyData.survey.Survey_Header__c || '';
-				this.thankYouText = surveyData.survey.Thank_You_Text__c || '';
-				this.thankYouLink = surveyData.survey.Thank_You_Link__c || '';
-				this.hideSurveyName = surveyData.survey.Hide_Survey_Name__c || false;
-				this.allResponsesAnonymous = surveyData.survey.All_Responses_Anonymous__c || false;
-				this.totalResponses = surveyData.totalResponses || 0;
-				this.surveyCreatedDate = surveyData.survey.CreatedDate;
-
-				// Populate questions
-				this.questions = surveyData.questions.map((q) => ({
-					id: q.id,
-					question: q.question,
-					questionType: q.questionType,
-					required: q.required,
-					choices: q.choices || [],
-					choicesText: q.choicesText || '',
-					orderNumber: q.orderNumber
-				}));
+				this.populateSurveyData(surveyData);
 
 				// Switch to view mode
 				this.isViewMode = true;
