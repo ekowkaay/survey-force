@@ -86,7 +86,7 @@ Make sure to start from a brand-new environment to avoid conflicts with previous
 1. Run this command in a terminal to deploy the app.
 
    ```
-   sf project deploy start --target-org mysurveyorg --source-dir force-app
+   sf project deploy start --source-dir force-app --target-org survey-force-lwc
    ```
 
 1. If your org isn't already open, open it now:
