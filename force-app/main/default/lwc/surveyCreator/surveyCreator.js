@@ -152,7 +152,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		return this.questions.map((q, index) => ({
 			...q,
 			index: index,
-			orderNumber: index + 1
+			orderNumber: q.orderNumber || index + 1
 		}));
 	}
 

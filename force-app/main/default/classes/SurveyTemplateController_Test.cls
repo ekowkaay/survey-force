@@ -5,10 +5,7 @@ private class SurveyTemplateController_Test {
 		// Create test surveys
 		List<Survey__c> surveys = new List<Survey__c>();
 		for (Integer i = 0; i < 3; i++) {
-			surveys.add(new Survey__c(
-				Name = 'Test Survey ' + i,
-				Thank_You_Text__c = 'Thank you for completing this survey'
-			));
+			surveys.add(new Survey__c(Name = 'Test Survey ' + i, Thank_You_Text__c = 'Thank you for completing this survey'));
 		}
 		insert surveys;
 	}
