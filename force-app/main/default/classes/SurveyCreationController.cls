@@ -321,4 +321,128 @@ public with sharing class SurveyCreationController {
 			return result;
 		}
 	}
+
+	/**
+	 * Survey data wrapper for viewing existing surveys
+	 */
+	public class SurveyViewData {
+		@AuraEnabled
+		public Survey__c survey { get; set; }
+		@AuraEnabled
+		public List<QuestionViewData> questions { get; set; }
+		@AuraEnabled
+		public Integer totalResponses { get; set; }
+	}
+
+	/**
+	 * Question data wrapper for viewing
+	 */
+	public class QuestionViewData {
+		@AuraEnabled
+		public Id id { get; set; }
+		@AuraEnabled
+		public String question { get; set; }
+		@AuraEnabled
+		public Integer orderNumber { get; set; }
+		@AuraEnabled
+		public String questionType { get; set; }
+		@AuraEnabled
+		public Boolean required { get; set; }
+		@AuraEnabled
+		public String choicesText { get; set; }
+		@AuraEnabled
+		public List<String> choices { get; set; }
+	}
+
+	/**
+	 * Get survey with questions for viewing/editing
+	 * @param surveyId The survey ID to fetch
+	 * @return SurveyViewData with survey and questions
+	 */
+	@AuraEnabled(cacheable=true)
+	public static SurveyViewData getSurveyWithQuestions(Id surveyId) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			SurveyViewData result = new SurveyViewData();
+
+			// Validate access to survey fields
+			List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
+				Schema.Survey__c.fields.Name,
+				Schema.Survey__c.fields.Survey_Header__c,
+				Schema.Survey__c.fields.Thank_You_Text__c,
+				Schema.Survey__c.fields.Thank_You_Link__c,
+				Schema.Survey__c.fields.Hide_Survey_Name__c,
+				Schema.Survey__c.fields.All_Responses_Anonymous__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
+
+			// Get survey record
+			result.survey = [
+				SELECT Id, Name, Survey_Header__c, Thank_You_Text__c, Thank_You_Link__c, Hide_Survey_Name__c, All_Responses_Anonymous__c, Questions__c, Completed_Surveys__c, CreatedDate
+				FROM Survey__c
+				WHERE Id = :surveyId
+				WITH USER_MODE
+				LIMIT 1
+			];
+
+			if (result.survey == null) {
+				throw new AuraHandledException('Survey not found');
+			}
+
+			// Get total responses
+			result.totalResponses = result.survey.Completed_Surveys__c != null ? Integer.valueOf(result.survey.Completed_Surveys__c) : 0;
+
+			// Validate access to question fields
+			List<Schema.SobjectField> questionFields = new List<Schema.SobjectField>{
+				Schema.Survey_Question__c.fields.Question__c,
+				Schema.Survey_Question__c.fields.OrderNumber__c,
+				Schema.Survey_Question__c.fields.Type__c,
+				Schema.Survey_Question__c.fields.Required__c,
+				Schema.Survey_Question__c.fields.Choices__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
+
+			// Get questions
+			List<Survey_Question__c> questionRecords = [
+				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+				ORDER BY OrderNumber__c ASC NULLS LAST
+			];
+
+			result.questions = new List<QuestionViewData>();
+			Integer orderNumber = 1;
+
+			for (Survey_Question__c q : questionRecords) {
+				QuestionViewData qd = new QuestionViewData();
+				qd.id = q.Id;
+				qd.question = q.Question__c;
+				qd.orderNumber = orderNumber++;
+				qd.questionType = q.Type__c;
+				qd.required = q.Required__c != null ? q.Required__c : false;
+				qd.choicesText = q.Choices__c != null ? q.Choices__c : '';
+
+				// Parse choices into list
+				qd.choices = new List<String>();
+				if (String.isNotBlank(q.Choices__c)) {
+					for (String choice : q.Choices__c.split('\n')) {
+						if (String.isNotBlank(choice.trim())) {
+							qd.choices.add(choice.trim());
+						}
+					}
+				}
+
+				result.questions.add(qd);
+			}
+
+			return result;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:getSurveyWithQuestions():' + e.getMessage());
+			throw new AuraHandledException('Error loading survey: ' + e.getMessage());
+		}
+	}
 }

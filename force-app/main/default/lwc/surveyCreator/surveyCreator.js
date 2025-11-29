@@ -1,12 +1,16 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import checkSiteAvailability from '@salesforce/apex/SurveyCreationController.checkSiteAvailability';
 import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.createSurveyWithDetails';
 import createSurveyQuestions from '@salesforce/apex/SurveyCreationController.createSurveyQuestions';
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
+import getSurveyWithQuestions from '@salesforce/apex/SurveyCreationController.getSurveyWithQuestions';
 
 export default class SurveyCreator extends NavigationMixin(LightningElement) {
+	// Public API property for viewing existing surveys
+	@api recordId;
+
 	// Survey properties
 	@track surveyId = null;
 	@track surveyName = '';
@@ -22,11 +26,13 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	@track isCreating = false;
 	@track activeTab = 'build';
 	@track showSettings = true;
+	@track isViewMode = false;
 
 	// Data
 	@track recentSurveys = [];
 	@track showRecentSurveys = false;
 	@track questions = [];
+	@track surveyCreatedDate = null;
 
 	// Question modal state
 	@track showQuestionModal = false;
@@ -49,15 +55,149 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	loadInitialData() {
+		// If recordId is provided, load the existing survey
+		if (this.recordId) {
+			this.loadExistingSurvey();
+		} else {
+			this.loadCreateModeData();
+		}
+	}
+
+	/**
+	 * Load data for create mode (new survey)
+	 */
+	loadCreateModeData() {
 		Promise.all([checkSiteAvailability(), getRecentSurveys()])
 			.then(([siteInfo, surveys]) => {
 				this.hasExistingSite = siteInfo.hasExistingSite;
 				this.recentSurveys = surveys;
 				this.showRecentSurveys = surveys && surveys.length > 0;
+				this.isViewMode = false;
 				this.isLoading = false;
 			})
 			.catch((error) => {
 				this.showToast('Error', 'Error loading page: ' + (error.body?.message || error.message), 'error');
+				this.isLoading = false;
+			});
+	}
+
+	/**
+	 * Load an existing survey for viewing/editing
+	 */
+	loadExistingSurvey() {
+		Promise.all([checkSiteAvailability(), getSurveyWithQuestions({ surveyId: this.recordId })])
+			.then(([siteInfo, surveyData]) => {
+				this.hasExistingSite = siteInfo.hasExistingSite;
+
+				// Populate survey data
+				this.surveyId = surveyData.survey.Id;
+				this.surveyName = surveyData.survey.Name;
+				this.surveyHeader = surveyData.survey.Survey_Header__c || '';
+				this.thankYouText = surveyData.survey.Thank_You_Text__c || '';
+				this.thankYouLink = surveyData.survey.Thank_You_Link__c || '';
+				this.hideSurveyName = surveyData.survey.Hide_Survey_Name__c || false;
+				this.allResponsesAnonymous = surveyData.survey.All_Responses_Anonymous__c || false;
+				this.totalResponses = surveyData.totalResponses || 0;
+				this.surveyCreatedDate = surveyData.survey.CreatedDate;
+
+				// Populate questions
+				this.questions = surveyData.questions.map((q) => ({
+					id: q.id,
+					question: q.question,
+					questionType: q.questionType,
+					required: q.required,
+					choices: q.choices || [],
+					choicesText: q.choicesText || '',
+					orderNumber: q.orderNumber
+				}));
+
+				// Set to view mode
+				this.isViewMode = true;
+				this.isLoading = false;
+
+				// Show recent surveys after loading
+				getRecentSurveys()
+					.then((surveys) => {
+						this.recentSurveys = surveys;
+						this.showRecentSurveys = surveys && surveys.length > 0;
+					})
+					.catch(() => {
+						// Ignore error for recent surveys
+					});
+			})
+			.catch((error) => {
+				this.showToast('Error', 'Error loading survey: ' + (error.body?.message || error.message), 'error');
+				this.isLoading = false;
+			});
+	}
+
+	/**
+	 * Switch to edit mode from view mode
+	 */
+	handleEditSurvey() {
+		this.isViewMode = false;
+		this.showSettings = true;
+	}
+
+	/**
+	 * Create a new survey (reset all fields)
+	 */
+	handleNewSurvey() {
+		this.surveyId = null;
+		this.surveyName = '';
+		this.surveyHeader = '';
+		this.thankYouText = '';
+		this.thankYouLink = '';
+		this.hideSurveyName = false;
+		this.allResponsesAnonymous = false;
+		this.questions = [];
+		this.totalResponses = 0;
+		this.surveyCreatedDate = null;
+		this.isViewMode = false;
+		this.showSettings = true;
+		this.activeTab = 'build';
+	}
+
+	/**
+	 * Load a survey from the recent surveys list
+	 */
+	handleLoadSurvey(event) {
+		const surveyIdToLoad = event.target.dataset.surveyId;
+		this.isLoading = true;
+
+		getSurveyWithQuestions({ surveyId: surveyIdToLoad })
+			.then((surveyData) => {
+				// Populate survey data
+				this.surveyId = surveyData.survey.Id;
+				this.surveyName = surveyData.survey.Name;
+				this.surveyHeader = surveyData.survey.Survey_Header__c || '';
+				this.thankYouText = surveyData.survey.Thank_You_Text__c || '';
+				this.thankYouLink = surveyData.survey.Thank_You_Link__c || '';
+				this.hideSurveyName = surveyData.survey.Hide_Survey_Name__c || false;
+				this.allResponsesAnonymous = surveyData.survey.All_Responses_Anonymous__c || false;
+				this.totalResponses = surveyData.totalResponses || 0;
+				this.surveyCreatedDate = surveyData.survey.CreatedDate;
+
+				// Populate questions
+				this.questions = surveyData.questions.map((q) => ({
+					id: q.id,
+					question: q.question,
+					questionType: q.questionType,
+					required: q.required,
+					choices: q.choices || [],
+					choicesText: q.choicesText || '',
+					orderNumber: q.orderNumber
+				}));
+
+				// Switch to view mode
+				this.isViewMode = true;
+				this.activeTab = 'build';
+				this.isLoading = false;
+
+				this.showToast('Success', 'Survey loaded successfully', 'success');
+			})
+			.catch((error) => {
+				this.showToast('Error', 'Error loading survey: ' + (error.body?.message || error.message), 'error');
 				this.isLoading = false;
 			});
 	}
@@ -80,11 +220,33 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	get surveyStatusText() {
+		if (this.isViewMode) {
+			return 'Viewing Survey';
+		}
 		return this.surveyId ? 'Saved' : 'Draft - Not saved';
 	}
 
 	get createButtonLabel() {
+		if (this.isViewMode) {
+			return 'Edit Survey';
+		}
 		return this.surveyId ? 'Update Survey' : 'Create Survey';
+	}
+
+	get showCreateButton() {
+		return !this.isViewMode;
+	}
+
+	get showEditButton() {
+		return this.isViewMode;
+	}
+
+	get showNewSurveyButton() {
+		return this.surveyId !== null;
+	}
+
+	get isFieldsDisabled() {
+		return this.isCreating || this.isViewMode;
 	}
 
 	get questionCount() {
@@ -138,6 +300,13 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			this.currentQuestion.questionType === 'Single Select--Horizontal' ||
 			this.currentQuestion.questionType === 'Multi-Select--Vertical'
 		);
+	}
+
+	get formattedCreatedDate() {
+		if (!this.surveyCreatedDate) {
+			return 'N/A';
+		}
+		return new Date(this.surveyCreatedDate).toLocaleDateString();
 	}
 
 	// Event handlers
@@ -323,7 +492,10 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 						})
 							.then(() => {
 								this.showToast('Success', 'Survey created successfully', 'success');
-								this.navigateToSurvey(result.surveyId);
+								this.isCreating = false;
+								// Switch to view mode after successful creation
+								this.isViewMode = true;
+								this.surveyCreatedDate = new Date().toISOString();
 							})
 							.catch((error) => {
 								this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
@@ -331,7 +503,10 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							});
 					} else {
 						this.showToast('Success', 'Survey created successfully', 'success');
-						this.navigateToSurvey(result.surveyId);
+						this.isCreating = false;
+						// Switch to view mode after successful creation
+						this.isViewMode = true;
+						this.surveyCreatedDate = new Date().toISOString();
 					}
 				} else {
 					this.showToast('Error', result.message, 'error');
