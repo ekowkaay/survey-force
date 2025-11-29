@@ -8,6 +8,7 @@
         <target>lightning__RecordPage</target>
         <target>lightning__AppPage</target>
         <target>lightning__HomePage</target>
+        <!-- lightningCommunity__Page does not support property tags, so it has no targetConfig -->
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>
     </targets>
@@ -22,7 +23,7 @@
             <property name="caseId" type="String" label="Case ID" description="Optional Case ID to associate with response"/>
             <property name="contactId" type="String" label="Contact ID" description="Optional Contact ID to associate with response"/>
         </targetConfig>
-        <targetConfig targets="lightningCommunity__Page,lightningCommunity__Default">
+        <targetConfig targets="lightningCommunity__Default">
             <property name="recordId" type="String" label="Survey ID" description="The ID of the Survey record to display"/>
             <property name="caseId" type="String" label="Case ID" description="Optional Case ID to associate with response"/>
             <property name="contactId" type="String" label="Contact ID" description="Optional Contact ID to associate with response"/>
