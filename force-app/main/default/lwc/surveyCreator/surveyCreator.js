@@ -5,6 +5,7 @@ import checkSiteAvailability from '@salesforce/apex/SurveyCreationController.che
 import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.createSurveyWithDetails';
 import createSurveyQuestions from '@salesforce/apex/SurveyCreationController.createSurveyQuestions';
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
+import getSurveyDetails from '@salesforce/apex/SurveyCreationController.getSurveyDetails';
 
 export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	// Survey properties
@@ -22,11 +23,18 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	@track isCreating = false;
 	@track activeTab = 'build';
 	@track showSettings = true;
+	@track isViewMode = false;
 
 	// Data
 	@track recentSurveys = [];
 	@track showRecentSurveys = false;
 	@track questions = [];
+
+	// View mode data
+	@track viewSurveyDetails = null;
+	@track createdDate = '';
+	@track lastModifiedDate = '';
+	@track createdByName = '';
 
 	// Question modal state
 	@track showQuestionModal = false;
@@ -62,6 +70,48 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			});
 	}
 
+	/**
+	 * Load survey details for view mode
+	 */
+	loadSurveyDetails(surveyIdToLoad) {
+		this.isLoading = true;
+		getSurveyDetails({ surveyId: surveyIdToLoad })
+			.then((result) => {
+				this.viewSurveyDetails = result;
+				this.surveyId = result.survey.Id;
+				this.surveyName = result.survey.Name;
+				this.surveyHeader = result.survey.Survey_Header__c || '';
+				this.thankYouText = result.survey.Thank_You_Text__c || '';
+				this.thankYouLink = result.survey.Thank_You_Link__c || '';
+				this.hideSurveyName = result.survey.Hide_Survey_Name__c || false;
+				this.allResponsesAnonymous = result.survey.All_Responses_Anonymous__c || false;
+				this.totalResponses = result.totalResponses || 0;
+				this.createdDate = result.createdDate;
+				this.lastModifiedDate = result.lastModifiedDate;
+				this.createdByName = result.createdByName;
+
+				// Map questions for view mode
+				this.questions = (result.questions || []).map((q) => ({
+					id: q.id,
+					question: q.question,
+					questionType: q.questionType,
+					required: q.required,
+					choices: q.choices || [],
+					choicesText: (q.choices || []).join('\n'),
+					orderNumber: q.orderNumber,
+					hideOnSurvey: q.hideOnSurvey
+				}));
+
+				this.isViewMode = true;
+				this.activeTab = 'view';
+				this.isLoading = false;
+			})
+			.catch((error) => {
+				this.showToast('Error', 'Error loading survey details: ' + (error.body?.message || error.message), 'error');
+				this.isLoading = false;
+			});
+	}
+
 	// Computed properties
 	get canCreate() {
 		return this.surveyName && this.surveyName.trim().length > 0;
@@ -80,6 +130,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	get surveyStatusText() {
+		if (this.isViewMode) {
+			return 'Saved';
+		}
 		return this.surveyId ? 'Saved' : 'Draft - Not saved';
 	}
 
@@ -99,7 +152,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		return this.questions.map((q, index) => ({
 			...q,
 			index: index,
-			orderNumber: index + 1
+			orderNumber: q.orderNumber || index + 1
 		}));
 	}
 
@@ -323,7 +376,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 						})
 							.then(() => {
 								this.showToast('Success', 'Survey created successfully', 'success');
-								this.navigateToSurvey(result.surveyId);
+								this.isCreating = false;
+								this.loadSurveyDetails(result.surveyId);
 							})
 							.catch((error) => {
 								this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
@@ -331,7 +385,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							});
 					} else {
 						this.showToast('Success', 'Survey created successfully', 'success');
-						this.navigateToSurvey(result.surveyId);
+						this.isCreating = false;
+						this.loadSurveyDetails(result.surveyId);
 					}
 				} else {
 					this.showToast('Error', result.message, 'error');
@@ -342,6 +397,51 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				this.showToast('Error', 'Error creating survey: ' + (error.body?.message || error.message), 'error');
 				this.isCreating = false;
 			});
+	}
+
+	/**
+	 * Switch from view mode back to edit/create mode
+	 */
+	handleEditSurvey() {
+		this.isViewMode = false;
+		this.activeTab = 'build';
+	}
+
+	/**
+	 * Create a new survey - resets the form
+	 */
+	handleCreateNew() {
+		this.surveyId = null;
+		this.surveyName = '';
+		this.surveyHeader = '';
+		this.thankYouText = '';
+		this.thankYouLink = '';
+		this.hideSurveyName = false;
+		this.allResponsesAnonymous = false;
+		this.questions = [];
+		this.isViewMode = false;
+		this.activeTab = 'build';
+		this.viewSurveyDetails = null;
+		this.totalResponses = 0;
+		this.createdDate = '';
+		this.lastModifiedDate = '';
+		this.createdByName = '';
+	}
+
+	/**
+	 * Navigate to standard record page
+	 */
+	handleGoToRecord() {
+		if (this.surveyId) {
+			this[NavigationMixin.Navigate]({
+				type: 'standard__recordPage',
+				attributes: {
+					recordId: this.surveyId,
+					objectApiName: 'Survey__c',
+					actionName: 'view'
+				}
+			});
+		}
 	}
 
 	// Share tab handlers
@@ -380,10 +480,10 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		}
 	}
 
-	// Navigation handlers
+	// Navigation handlers - load survey in view mode within component
 	handleViewSurvey(event) {
-		const surveyId = event.target.dataset.surveyId;
-		this.navigateToSurvey(surveyId);
+		const surveyIdToView = event.target.dataset.surveyId;
+		this.loadSurveyDetails(surveyIdToView);
 	}
 
 	navigateToSurvey(surveyId) {

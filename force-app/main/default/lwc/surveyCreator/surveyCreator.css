@@ -157,6 +157,45 @@
 	padding-left: 10px;
 }
 
+/* View Mode Styles */
+.view-questions-container {
+	background-color: var(--lwc-colorBackgroundAlt, #fff);
+	border-radius: 8px;
+}
+
+.view-question-item {
+	border-left: 4px solid var(--lwc-brandPrimary, #0176d3);
+	border-radius: 4px;
+}
+
+.view-question-item .question-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.question-text-view {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--lwc-colorTextDefault, #181818);
+}
+
+.choices-container {
+	padding-left: 1rem;
+	border-left: 2px solid var(--lwc-colorBorder, #e5e5e5);
+}
+
+.choices-container ul {
+	margin: 0;
+	padding-left: 1rem;
+}
+
+.choices-container li {
+	color: var(--lwc-colorTextDefault, #181818);
+	padding: 0.25rem 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
 	.survey-header .slds-grid {

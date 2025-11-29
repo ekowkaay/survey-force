@@ -236,6 +236,145 @@ public with sharing class SurveyCreationController {
 	}
 
 	/**
+	 * Survey details wrapper for viewing a survey
+	 */
+	public class SurveyDetails {
+		@AuraEnabled
+		public Survey__c survey { get; set; }
+		@AuraEnabled
+		public List<QuestionDetails> questions { get; set; }
+		@AuraEnabled
+		public Integer totalResponses { get; set; }
+		@AuraEnabled
+		public Datetime createdDate { get; set; }
+		@AuraEnabled
+		public Datetime lastModifiedDate { get; set; }
+		@AuraEnabled
+		public String createdByName { get; set; }
+	}
+
+	/**
+	 * Question details wrapper for viewing
+	 */
+	public class QuestionDetails {
+		@AuraEnabled
+		public Id id { get; set; }
+		@AuraEnabled
+		public String question { get; set; }
+		@AuraEnabled
+		public Integer orderNumber { get; set; }
+		@AuraEnabled
+		public String questionType { get; set; }
+		@AuraEnabled
+		public Boolean required { get; set; }
+		@AuraEnabled
+		public List<String> choices { get; set; }
+		@AuraEnabled
+		public Boolean hideOnSurvey { get; set; }
+	}
+
+	/**
+	 * Get survey details with questions for viewing
+	 * @param surveyId The survey ID to retrieve
+	 * @return SurveyDetails wrapper with survey and questions
+	 */
+	@AuraEnabled
+	public static SurveyDetails getSurveyDetails(Id surveyId) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
+				Schema.Survey__c.fields.Name,
+				Schema.Survey__c.fields.Survey_Header__c,
+				Schema.Survey__c.fields.Hide_Survey_Name__c,
+				Schema.Survey__c.fields.Thank_You_Text__c,
+				Schema.Survey__c.fields.Thank_You_Link__c,
+				Schema.Survey__c.fields.All_Responses_Anonymous__c,
+				Schema.Survey__c.fields.Questions__c,
+				Schema.Survey__c.fields.Completed_Surveys__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
+
+			Survey__c survey = [
+				SELECT
+					Id,
+					Name,
+					Survey_Header__c,
+					Hide_Survey_Name__c,
+					Thank_You_Text__c,
+					Thank_You_Link__c,
+					All_Responses_Anonymous__c,
+					Questions__c,
+					Completed_Surveys__c,
+					CreatedDate,
+					LastModifiedDate,
+					CreatedBy.Name
+				FROM Survey__c
+				WHERE Id = :surveyId
+				WITH USER_MODE
+				LIMIT 1
+			];
+
+			SurveyDetails details = new SurveyDetails();
+			details.survey = survey;
+			details.totalResponses = survey.Completed_Surveys__c != null ? Integer.valueOf(survey.Completed_Surveys__c) : 0;
+			details.createdDate = survey.CreatedDate;
+			details.lastModifiedDate = survey.LastModifiedDate;
+			details.createdByName = survey.CreatedBy.Name;
+
+			// Get questions
+			List<Schema.SobjectField> questionFields = new List<Schema.SobjectField>{
+				Schema.Survey_Question__c.fields.Question__c,
+				Schema.Survey_Question__c.fields.OrderNumber__c,
+				Schema.Survey_Question__c.fields.Type__c,
+				Schema.Survey_Question__c.fields.Required__c,
+				Schema.Survey_Question__c.fields.Choices__c,
+				Schema.Survey_Question__c.fields.Hide_on_Survey__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
+
+			List<Survey_Question__c> questionRecords = [
+				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+				ORDER BY OrderNumber__c ASC NULLS LAST
+			];
+
+			details.questions = new List<QuestionDetails>();
+			Integer orderNum = 1;
+			for (Survey_Question__c q : questionRecords) {
+				QuestionDetails qd = new QuestionDetails();
+				qd.id = q.Id;
+				qd.question = q.Question__c;
+				qd.orderNumber = orderNum++;
+				qd.questionType = q.Type__c;
+				qd.required = q.Required__c != null ? q.Required__c : false;
+				qd.hideOnSurvey = q.Hide_on_Survey__c != null ? q.Hide_on_Survey__c : false;
+
+				// Parse choices
+				qd.choices = new List<String>();
+				if (String.isNotBlank(q.Choices__c)) {
+					for (String choice : q.Choices__c.split('\n')) {
+						if (String.isNotBlank(choice.trim())) {
+							qd.choices.add(choice.trim());
+						}
+					}
+				}
+
+				details.questions.add(qd);
+			}
+
+			return details;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:getSurveyDetails():' + e.getMessage());
+			throw new AuraHandledException('Error loading survey details: ' + e.getMessage());
+		}
+	}
+
+	/**
 	 * Clone an existing survey
 	 * @param sourceSurveyId Survey ID to clone
 	 * @param newSurveyName Name for the new survey

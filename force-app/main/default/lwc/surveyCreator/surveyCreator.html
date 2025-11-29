@@ -24,10 +24,22 @@
 						</div>
 					</div>
 					<div class="slds-col">
-						<lightning-button-group>
-							<lightning-button label="Preview" icon-name="utility:preview" onclick={handlePreview}></lightning-button>
-							<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
-						</lightning-button-group>
+						<!-- View Mode Header Buttons -->
+						<template lwc:if={isViewMode}>
+							<lightning-button-group>
+								<lightning-button label="Create New" icon-name="utility:add" onclick={handleCreateNew}></lightning-button>
+								<lightning-button label="Edit" icon-name="utility:edit" onclick={handleEditSurvey}></lightning-button>
+								<lightning-button label="Preview" icon-name="utility:preview" onclick={handlePreview}></lightning-button>
+								<lightning-button variant="brand" label="Go to Record" icon-name="utility:new_window" onclick={handleGoToRecord}></lightning-button>
+							</lightning-button-group>
+						</template>
+						<!-- Edit Mode Header Buttons -->
+						<template lwc:else>
+							<lightning-button-group>
+								<lightning-button label="Preview" icon-name="utility:preview" onclick={handlePreview}></lightning-button>
+								<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
+							</lightning-button-group>
+						</template>
 					</div>
 				</div>
 			</div>
@@ -44,6 +56,111 @@
 			<!-- Tabs Section -->
 			<div class="slds-tabs_default">
 				<lightning-tabset active-tab-value={activeTab} variant="scoped">
+					<!-- View Tab (shown when in view mode) -->
+					<template lwc:if={isViewMode}>
+						<lightning-tab label="View Survey" value="view" icon-name="utility:preview">
+							<div class="tab-content slds-p-around_medium">
+								<!-- Survey Info Card -->
+								<div class="slds-card slds-m-bottom_medium">
+									<div class="slds-card__header slds-grid">
+										<header class="slds-media slds-media_center slds-has-flexi-truncate">
+											<div class="slds-media__figure">
+												<lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+											</div>
+											<div class="slds-media__body">
+												<h2 class="slds-card__header-title">Survey Information</h2>
+											</div>
+										</header>
+									</div>
+									<div class="slds-card__body slds-card__body_inner">
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<dl class="slds-list_horizontal slds-wrap">
+													<dt class="slds-item_label slds-text-color_weak">Survey Name:</dt>
+													<dd class="slds-item_detail">{surveyName}</dd>
+													<dt class="slds-item_label slds-text-color_weak">Header:</dt>
+													<dd class="slds-item_detail">{surveyHeader}</dd>
+													<dt class="slds-item_label slds-text-color_weak">Questions:</dt>
+													<dd class="slds-item_detail">{questionCount}</dd>
+													<dt class="slds-item_label slds-text-color_weak">Responses:</dt>
+													<dd class="slds-item_detail">{totalResponses}</dd>
+												</dl>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<dl class="slds-list_horizontal slds-wrap">
+													<dt class="slds-item_label slds-text-color_weak">Anonymous:</dt>
+													<dd class="slds-item_detail">{anonymousText}</dd>
+													<dt class="slds-item_label slds-text-color_weak">Hide Name:</dt>
+													<dd class="slds-item_detail">{hideNameText}</dd>
+													<dt class="slds-item_label slds-text-color_weak">Created By:</dt>
+													<dd class="slds-item_detail">{createdByName}</dd>
+												</dl>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Questions List Card (View Mode) -->
+								<div class="slds-card questions-card">
+									<div class="slds-card__header slds-grid">
+										<header class="slds-media slds-media_center slds-has-flexi-truncate">
+											<div class="slds-media__figure">
+												<lightning-icon icon-name="utility:questions_and_answers" size="small"></lightning-icon>
+											</div>
+											<div class="slds-media__body">
+												<h2 class="slds-card__header-title">
+													<span>Survey Questions ({questionCount})</span>
+												</h2>
+											</div>
+										</header>
+									</div>
+									<div class="slds-card__body slds-card__body_inner">
+										<template lwc:if={hasQuestions}>
+											<div class="slds-box slds-theme_default view-questions-container">
+												<template for:each={questionsWithIndex} for:item="question">
+													<div key={question.id} class="view-question-item slds-m-bottom_medium slds-p-around_medium slds-box slds-theme_shade">
+														<div class="slds-grid slds-grid_vertical-align-start">
+															<div class="slds-col slds-grow">
+																<div class="question-header slds-m-bottom_x-small">
+																	<span class="slds-badge slds-badge_inverse slds-m-right_x-small">Q{question.orderNumber}</span>
+																	<template lwc:if={question.required}>
+																		<span class="slds-badge slds-theme_error slds-m-right_x-small">Required</span>
+																	</template>
+																	<span class="slds-badge slds-badge_lightest">{question.questionType}</span>
+																</div>
+																<p class="slds-text-body_regular slds-m-bottom_small question-text-view">{question.question}</p>
+																<template lwc:if={question.choices}>
+																	<template lwc:if={question.choices.length}>
+																		<div class="choices-container slds-m-top_small">
+																			<p class="slds-text-title slds-m-bottom_xx-small">Choices:</p>
+																			<ul class="slds-list_dotted">
+																				<template for:each={question.choices} for:item="choice">
+																					<li key={choice} class="slds-item">{choice}</li>
+																				</template>
+																			</ul>
+																		</div>
+																	</template>
+																</template>
+															</div>
+														</div>
+													</div>
+												</template>
+											</div>
+										</template>
+										<template lwc:else>
+											<div class="slds-illustration slds-illustration_small empty-state slds-p-around_large">
+												<div class="slds-text-longform">
+													<h3 class="slds-text-heading_medium">No Questions</h3>
+													<p class="slds-text-body_regular">This survey has no questions yet.</p>
+												</div>
+											</div>
+										</template>
+									</div>
+								</div>
+							</div>
+						</lightning-tab>
+					</template>
+
 					<!-- Build Tab -->
 					<lightning-tab label="Build" value="build" icon-name="utility:builder">
 						<div class="tab-content slds-p-around_medium">
@@ -325,14 +442,26 @@
 									<dl class="slds-list_horizontal slds-wrap">
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Survey Name:</dt>
 										<dd class="slds-item_detail slds-truncate">{surveyName}</dd>
+										<dt class="slds-item_label slds-text-color_weak slds-truncate">Header:</dt>
+										<dd class="slds-item_detail slds-truncate">{surveyHeader}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Status:</dt>
 										<dd class="slds-item_detail slds-truncate">{surveyStatusText}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Questions:</dt>
 										<dd class="slds-item_detail slds-truncate">{questionCount}</dd>
+										<dt class="slds-item_label slds-text-color_weak slds-truncate">Responses:</dt>
+										<dd class="slds-item_detail slds-truncate">{totalResponses}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Anonymous:</dt>
 										<dd class="slds-item_detail slds-truncate">{anonymousText}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Hide Name:</dt>
 										<dd class="slds-item_detail slds-truncate">{hideNameText}</dd>
+										<dt class="slds-item_label slds-text-color_weak slds-truncate">Thank You Text:</dt>
+										<dd class="slds-item_detail slds-truncate">{thankYouText}</dd>
+										<dt class="slds-item_label slds-text-color_weak slds-truncate">Thank You Link:</dt>
+										<dd class="slds-item_detail slds-truncate">{thankYouLink}</dd>
+										<template lwc:if={isViewMode}>
+											<dt class="slds-item_label slds-text-color_weak slds-truncate">Created By:</dt>
+											<dd class="slds-item_detail slds-truncate">{createdByName}</dd>
+										</template>
 									</dl>
 								</div>
 							</div>

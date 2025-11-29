@@ -110,4 +110,41 @@ private class SurveyCreationController_Test {
 			System.assert(result.message.contains('required'), 'Message should indicate name is required');
 		}
 	}
+
+	@IsTest
+	private static void testGetSurveyDetails() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			Test.startTest();
+			SurveyCreationController.SurveyDetails details = SurveyCreationController.getSurveyDetails(tu.surveyId);
+			Test.stopTest();
+
+			System.assertNotEquals(null, details, 'Survey details should not be null');
+			System.assertNotEquals(null, details.survey, 'Survey should not be null');
+			System.assertEquals(tu.surveyId, details.survey.Id, 'Survey ID should match');
+			System.assertNotEquals(null, details.questions, 'Questions should not be null');
+			System.assert(details.questions.size() > 0, 'Should have at least one question');
+			System.assertNotEquals(null, details.createdByName, 'Created by name should not be null');
+		}
+	}
+
+	@IsTest
+	private static void testGetSurveyDetailsWithNullId() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			Test.startTest();
+			Boolean exceptionThrown = false;
+			try {
+				SurveyCreationController.SurveyDetails details = SurveyCreationController.getSurveyDetails(null);
+			} catch (AuraHandledException e) {
+				exceptionThrown = true;
+				System.assert(e.getMessage().contains('required'), 'Error should indicate ID is required');
+			}
+			Test.stopTest();
+
+			System.assert(exceptionThrown, 'Exception should be thrown for null ID');
+		}
+	}
 }
