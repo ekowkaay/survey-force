@@ -333,7 +333,16 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	// Survey actions
 	handlePreview() {
 		if (this.surveyId) {
-			window.open('/apex/TakeSurvey?id=' + this.surveyId + '&preview=true', '_blank');
+			this[NavigationMixin.Navigate]({
+				type: 'standard__navItemPage',
+				attributes: {
+					apiName: 'Survey_Taker_Page'
+				},
+				state: {
+					c__recordId: this.surveyId,
+					c__preview: 'true'
+				}
+			});
 		} else {
 			this.showToast('Info', 'Please save the survey first to preview', 'info');
 		}
