@@ -1,5 +1,6 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { CurrentPageReference } from 'lightning/navigation';
 import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData';
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
 
@@ -7,6 +8,34 @@ export default class SurveyTaker extends LightningElement {
 	@api recordId;
 	@api caseId = null;
 	@api contactId = null;
+
+	/**
+	 * Wire adapter to get current page reference and extract URL state parameters
+	 * This enables the component to read c__recordId from URL when navigating via tabs
+	 */
+	@wire(CurrentPageReference)
+	handlePageReference(pageRef) {
+		if (pageRef && pageRef.state) {
+			// Read recordId from URL state if not already set via @api property
+			if (pageRef.state.c__recordId && !this.recordId) {
+				this.recordId = pageRef.state.c__recordId;
+				// Load survey data if component already initialized
+				if (this._isConnected) {
+					this.loadSurveyData();
+				}
+			}
+			// Read caseId from URL state if not already set
+			if (pageRef.state.c__caseId && !this.caseId) {
+				this.caseId = pageRef.state.c__caseId;
+			}
+			// Read contactId from URL state if not already set
+			if (pageRef.state.c__contactId && !this.contactId) {
+				this.contactId = pageRef.state.c__contactId;
+			}
+		}
+	}
+
+	_isConnected = false;
 
 	@track isLoading = true;
 	@track isSubmitting = false;
@@ -36,7 +65,12 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	connectedCallback() {
-		this.loadSurveyData();
+		this._isConnected = true;
+		// Only load survey data if recordId is available
+		// If recordId comes from URL state via wire adapter, it will load there instead
+		if (this.recordId) {
+			this.loadSurveyData();
+		}
 	}
 
 	loadSurveyData() {
