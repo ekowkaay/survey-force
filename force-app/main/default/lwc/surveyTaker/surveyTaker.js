@@ -35,8 +35,9 @@ export default class SurveyTaker extends LightningElement {
 				this._urlContactId = pageRef.state.c__contactId;
 			}
 			// Load survey data if we have a new recordId that differs from what was already loaded
+			// and not currently loading to prevent race conditions
 			const currentId = this.effectiveRecordId;
-			if (currentId && currentId !== this._loadedRecordId) {
+			if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
 				this.loadSurveyData();
 			}
 		}
@@ -66,7 +67,7 @@ export default class SurveyTaker extends LightningElement {
 	// Track the recordId that was successfully loaded to prevent double-loading
 	_loadedRecordId = null;
 
-	@track isLoading = true;
+	@track isLoading = false;
 	@track isSubmitting = false;
 	@track isSubmitted = false;
 	@track error = null;
@@ -95,9 +96,10 @@ export default class SurveyTaker extends LightningElement {
 
 	connectedCallback() {
 		// Only load survey data if recordId is available and not already loaded
+		// Also check if not currently loading to prevent race conditions
 		// If recordId comes from URL state via wire adapter, it will load there instead
 		const currentId = this.effectiveRecordId;
-		if (currentId && currentId !== this._loadedRecordId) {
+		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
 			this.loadSurveyData();
 		}
 	}
