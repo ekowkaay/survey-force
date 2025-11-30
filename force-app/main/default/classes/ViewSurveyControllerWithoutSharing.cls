@@ -14,6 +14,43 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	}
 
 	/**
+	 * Query Survey Invitation by token without sharing rules enforcement
+	 * This allows guest users to access invitations via unique token URL
+	 * @param token The unique invitation token
+	 * @return The SurveyInvitation record if it exists, null otherwise
+	 */
+	public static SurveyInvitation__c getInvitationByToken(String token) {
+		try {
+			List<SurveyInvitation__c> invitations = [
+				SELECT Id, Survey__c, Token__c, Status__c, Email__c, ParticipantName__c, Contact__c
+				FROM SurveyInvitation__c
+				WHERE Token__c = :token
+				LIMIT 1
+			];
+			return invitations.isEmpty() ? null : invitations[0];
+		} catch (Exception e) {
+			System.debug('Error querying invitation: ' + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Update invitation status without sharing rules enforcement
+	 * @param invitationId The invitation ID to update
+	 * @param status The new status value
+	 * @param surveyTakerId The survey taker ID (if completed)
+	 */
+	public static void updateInvitationStatus(Id invitationId, String status, Id surveyTakerId) {
+		SurveyInvitation__c invitation = new SurveyInvitation__c(Id = invitationId);
+		invitation.Status__c = status;
+		if (status == 'Completed') {
+			invitation.CompletedDate__c = Datetime.now();
+			invitation.SurveyTaker__c = surveyTakerId;
+		}
+		update invitation;
+	}
+
+	/**
 	 * Query Survey without sharing rules enforcement, but only if it's marked as publicly available
 	 * This allows guest users to access surveys via direct link without requiring sharing rules
 	 * @param surveyId The ID of the survey to query
