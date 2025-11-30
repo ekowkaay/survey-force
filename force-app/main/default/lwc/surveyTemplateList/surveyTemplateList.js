@@ -25,7 +25,6 @@ const COLUMNS = [
 			rowActions: [
 				{ label: 'Edit', name: 'edit' },
 				{ label: 'Clone', name: 'clone' },
-				{ label: 'Preview', name: 'preview' },
 				{ label: 'Delete', name: 'delete' }
 			]
 		}
@@ -126,9 +125,6 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 			case 'clone':
 				this.openCloneModal(row);
 				break;
-			case 'preview':
-				this.navigateToPreview(row.Id);
-				break;
 			case 'delete':
 				this.handleDeleteSurvey(row.Id);
 				break;
@@ -144,18 +140,6 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 				recordId: surveyId,
 				objectApiName: 'Survey__c',
 				actionName: 'view'
-			}
-		});
-	}
-
-	navigateToPreview(surveyId) {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Taker_Page'
-			},
-			state: {
-				c__recordId: surveyId
 			}
 		});
 	}
