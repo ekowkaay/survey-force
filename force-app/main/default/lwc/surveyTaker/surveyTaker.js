@@ -25,7 +25,6 @@ export default class SurveyTaker extends LightningElement {
 		}
 		if (pageRef.state) {
 			// Store URL state values in internal properties
-			const previousRecordId = this._urlRecordId;
 			if (pageRef.state.c__recordId) {
 				this._urlRecordId = pageRef.state.c__recordId;
 			}
@@ -35,8 +34,9 @@ export default class SurveyTaker extends LightningElement {
 			if (pageRef.state.c__contactId) {
 				this._urlContactId = pageRef.state.c__contactId;
 			}
-			// Load survey data if recordId changed and we have a valid ID
-			if (this._urlRecordId && this._urlRecordId !== previousRecordId) {
+			// Load survey data if we have a new recordId that differs from what was already loaded
+			const currentId = this.effectiveRecordId;
+			if (currentId && currentId !== this._loadedRecordId) {
 				this.loadSurveyData();
 			}
 		}
@@ -63,7 +63,8 @@ export default class SurveyTaker extends LightningElement {
 		return this.contactId || this._urlContactId;
 	}
 
-	_dataLoaded = false;
+	// Track the recordId that was successfully loaded to prevent double-loading
+	_loadedRecordId = null;
 
 	@track isLoading = true;
 	@track isSubmitting = false;
@@ -93,9 +94,10 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	connectedCallback() {
-		// Only load survey data if recordId is available and not already loaded by wire adapter
+		// Only load survey data if recordId is available and not already loaded
 		// If recordId comes from URL state via wire adapter, it will load there instead
-		if (this.effectiveRecordId && !this._dataLoaded) {
+		const currentId = this.effectiveRecordId;
+		if (currentId && currentId !== this._loadedRecordId) {
 			this.loadSurveyData();
 		}
 	}
@@ -103,9 +105,10 @@ export default class SurveyTaker extends LightningElement {
 	loadSurveyData() {
 		this.isLoading = true;
 		this.error = null;
+		const recordIdToLoad = this.effectiveRecordId;
 
 		getSurveyData({
-			surveyId: this.effectiveRecordId,
+			surveyId: recordIdToLoad,
 			caseId: this.effectiveCaseId,
 			contactId: this.effectiveContactId
 		})
@@ -124,8 +127,8 @@ export default class SurveyTaker extends LightningElement {
 
 					// Initialize responses map
 					this.initializeResponses();
-					// Mark data as loaded only on successful completion
-					this._dataLoaded = true;
+					// Track which recordId was successfully loaded to prevent duplicate loads
+					this._loadedRecordId = recordIdToLoad;
 				} else {
 					this.error = 'Survey not found or not available';
 				}
