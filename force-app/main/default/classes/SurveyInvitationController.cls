@@ -376,7 +376,9 @@ public with sharing class SurveyInvitationController {
 		} else {
 			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
 		}
-		return baseUrl + '/survey?token=' + token;
+		// Survey page path - can be customized via custom label or custom metadata in future
+		String surveyPagePath = '/survey';
+		return baseUrl + surveyPagePath + '?token=' + token;
 	}
 
 	/**

@@ -35,11 +35,23 @@ export default class SurveyTaker extends LightningElement {
 
 		// Load survey data if we have a new recordId or token that differs from what was already loaded
 		// and not currently loading to prevent race conditions
-		const currentId = this.effectiveRecordId;
-		const currentToken = this.effectiveToken;
-		if ((currentId || currentToken) && (currentId !== this._loadedRecordId || currentToken !== this._loadedToken) && !this.isLoading) {
+		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
 		}
+	}
+
+	/**
+	 * Helper method to determine if survey data should be loaded
+	 * @returns {boolean} True if survey data should be loaded
+	 */
+	shouldLoadSurveyData() {
+		const currentId = this.effectiveRecordId;
+		const currentToken = this.effectiveToken;
+		const hasIdentifier = currentId || currentToken;
+		const isNewData = currentId !== this._loadedRecordId || currentToken !== this._loadedToken;
+		const notCurrentlyLoading = !this.isLoading;
+
+		return hasIdentifier && isNewData && notCurrentlyLoading;
 	}
 
 	/**
@@ -105,9 +117,7 @@ export default class SurveyTaker extends LightningElement {
 		// Only load survey data if recordId or token is available and not already loaded
 		// Also check if not currently loading to prevent race conditions
 		// If recordId comes from URL state via wire adapter, it will load there instead
-		const currentId = this.effectiveRecordId;
-		const currentToken = this.effectiveToken;
-		if ((currentId || currentToken) && (currentId !== this._loadedRecordId || currentToken !== this._loadedToken) && !this.isLoading) {
+		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
 		}
 	}

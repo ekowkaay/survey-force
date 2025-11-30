@@ -404,6 +404,21 @@ public with sharing class SurveyTakerController {
 	}
 
 	/**
+	 * Helper method to safely extract contact ID from invitation
+	 * @param invitation The survey invitation record
+	 * @return String The contact ID or null
+	 */
+	private static String getContactIdFromInvitation(SurveyInvitation__c invitation) {
+		if (invitation == null) {
+			return null;
+		}
+		if (invitation.Contact__c == null) {
+			return null;
+		}
+		return String.valueOf(invitation.Contact__c);
+	}
+
+	/**
 	 * Submit survey responses via invitation token
 	 * @param token The unique invitation token
 	 * @param responses List of responses
@@ -427,7 +442,7 @@ public with sharing class SurveyTakerController {
 
 			// Get invitation details for contact linkage
 			SurveyInvitation__c invitation = ViewSurveyControllerWithoutSharing.getInvitationByToken(token);
-			String contactId = invitation != null && invitation.Contact__c != null ? String.valueOf(invitation.Contact__c) : null;
+			String contactId = getContactIdFromInvitation(invitation);
 
 			// Validate responses
 			List<QuestionData> questions = getQuestions(surveyId);

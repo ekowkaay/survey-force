@@ -156,12 +156,25 @@ export default class SurveyInvitations extends LightningElement {
 
 	handleCopyAllLinks() {
 		const allLinks = this.generatedLinks.map((link) => link.surveyUrl).join('\n');
-		this.copyToClipboard(allLinks);
-		this.showToast('Success', 'All links copied to clipboard', 'success');
+		this.copyToClipboard(allLinks, true);
 	}
 
-	copyToClipboard(text) {
-		navigator.clipboard.writeText(text);
+	copyToClipboard(text, showSuccessToast = false) {
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard
+				.writeText(text)
+				.then(() => {
+					if (showSuccessToast) {
+						this.showToast('Success', 'All links copied to clipboard', 'success');
+					}
+				})
+				.catch(() => {
+					this.showToast('Error', 'Failed to copy to clipboard. Please copy manually.', 'error');
+				});
+		} else {
+			// Fallback for browsers that don't support clipboard API
+			this.showToast('Error', 'Clipboard not supported in this browser', 'error');
+		}
 	}
 
 	// Row Actions
