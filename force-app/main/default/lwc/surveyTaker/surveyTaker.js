@@ -109,6 +109,10 @@ export default class SurveyTaker extends LightningElement {
 			contactId: this.effectiveContactId
 		})
 			.then((result) => {
+				// Track which recordId was loaded to prevent duplicate loads
+				// Set this regardless of result to avoid unnecessary retry attempts
+				this._loadedRecordId = recordIdToLoad;
+
 				if (result && result.survey) {
 					this.surveyName = result.survey.Name;
 					this.surveyHeader = result.survey.Survey_Header__c || '';
@@ -123,8 +127,6 @@ export default class SurveyTaker extends LightningElement {
 
 					// Initialize responses map
 					this.initializeResponses();
-					// Track which recordId was successfully loaded to prevent duplicate loads
-					this._loadedRecordId = recordIdToLoad;
 				} else {
 					this.error = 'Survey not found or not available';
 				}
