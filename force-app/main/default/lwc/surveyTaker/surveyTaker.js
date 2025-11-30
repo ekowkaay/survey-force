@@ -23,23 +23,17 @@ export default class SurveyTaker extends LightningElement {
 		if (!pageRef) {
 			return;
 		}
-		if (pageRef.state) {
-			// Store URL state values in internal properties
-			if (pageRef.state.c__recordId) {
-				this._urlRecordId = pageRef.state.c__recordId;
-			}
-			if (pageRef.state.c__caseId) {
-				this._urlCaseId = pageRef.state.c__caseId;
-			}
-			if (pageRef.state.c__contactId) {
-				this._urlContactId = pageRef.state.c__contactId;
-			}
-			// Load survey data if we have a new recordId that differs from what was already loaded
-			// and not currently loading to prevent race conditions
-			const currentId = this.effectiveRecordId;
-			if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
-				this.loadSurveyData();
-			}
+		// Update URL state values - set to value from URL or null if not present
+		const state = pageRef.state || {};
+		this._urlRecordId = state.c__recordId || null;
+		this._urlCaseId = state.c__caseId || null;
+		this._urlContactId = state.c__contactId || null;
+
+		// Load survey data if we have a new recordId that differs from what was already loaded
+		// and not currently loading to prevent race conditions
+		const currentId = this.effectiveRecordId;
+		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
+			this.loadSurveyData();
 		}
 	}
 
