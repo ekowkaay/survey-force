@@ -1,5 +1,6 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { CurrentPageReference } from 'lightning/navigation';
 import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData';
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
 
@@ -8,7 +9,59 @@ export default class SurveyTaker extends LightningElement {
 	@api caseId = null;
 	@api contactId = null;
 
-	@track isLoading = true;
+	// Internal properties to store URL state values
+	_urlRecordId = null;
+	_urlCaseId = null;
+	_urlContactId = null;
+
+	/**
+	 * Wire adapter to get current page reference and extract URL state parameters
+	 * This enables the component to read c__recordId from URL when navigating via tabs
+	 */
+	@wire(CurrentPageReference)
+	handlePageReference(pageRef) {
+		if (!pageRef) {
+			return;
+		}
+		// Update URL state values - set to value from URL or null if not present
+		const state = pageRef.state || {};
+		this._urlRecordId = state.c__recordId || null;
+		this._urlCaseId = state.c__caseId || null;
+		this._urlContactId = state.c__contactId || null;
+
+		// Load survey data if we have a new recordId that differs from what was already loaded
+		// and not currently loading to prevent race conditions
+		const currentId = this.effectiveRecordId;
+		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
+			this.loadSurveyData();
+		}
+	}
+
+	/**
+	 * Computed getter for effective recordId - prefers @api property, falls back to URL state
+	 */
+	get effectiveRecordId() {
+		return this.recordId || this._urlRecordId;
+	}
+
+	/**
+	 * Computed getter for effective caseId - prefers @api property, falls back to URL state
+	 */
+	get effectiveCaseId() {
+		return this.caseId || this._urlCaseId;
+	}
+
+	/**
+	 * Computed getter for effective contactId - prefers @api property, falls back to URL state
+	 */
+	get effectiveContactId() {
+		return this.contactId || this._urlContactId;
+	}
+
+	// Track the recordId that was successfully loaded to prevent double-loading
+	_loadedRecordId = null;
+
+	@track isLoading = false;
 	@track isSubmitting = false;
 	@track isSubmitted = false;
 	@track error = null;
@@ -36,19 +89,30 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	connectedCallback() {
-		this.loadSurveyData();
+		// Only load survey data if recordId is available and not already loaded
+		// Also check if not currently loading to prevent race conditions
+		// If recordId comes from URL state via wire adapter, it will load there instead
+		const currentId = this.effectiveRecordId;
+		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
+			this.loadSurveyData();
+		}
 	}
 
 	loadSurveyData() {
 		this.isLoading = true;
 		this.error = null;
+		const recordIdToLoad = this.effectiveRecordId;
 
 		getSurveyData({
-			surveyId: this.recordId,
-			caseId: this.caseId,
-			contactId: this.contactId
+			surveyId: recordIdToLoad,
+			caseId: this.effectiveCaseId,
+			contactId: this.effectiveContactId
 		})
 			.then((result) => {
+				// Track which recordId was loaded to prevent duplicate loads
+				// Set this regardless of result to avoid unnecessary retry attempts
+				this._loadedRecordId = recordIdToLoad;
+
 				if (result && result.survey) {
 					this.surveyName = result.survey.Name;
 					this.surveyHeader = result.survey.Survey_Header__c || '';
@@ -131,10 +195,10 @@ export default class SurveyTaker extends LightningElement {
 		const isAnonymous = this.anonymousValue === 'anonymous' || this.anonymousOption === 'Anonymous';
 
 		submitSurveyResponses({
-			surveyId: this.recordId,
+			surveyId: this.effectiveRecordId,
 			responses: responseArray,
-			caseId: this.caseId,
-			contactId: this.contactId,
+			caseId: this.effectiveCaseId,
+			contactId: this.effectiveContactId,
 			isAnonymous: isAnonymous
 		})
 			.then((result) => {
