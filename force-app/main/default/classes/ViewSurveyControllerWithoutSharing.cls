@@ -22,7 +22,7 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	public static SurveyInvitation__c getInvitationByToken(String token) {
 		try {
 			List<SurveyInvitation__c> invitations = [
-				SELECT Id, Survey__c, Token__c, Status__c, Email__c, ParticipantName__c, Contact__c
+				SELECT Id, Survey__c, Token__c, Status__c, Email__c, ParticipantName__c, Contact__c, ExpirationDate__c
 				FROM SurveyInvitation__c
 				WHERE Token__c = :token
 				LIMIT 1

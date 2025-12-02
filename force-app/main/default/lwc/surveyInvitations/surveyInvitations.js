@@ -16,6 +16,7 @@ const COLUMNS = [
 		}
 	},
 	{ label: 'Created', fieldName: 'createdDate', type: 'date' },
+	{ label: 'Expires', fieldName: 'expirationDate', type: 'date' },
 	{ label: 'Completed', fieldName: 'completedDate', type: 'date' },
 	{
 		type: 'action',

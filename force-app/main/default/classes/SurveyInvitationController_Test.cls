@@ -176,4 +176,70 @@ private class SurveyInvitationController_Test {
 			System.assertEquals(2, invitations.size(), 'Should return 2 invitations');
 		}
 	}
+
+	@IsTest
+	private static void testInvitationWithExpiration() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create custom setting with 30 day expiration
+			SurveySettings__c settings = new SurveySettings__c();
+			settings.InvitationExpirationDays__c = 30;
+			insert settings;
+
+			Test.startTest();
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			Test.stopTest();
+
+			// Verify expiration date is set
+			SurveyInvitation__c invitation = [SELECT Id, ExpirationDate__c FROM SurveyInvitation__c WHERE Id = :result.invitationId];
+			System.assertNotEquals(null, invitation.ExpirationDate__c, 'Expiration date should be set');
+			System.assert(invitation.ExpirationDate__c > DateTime.now(), 'Expiration date should be in future');
+		}
+	}
+
+	@IsTest
+	private static void testInvitationNoExpiration() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create custom setting with 0 day expiration (no expiration)
+			SurveySettings__c settings = new SurveySettings__c();
+			settings.InvitationExpirationDays__c = 0;
+			insert settings;
+
+			Test.startTest();
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			Test.stopTest();
+
+			// Verify expiration date is null
+			SurveyInvitation__c invitation = [SELECT Id, ExpirationDate__c FROM SurveyInvitation__c WHERE Id = :result.invitationId];
+			System.assertEquals(null, invitation.ExpirationDate__c, 'Expiration date should be null when disabled');
+		}
+	}
+
+	@IsTest
+	private static void testExpiredInvitationValidation() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create invitation
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+
+			// Manually set expiration date to past
+			SurveyInvitation__c invitation = [SELECT Id FROM SurveyInvitation__c WHERE Id = :createResult.invitationId];
+			invitation.ExpirationDate__c = DateTime.now().addDays(-1);
+			update invitation;
+
+			Test.startTest();
+			SurveyInvitationController.ValidationResult result = SurveyInvitationController.validateInvitation(createResult.token);
+			Test.stopTest();
+
+			System.assertEquals(false, result.isValid, 'Expired invitation should be invalid');
+			System.assert(result.message.contains('expired'), 'Message should indicate expiration');
+		}
+	}
 }
