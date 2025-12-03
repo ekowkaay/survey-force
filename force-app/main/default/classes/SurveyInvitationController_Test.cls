@@ -256,7 +256,7 @@ private class SurveyInvitationController_Test {
 
 			// Set event date to 10 days from now (e.g., training event date)
 			DateTime eventDate = DateTime.now().addDays(10);
-			String relatedRecordId = 'a1B000000000001'; // Example training event ID
+			String relatedRecordId = 'TRAINING_EVENT_001'; // Example training event reference
 
 			Test.startTest();
 			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, eventDate, relatedRecordId);
@@ -294,7 +294,7 @@ private class SurveyInvitationController_Test {
 
 			// Set event date
 			DateTime eventDate = DateTime.now().addDays(7);
-			String relatedRecordId = 'a1B000000000002';
+			String relatedRecordId = 'TRAINING_EVENT_002'; // Example training event reference
 
 			Test.startTest();
 			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 3, eventDate, relatedRecordId);
