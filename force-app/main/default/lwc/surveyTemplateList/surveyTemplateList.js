@@ -23,6 +23,7 @@ const COLUMNS = [
 		type: 'action',
 		typeAttributes: {
 			rowActions: [
+				{ label: 'Preview', name: 'preview' },
 				{ label: 'Edit', name: 'edit' },
 				{ label: 'Clone', name: 'clone' },
 				{ label: 'Delete', name: 'delete' }
@@ -119,6 +120,9 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 		const row = event.detail.row;
 
 		switch (action.name) {
+			case 'preview':
+				this.navigateToPreview(row.Id);
+				break;
 			case 'edit':
 				this.navigateToBuilder(row.Id);
 				break;
@@ -131,6 +135,20 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 			default:
 				break;
 		}
+	}
+
+	// Preview - Navigate to Survey Taker Page with preview parameter
+	navigateToPreview(surveyId) {
+		this[NavigationMixin.Navigate]({
+			type: 'standard__navItemPage',
+			attributes: {
+				apiName: 'Survey_Taker_Page'
+			},
+			state: {
+				c__recordId: surveyId,
+				c__preview: 'true'
+			}
+		});
 	}
 
 	navigateToBuilder(surveyId) {

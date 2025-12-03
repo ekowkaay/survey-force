@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SurveyTaker__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Reference to the SurveyTaker record created when this invitation was completed</description>
+    <externalId>false</externalId>
+    <label>Survey Taker</label>
+    <referenceTo>SurveyTaker__c</referenceTo>
+    <relationshipLabel>Survey Invitations</relationshipLabel>
+    <relationshipName>SurveyInvitations</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

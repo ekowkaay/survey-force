@@ -402,4 +402,174 @@ public with sharing class SurveyTakerController {
 			throw new AuraHandledException('Error creating survey taker: ' + e.getMessage());
 		}
 	}
+
+	/**
+	 * Helper method to safely extract contact ID from invitation
+	 * @param invitation The survey invitation record
+	 * @return String The contact ID or null
+	 */
+	private static String getContactIdFromInvitation(SurveyInvitation__c invitation) {
+		if (invitation == null) {
+			return null;
+		}
+		if (invitation.Contact__c == null) {
+			return null;
+		}
+		return String.valueOf(invitation.Contact__c);
+	}
+
+	/**
+	 * Submit survey responses via invitation token
+	 * @param token The unique invitation token
+	 * @param responses List of responses
+	 * @return SubmitResult with success status and messages
+	 */
+	@AuraEnabled
+	public static SubmitResult submitSurveyWithToken(String token, List<ResponseData> responses) {
+		SubmitResult result = new SubmitResult();
+		result.success = false;
+
+		try {
+			// Validate the invitation token
+			SurveyInvitationController.ValidationResult validation = SurveyInvitationController.validateInvitation(token);
+
+			if (!validation.isValid) {
+				result.message = validation.message;
+				return result;
+			}
+
+			Id surveyId = validation.surveyId;
+
+			// Get invitation details for contact linkage
+			SurveyInvitation__c invitation = ViewSurveyControllerWithoutSharing.getInvitationByToken(token);
+			String contactId = getContactIdFromInvitation(invitation);
+
+			// Validate responses
+			List<QuestionData> questions = getQuestions(surveyId);
+			Map<Id, QuestionData> questionMap = new Map<Id, QuestionData>();
+			for (QuestionData q : questions) {
+				questionMap.put(q.id, q);
+			}
+
+			// Check required questions
+			Map<Id, ResponseData> responseMap = new Map<Id, ResponseData>();
+			for (ResponseData r : responses) {
+				responseMap.put(r.questionId, r);
+			}
+
+			for (QuestionData q : questions) {
+				if (q.required && !q.hideOnSurvey) {
+					ResponseData response = responseMap.get(q.id);
+					if (response == null || (String.isBlank(response.response) && (response.responses == null || response.responses.isEmpty()))) {
+						result.message = 'Please answer all required questions';
+						return result;
+					}
+				}
+			}
+
+			// Create survey taker record
+			Id surveyTakerId = createSurveyTaker(surveyId, null, contactId, false);
+
+			if (surveyTakerId == null) {
+				result.message = 'Error creating survey response record';
+				return result;
+			}
+
+			// Create response records
+			List<SurveyQuestionResponse__c> responseRecords = new List<SurveyQuestionResponse__c>();
+
+			for (ResponseData r : responses) {
+				QuestionData question = questionMap.get(r.questionId);
+				if (question == null || question.hideOnSurvey) {
+					continue;
+				}
+
+				if (question.questionType == 'Single Select--Vertical' || question.questionType == 'Single Select--Horizontal') {
+					if (String.isNotBlank(r.response)) {
+						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
+						sqr.Survey_Question__c = r.questionId;
+						sqr.SurveyTaker__c = surveyTakerId;
+						sqr.Response__c = getChoiceLabel(question.choices, r.response);
+						responseRecords.add(sqr);
+					}
+				} else if (question.questionType == 'Multi-Select--Vertical') {
+					if (r.responses != null && !r.responses.isEmpty()) {
+						for (String selectedValue : r.responses) {
+							SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
+							sqr.Survey_Question__c = r.questionId;
+							sqr.SurveyTaker__c = surveyTakerId;
+							sqr.Response__c = getChoiceLabel(question.choices, selectedValue);
+							responseRecords.add(sqr);
+						}
+					}
+				} else if (question.questionType == 'Free Text') {
+					if (String.isNotBlank(r.response)) {
+						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
+						sqr.Survey_Question__c = r.questionId;
+						sqr.SurveyTaker__c = surveyTakerId;
+						sqr.Response__c = r.response;
+						responseRecords.add(sqr);
+					}
+				}
+			}
+
+			// Insert responses
+			if (!responseRecords.isEmpty()) {
+				ViewSurveyControllerWithoutSharing.createSurveyQuestionResponse(responseRecords);
+			}
+
+			// Mark invitation as completed
+			SurveyInvitationController.completeInvitation(token, surveyTakerId);
+
+			// Get thank you information
+			Survey__c survey;
+			if (System.UserInfo.getUserType() == 'Guest') {
+				survey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(surveyId);
+			} else {
+				survey = [
+					SELECT Thank_You_Text__c, Thank_You_Link__c
+					FROM Survey__c
+					WHERE Id = :surveyId
+					WITH USER_MODE
+					LIMIT 1
+				];
+			}
+
+			result.success = true;
+			result.message = 'Survey submitted successfully';
+			result.thankYouText = String.isNotBlank(survey.Thank_You_Text__c) ? survey.Thank_You_Text__c : System.Label.LABS_SF_Survey_Submitted_Thank_you;
+			result.thankYouLink = survey.Thank_You_Link__c;
+
+			return result;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyTakerController:submitSurveyWithToken():' + e.getMessage());
+			result.message = 'Error submitting survey: ' + e.getMessage();
+			return result;
+		}
+	}
+
+	/**
+	 * Get survey data using invitation token
+	 * @param token The unique invitation token
+	 * @return SurveyData wrapper with all survey information
+	 */
+	@AuraEnabled(cacheable=true)
+	public static SurveyData getSurveyDataByToken(String token) {
+		try {
+			// Validate the invitation token
+			SurveyInvitationController.ValidationResult validation = SurveyInvitationController.validateInvitation(token);
+
+			if (!validation.isValid) {
+				throw new AuraHandledException(validation.message);
+			}
+
+			// Get survey data using the validated survey ID
+			return getSurveyData(validation.surveyId, null, null);
+		} catch (AuraHandledException e) {
+			throw e;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyTakerController:getSurveyDataByToken():' + e.getMessage());
+			throw new AuraHandledException('Error loading survey: ' + e.getMessage());
+		}
+	}
 }

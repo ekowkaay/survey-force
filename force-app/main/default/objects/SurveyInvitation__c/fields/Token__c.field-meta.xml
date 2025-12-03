@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Token__c</fullName>
+    <caseSensitive>true</caseSensitive>
+    <description>Unique token for the survey invitation URL. Used to identify this specific invitation.</description>
+    <externalId>true</externalId>
+    <label>Token</label>
+    <length>36</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

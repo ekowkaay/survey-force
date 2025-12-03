@@ -2,7 +2,9 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
 import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData';
+import getSurveyDataByToken from '@salesforce/apex/SurveyTakerController.getSurveyDataByToken';
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
+import submitSurveyWithToken from '@salesforce/apex/SurveyTakerController.submitSurveyWithToken';
 
 export default class SurveyTaker extends LightningElement {
 	@api recordId;
@@ -13,6 +15,7 @@ export default class SurveyTaker extends LightningElement {
 	_urlRecordId = null;
 	_urlCaseId = null;
 	_urlContactId = null;
+	_urlToken = null;
 
 	/**
 	 * Wire adapter to get current page reference and extract URL state parameters
@@ -28,13 +31,27 @@ export default class SurveyTaker extends LightningElement {
 		this._urlRecordId = state.c__recordId || null;
 		this._urlCaseId = state.c__caseId || null;
 		this._urlContactId = state.c__contactId || null;
+		this._urlToken = state.c__token || state.token || null;
 
-		// Load survey data if we have a new recordId that differs from what was already loaded
+		// Load survey data if we have a new recordId or token that differs from what was already loaded
 		// and not currently loading to prevent race conditions
-		const currentId = this.effectiveRecordId;
-		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
+		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
 		}
+	}
+
+	/**
+	 * Helper method to determine if survey data should be loaded
+	 * @returns {boolean} True if survey data should be loaded
+	 */
+	shouldLoadSurveyData() {
+		const currentId = this.effectiveRecordId;
+		const currentToken = this.effectiveToken;
+		const hasIdentifier = currentId || currentToken;
+		const isNewData = currentId !== this._loadedRecordId || currentToken !== this._loadedToken;
+		const notCurrentlyLoading = !this.isLoading;
+
+		return hasIdentifier && isNewData && notCurrentlyLoading;
 	}
 
 	/**
@@ -58,8 +75,16 @@ export default class SurveyTaker extends LightningElement {
 		return this.contactId || this._urlContactId;
 	}
 
-	// Track the recordId that was successfully loaded to prevent double-loading
+	/**
+	 * Computed getter for effective token - from URL state
+	 */
+	get effectiveToken() {
+		return this._urlToken;
+	}
+
+	// Track the recordId and token that was successfully loaded to prevent double-loading
 	_loadedRecordId = null;
+	_loadedToken = null;
 
 	@track isLoading = false;
 	@track isSubmitting = false;
@@ -89,11 +114,10 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	connectedCallback() {
-		// Only load survey data if recordId is available and not already loaded
+		// Only load survey data if recordId or token is available and not already loaded
 		// Also check if not currently loading to prevent race conditions
 		// If recordId comes from URL state via wire adapter, it will load there instead
-		const currentId = this.effectiveRecordId;
-		if (currentId && currentId !== this._loadedRecordId && !this.isLoading) {
+		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
 		}
 	}
@@ -102,16 +126,26 @@ export default class SurveyTaker extends LightningElement {
 		this.isLoading = true;
 		this.error = null;
 		const recordIdToLoad = this.effectiveRecordId;
+		const tokenToLoad = this.effectiveToken;
 
-		getSurveyData({
-			surveyId: recordIdToLoad,
-			caseId: this.effectiveCaseId,
-			contactId: this.effectiveContactId
-		})
+		// Use token-based loading if token is provided
+		let dataPromise;
+		if (tokenToLoad) {
+			dataPromise = getSurveyDataByToken({ token: tokenToLoad });
+		} else {
+			dataPromise = getSurveyData({
+				surveyId: recordIdToLoad,
+				caseId: this.effectiveCaseId,
+				contactId: this.effectiveContactId
+			});
+		}
+
+		dataPromise
 			.then((result) => {
-				// Track which recordId was loaded to prevent duplicate loads
+				// Track which recordId/token was loaded to prevent duplicate loads
 				// Set this regardless of result to avoid unnecessary retry attempts
 				this._loadedRecordId = recordIdToLoad;
+				this._loadedToken = tokenToLoad;
 
 				if (result && result.survey) {
 					this.surveyName = result.survey.Name;
@@ -122,8 +156,13 @@ export default class SurveyTaker extends LightningElement {
 					this.isInternal = result.isInternal;
 					this.anonymousOption = result.anonymousOption;
 
-					// Can choose anonymous only if internal user and survey allows non-anonymous
-					this.canChooseAnonymous = this.isInternal && this.anonymousOption !== 'Anonymous';
+					// When using token, always anonymous (no choice)
+					if (tokenToLoad) {
+						this.canChooseAnonymous = false;
+					} else {
+						// Can choose anonymous only if internal user and survey allows non-anonymous
+						this.canChooseAnonymous = this.isInternal && this.anonymousOption !== 'Anonymous';
+					}
 
 					// Initialize responses map
 					this.initializeResponses();
@@ -132,8 +171,8 @@ export default class SurveyTaker extends LightningElement {
 				}
 				this.isLoading = false;
 			})
-			.catch((error) => {
-				this.error = error.body?.message || error.message || 'Error loading survey';
+			.catch((err) => {
+				this.error = err.body?.message || err.message || 'Error loading survey';
 				this.isLoading = false;
 			});
 	}
@@ -194,13 +233,24 @@ export default class SurveyTaker extends LightningElement {
 
 		const isAnonymous = this.anonymousValue === 'anonymous' || this.anonymousOption === 'Anonymous';
 
-		submitSurveyResponses({
-			surveyId: this.effectiveRecordId,
-			responses: responseArray,
-			caseId: this.effectiveCaseId,
-			contactId: this.effectiveContactId,
-			isAnonymous: isAnonymous
-		})
+		// Use token-based submission if token is provided
+		let submitPromise;
+		if (this.effectiveToken) {
+			submitPromise = submitSurveyWithToken({
+				token: this.effectiveToken,
+				responses: responseArray
+			});
+		} else {
+			submitPromise = submitSurveyResponses({
+				surveyId: this.effectiveRecordId,
+				responses: responseArray,
+				caseId: this.effectiveCaseId,
+				contactId: this.effectiveContactId,
+				isAnonymous: isAnonymous
+			});
+		}
+
+		submitPromise
 			.then((result) => {
 				if (result.success) {
 					this.thankYouText = result.thankYouText || this.thankYouText;
@@ -211,8 +261,8 @@ export default class SurveyTaker extends LightningElement {
 				}
 				this.isSubmitting = false;
 			})
-			.catch((error) => {
-				this.showToast('Error', error.body?.message || 'Error submitting survey', 'error');
+			.catch((err) => {
+				this.showToast('Error', err.body?.message || 'Error submitting survey', 'error');
 				this.isSubmitting = false;
 			});
 	}
