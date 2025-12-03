@@ -31,6 +31,13 @@
 		<template if:false={isLoading}>
 			<template if:false={error}>
 				<template if:false={isSubmitted}>
+					<!-- Dynamic Invitation Header (shown when accessing via invitation link) -->
+					<template if:true={invitationHeader}>
+						<div class="slds-box slds-theme_info slds-m-around_medium">
+							<p class="slds-text-body_regular">{invitationHeader}</p>
+						</div>
+					</template>
+
 					<!-- Survey Header -->
 					<template if:true={showSurveyName}>
 						<div class="slds-box slds-theme_shade slds-m-around_medium">

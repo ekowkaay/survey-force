@@ -93,6 +93,7 @@ export default class SurveyTaker extends LightningElement {
 
 	@track surveyName = '';
 	@track surveyHeader = '';
+	@track invitationHeader = '';
 	@track showSurveyName = true;
 	@track thankYouText = '';
 	@track questions = [];
@@ -150,6 +151,7 @@ export default class SurveyTaker extends LightningElement {
 				if (result && result.survey) {
 					this.surveyName = result.survey.Name;
 					this.surveyHeader = result.survey.Survey_Header__c || '';
+					this.invitationHeader = result.invitationHeader || '';
 					this.showSurveyName = !result.survey.Hide_Survey_Name__c;
 					this.thankYouText = result.survey.Thank_You_Text__c || 'Your survey response has been recorded. Thank you!';
 					this.questions = result.questions || [];

@@ -15,7 +15,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test Participant', null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test Participant', null, null, null, null);
 			Test.stopTest();
 
 			System.assertEquals(true, result.success, 'Invitation should be created successfully');
@@ -80,7 +80,7 @@ private class SurveyInvitationController_Test {
 			System.assertEquals(false, result1.success, 'Should fail with count 0');
 
 			// Test with too many
-			SurveyInvitationController.BulkInvitationResult result2 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 201, null, null);
+			SurveyInvitationController.BulkInvitationResult result2 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 201, null, null, null);
 			System.assertEquals(false, result2.success, 'Should fail with count > 200');
 			Test.stopTest();
 		}
@@ -166,7 +166,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitations
-			SurveyInvitationController.createInvitation(tu.surveyId, 'test1@example.com', 'User 1', null, null, null);
+			SurveyInvitationController.createInvitation(tu.surveyId, 'test1@example.com', 'User 1', null, null, null, null);
 			SurveyInvitationController.createInvitation(tu.surveyId, 'test2@example.com', 'User 2', null, null, null);
 
 			Test.startTest();
@@ -257,9 +257,10 @@ private class SurveyInvitationController_Test {
 			// Set event date to 10 days from now (e.g., training event date)
 			DateTime eventDate = DateTime.now().addDays(10);
 			String relatedRecordId = 'TRAINING_EVENT_001'; // Example training event reference
+			String eventTopic = 'Advanced Salesforce Development';
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, eventDate, relatedRecordId);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, eventDate, relatedRecordId, eventTopic);
 			Test.stopTest();
 
 			// Verify invitation was created successfully
@@ -267,12 +268,13 @@ private class SurveyInvitationController_Test {
 
 			// Verify event date and related record are stored
 			SurveyInvitation__c invitation = [
-				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c
+				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c, EventTopic__c
 				FROM SurveyInvitation__c
 				WHERE Id = :result.invitationId
 			];
 			System.assertEquals(eventDate, invitation.EventDate__c, 'Event date should be stored');
 			System.assertEquals(relatedRecordId, invitation.RelatedRecordId__c, 'Related record ID should be stored');
+			System.assertEquals(eventTopic, invitation.EventTopic__c, 'Event topic should be stored');
 
 			// Verify expiration date is calculated from event date (event date + 14 days)
 			System.assertNotEquals(null, invitation.ExpirationDate__c, 'Expiration date should be set');
@@ -295,9 +297,10 @@ private class SurveyInvitationController_Test {
 			// Set event date
 			DateTime eventDate = DateTime.now().addDays(7);
 			String relatedRecordId = 'TRAINING_EVENT_002'; // Example training event reference
+			String eventTopic = 'Introduction to Lightning Web Components';
 
 			Test.startTest();
-			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 3, eventDate, relatedRecordId);
+			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 3, eventDate, relatedRecordId, eventTopic);
 			Test.stopTest();
 
 			System.assertEquals(true, result.success, 'Bulk creation should succeed');
@@ -305,7 +308,7 @@ private class SurveyInvitationController_Test {
 
 			// Verify all invitations have the event date and calculated expiration
 			List<SurveyInvitation__c> invitations = [
-				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c
+				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c, EventTopic__c
 				FROM SurveyInvitation__c
 				WHERE Survey__c = :tu.surveyId
 			];
@@ -315,6 +318,7 @@ private class SurveyInvitationController_Test {
 			for (SurveyInvitation__c inv : invitations) {
 				System.assertEquals(eventDate, inv.EventDate__c, 'Event date should match');
 				System.assertEquals(relatedRecordId, inv.RelatedRecordId__c, 'Related record ID should match');
+				System.assertEquals(eventTopic, inv.EventTopic__c, 'Event topic should match');
 				System.assertEquals(expectedExpiration, inv.ExpirationDate__c, 'Expiration should be 14 days after event date');
 			}
 		}
@@ -335,7 +339,7 @@ private class SurveyInvitationController_Test {
 			DateTime pastEventDate = DateTime.now().addDays(-20);
 
 			// Create invitation - should expire 14 days after event (6 days ago)
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, pastEventDate, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, pastEventDate, null, null);
 
 			Test.startTest();
 			SurveyInvitationController.ValidationResult result = SurveyInvitationController.validateInvitation(createResult.token);

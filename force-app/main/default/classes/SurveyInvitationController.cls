@@ -71,6 +71,8 @@ public with sharing class SurveyInvitationController {
 		public Datetime eventDate { get; set; }
 		@AuraEnabled
 		public String relatedRecordId { get; set; }
+		@AuraEnabled
+		public String eventTopic { get; set; }
 	}
 
 	/**
@@ -87,6 +89,10 @@ public with sharing class SurveyInvitationController {
 		public Id invitationId { get; set; }
 		@AuraEnabled
 		public String status { get; set; }
+		@AuraEnabled
+		public DateTime eventDate { get; set; }
+		@AuraEnabled
+		public String eventTopic { get; set; }
 	}
 
 	/**
@@ -126,10 +132,11 @@ public with sharing class SurveyInvitationController {
 	 * @param contactId Optional contact ID to associate
 	 * @param eventDate Optional event date for expiration calculation
 	 * @param relatedRecordId Optional related record ID (e.g., Training Event ID)
+	 * @param eventTopic Optional event topic/name for dynamic survey header
 	 * @return InvitationResult with the generated invitation details
 	 */
 	@AuraEnabled
-	public static InvitationResult createInvitation(Id surveyId, String email, String participantName, Id contactId, DateTime eventDate, String relatedRecordId) {
+	public static InvitationResult createInvitation(Id surveyId, String email, String participantName, Id contactId, DateTime eventDate, String relatedRecordId, String eventTopic) {
 		InvitationResult result = new InvitationResult();
 		result.success = false;
 
@@ -156,7 +163,8 @@ public with sharing class SurveyInvitationController {
 				Schema.SurveyInvitation__c.fields.Contact__c,
 				Schema.SurveyInvitation__c.fields.ExpirationDate__c,
 				Schema.SurveyInvitation__c.fields.EventDate__c,
-				Schema.SurveyInvitation__c.fields.RelatedRecordId__c
+				Schema.SurveyInvitation__c.fields.RelatedRecordId__c,
+				Schema.SurveyInvitation__c.fields.EventTopic__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.SurveyInvitation__c.getSObjectType(), fields);
 
@@ -174,6 +182,7 @@ public with sharing class SurveyInvitationController {
 			invitation.ExpirationDate__c = expirationDate;
 			invitation.EventDate__c = eventDate;
 			invitation.RelatedRecordId__c = relatedRecordId;
+			invitation.EventTopic__c = eventTopic;
 
 			insert invitation;
 
@@ -197,10 +206,11 @@ public with sharing class SurveyInvitationController {
 	 * @param count Number of invitations to generate
 	 * @param eventDate Optional event date for expiration calculation
 	 * @param relatedRecordId Optional related record ID (e.g., Training Event ID)
+	 * @param eventTopic Optional event topic/name for dynamic survey header
 	 * @return BulkInvitationResult with all generated invitations
 	 */
 	@AuraEnabled
-	public static BulkInvitationResult createBulkInvitations(Id surveyId, Integer count, DateTime eventDate, String relatedRecordId) {
+	public static BulkInvitationResult createBulkInvitations(Id surveyId, Integer count, DateTime eventDate, String relatedRecordId, String eventTopic) {
 		BulkInvitationResult result = new BulkInvitationResult();
 		result.success = false;
 		result.invitations = new List<InvitationData>();
@@ -235,7 +245,8 @@ public with sharing class SurveyInvitationController {
 				Schema.SurveyInvitation__c.fields.Status__c,
 				Schema.SurveyInvitation__c.fields.ExpirationDate__c,
 				Schema.SurveyInvitation__c.fields.EventDate__c,
-				Schema.SurveyInvitation__c.fields.RelatedRecordId__c
+				Schema.SurveyInvitation__c.fields.RelatedRecordId__c,
+				Schema.SurveyInvitation__c.fields.EventTopic__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.SurveyInvitation__c.getSObjectType(), fields);
 
@@ -252,6 +263,7 @@ public with sharing class SurveyInvitationController {
 				invitation.ExpirationDate__c = expirationDate;
 				invitation.EventDate__c = eventDate;
 				invitation.RelatedRecordId__c = relatedRecordId;
+				invitation.EventTopic__c = eventTopic;
 				invitations.add(invitation);
 			}
 
@@ -305,6 +317,8 @@ public with sharing class SurveyInvitationController {
 
 			result.invitationId = invitation.Id;
 			result.status = invitation.Status__c;
+			result.eventDate = invitation.EventDate__c;
+			result.eventTopic = invitation.EventTopic__c;
 
 			if (invitation.Status__c == STATUS_COMPLETED) {
 				result.message = 'This survey has already been completed';
@@ -391,12 +405,13 @@ public with sharing class SurveyInvitationController {
 				Schema.SurveyInvitation__c.fields.CompletedDate__c,
 				Schema.SurveyInvitation__c.fields.ExpirationDate__c,
 				Schema.SurveyInvitation__c.fields.EventDate__c,
-				Schema.SurveyInvitation__c.fields.RelatedRecordId__c
+				Schema.SurveyInvitation__c.fields.RelatedRecordId__c,
+				Schema.SurveyInvitation__c.fields.EventTopic__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.SurveyInvitation__c.getSObjectType(), fields);
 
 			List<SurveyInvitation__c> invitations = [
-				SELECT Id, Name, Token__c, Status__c, Email__c, ParticipantName__c, CreatedDate, CompletedDate__c, ExpirationDate__c, EventDate__c, RelatedRecordId__c
+				SELECT Id, Name, Token__c, Status__c, Email__c, ParticipantName__c, CreatedDate, CompletedDate__c, ExpirationDate__c, EventDate__c, RelatedRecordId__c, EventTopic__c
 				FROM SurveyInvitation__c
 				WHERE Survey__c = :surveyId
 				WITH USER_MODE
@@ -415,6 +430,12 @@ public with sharing class SurveyInvitationController {
 				data.surveyUrl = buildSurveyUrl(inv.Token__c);
 				data.createdDate = inv.CreatedDate;
 				data.completedDate = inv.CompletedDate__c;
+				data.expirationDate = inv.ExpirationDate__c;
+				data.eventDate = inv.EventDate__c;
+				data.relatedRecordId = inv.RelatedRecordId__c;
+				data.eventTopic = inv.EventTopic__c;
+				results.add(data);
+			}
 				data.expirationDate = inv.ExpirationDate__c;
 				data.eventDate = inv.EventDate__c;
 				data.relatedRecordId = inv.RelatedRecordId__c;
