@@ -1,47 +1,262 @@
-/* Custom styling for modern survey UI */
-
-/* Checkbox button styling for horizontal multi-select */
-.slds-checkbox_button {
-	display: inline-block;
-	padding: 0.5rem 1rem;
-	border: 1px solid #c9c9c9;
-	border-radius: 0.25rem;
-	background-color: #ffffff;
-	color: #080707;
-	cursor: pointer;
-	text-align: center;
-	transition: all 0.2s ease;
+/* Survey Container - Clean white background */
+.survey-container {
+background-color: #ffffff;
+min-height: 100vh;
+position: relative;
+overflow: hidden;
 }
 
-.slds-checkbox_button:hover {
-	background-color: #f3f3f3;
-	border-color: #0070d2;
+/* Progress Bar at Top - Orange */
+.progress-bar-container {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+height: 6px;
+background-color: #f3f2f2;
+z-index: 1000;
 }
 
-input[type='checkbox']:checked + .slds-checkbox_button {
-	background-color: #0070d2;
-	border-color: #0070d2;
-	color: #ffffff;
+.progress-bar {
+height: 100%;
+background-color: #ff6b35;
+transition: width 0.3s ease;
 }
 
-input[type='checkbox']:focus + .slds-checkbox_button {
-	box-shadow: 0 0 3px #0070d2;
-	outline: none;
+/* Content Container */
+.content-container {
+max-width: 900px;
+margin: 0 auto;
+padding: 60px 40px 200px;
 }
 
-/* Card styling enhancements */
-.slds-card_boundary {
-	border: 1px solid #dddbda;
-	border-radius: 0.25rem;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Invitation Header */
+.invitation-header {
+text-align: center;
+color: #54698d;
+font-size: 0.95rem;
+line-height: 1.6;
+max-width: 800px;
+margin: 0 auto;
 }
 
-/* Progress bar container */
-.slds-container_center {
-	padding: 1rem;
+/* Survey Header */
+.survey-header {
+margin-bottom: 80px;
 }
 
-/* Question text styling */
-.slds-text-heading_medium {
-	line-height: 1.5;
+.survey-title {
+font-size: 2.5rem;
+font-weight: 400;
+color: #54698d;
+margin-bottom: 0.5rem;
+letter-spacing: 0.02em;
+}
+
+.survey-subtitle {
+font-size: 1.1rem;
+color: #8a94a6;
+font-weight: 300;
+}
+
+/* Question Container */
+.question-container {
+max-width: 700px;
+margin: 0 auto;
+padding: 40px 0;
+}
+
+/* Question Block with Accent Line */
+.question-block {
+display: flex;
+align-items: flex-start;
+margin-bottom: 60px;
+}
+
+.accent-line {
+width: 4px;
+min-height: 80px;
+background-color: #ff6b35;
+margin-right: 30px;
+border-radius: 2px;
+flex-shrink: 0;
+}
+
+.question-text {
+font-size: 1.5rem;
+color: #54698d;
+font-weight: 400;
+line-height: 1.5;
+flex: 1;
+}
+
+.required-indicator {
+color: #ff6b35;
+margin-left: 4px;
+}
+
+/* Answer Container */
+.answer-container {
+margin-bottom: 80px;
+padding-left: 34px;
+}
+
+/* Radio Buttons - Horizontal */
+.radio-horizontal {
+display: flex;
+justify-content: center;
+gap: 20px;
+}
+
+/* Radio Buttons - Vertical */
+.radio-vertical {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+/* Text Input */
+.text-input {
+width: 100%;
+max-width: 600px;
+}
+
+/* Checkbox Container */
+.checkbox-container {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+/* Navigation Container */
+.navigation-container {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding-left: 34px;
+margin-top: 60px;
+}
+
+.nav-spacer {
+flex: 1;
+}
+
+/* Buttons */
+.next-button,
+.back-button {
+padding: 12px 40px;
+font-size: 1rem;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+transition: all 0.2s ease;
+font-weight: 500;
+}
+
+.next-button {
+background-color: #ff6b35;
+color: #ffffff;
+}
+
+.next-button:hover:not(:disabled) {
+background-color: #ff5722;
+transform: translateY(-1px);
+box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+}
+
+.next-button:disabled {
+background-color: #cccccc;
+cursor: not-allowed;
+}
+
+.back-button {
+background-color: transparent;
+color: #54698d;
+border: 1px solid #d8dde6;
+}
+
+.back-button:hover {
+background-color: #f8f9fa;
+border-color: #54698d;
+}
+
+/* Decorative Footer */
+.decorative-footer {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+height: 150px;
+background: linear-gradient(to bottom, transparent, #f5f5f5 40%);
+pointer-events: none;
+}
+
+.decorative-footer::before {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 100px;
+background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%);
+opacity: 0.15;
+border-radius: 50% 50% 0 0 / 100px 100px 0 0;
+}
+
+.decorative-footer::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 10%;
+width: 200px;
+height: 80px;
+background: radial-gradient(ellipse at center, #ff6b35 0%, transparent 70%);
+opacity: 0.3;
+border-radius: 50%;
+}
+
+/* Submitted Container */
+.submitted-container {
+text-align: center;
+padding: 100px 40px;
+}
+
+/* Override SLDS styles for cleaner look */
+lightning-radio-group {
+--slds-c-radio-group-spacing-block-start: 0;
+--slds-c-radio-group-spacing-block-end: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+.content-container {
+padding: 40px 20px 180px;
+}
+
+.survey-title {
+font-size: 2rem;
+}
+
+.question-text {
+font-size: 1.25rem;
+}
+
+.accent-line {
+margin-right: 20px;
+min-height: 60px;
+}
+
+.answer-container {
+padding-left: 24px;
+}
+
+.navigation-container {
+padding-left: 24px;
+}
+
+.next-button,
+.back-button {
+padding: 10px 30px;
+font-size: 0.95rem;
+}
 }

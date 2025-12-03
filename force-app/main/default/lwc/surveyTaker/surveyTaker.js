@@ -163,6 +163,10 @@ export default class SurveyTaker extends LightningElement {
 		return response ? response.response : '';
 	}
 
+	get progressBarStyle() {
+		return `width: ${this.progressPercentage}%`;
+	}
+
 	get anonymousOptions() {
 		return [
 			{ label: 'Submit with my name', value: 'named' },

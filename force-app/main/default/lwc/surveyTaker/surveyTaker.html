@@ -1,228 +1,180 @@
 <template>
-	<div class="slds-container_center slds-container_large">
-		<!-- Loading State -->
-		<template if:true={isLoading}>
-			<div class="slds-is-relative" style="min-height: 400px">
-				<lightning-spinner alternative-text="Loading survey..." size="medium"></lightning-spinner>
-			</div>
-		</template>
+<div class="survey-container">
+<!-- Loading State -->
+<template if:true={isLoading}>
+<div class="slds-is-relative" style="min-height: 400px">
+<lightning-spinner alternative-text="Loading survey..." size="medium"></lightning-spinner>
+</div>
+</template>
 
-		<!-- Error State -->
-		<template if:true={error}>
-			<div class="slds-box slds-theme_error slds-m-around_medium">
-				<p class="slds-text-heading_small">{error}</p>
-			</div>
-		</template>
+<!-- Error State -->
+<template if:true={error}>
+<div class="slds-box slds-theme_error slds-m-around_medium">
+<p class="slds-text-heading_small">{error}</p>
+</div>
+</template>
 
-		<!-- Survey Submitted State -->
-		<template if:true={isSubmitted}>
-			<div class="slds-m-around_medium">
-				<div class="slds-text-align_center slds-m-vertical_large slds-p-around_large">
-					<lightning-icon icon-name="utility:success" size="large" class="slds-m-bottom_medium" alternative-text="Success"></lightning-icon>
-					<h2 class="slds-text-heading_large slds-m-bottom_medium">Thank You!</h2>
-					<div class="slds-text-body_regular">
-						<lightning-formatted-rich-text value={thankYouText}></lightning-formatted-rich-text>
-					</div>
-				</div>
-			</div>
-		</template>
+<!-- Survey Submitted State -->
+<template if:true={isSubmitted}>
+<div class="submitted-container">
+<div class="slds-text-align_center slds-p-around_xx-large">
+<lightning-icon icon-name="utility:success" size="large" class="slds-m-bottom_medium" alternative-text="Success"></lightning-icon>
+<h2 class="slds-text-heading_large slds-m-bottom_medium">Thank You!</h2>
+<div class="slds-text-body_regular">
+<lightning-formatted-rich-text value={thankYouText}></lightning-formatted-rich-text>
+</div>
+</div>
+</div>
+</template>
 
-		<!-- Survey Form -->
-		<template if:false={isLoading}>
-			<template if:false={error}>
-				<template if:false={isSubmitted}>
-					<!-- Dynamic Invitation Header -->
-					<template if:true={invitationHeader}>
-						<div class="slds-box slds-theme_info slds-m-bottom_medium">
-							<p class="slds-text-body_regular">{invitationHeader}</p>
-						</div>
-					</template>
+<!-- Survey Form -->
+<template if:false={isLoading}>
+<template if:false={error}>
+<template if:false={isSubmitted}>
+<!-- Progress Bar at Top -->
+<div class="progress-bar-container">
+<div class="progress-bar" style={progressBarStyle}></div>
+</div>
 
-					<!-- Survey Header -->
-					<template if:true={showSurveyName}>
-						<div class="slds-box slds-theme_shade slds-m-bottom_medium">
-							<template if:true={surveyHeader}>
-								<h1 class="slds-text-heading_large slds-m-bottom_x-small">{surveyHeader}</h1>
-							</template>
-							<template if:true={surveyName}>
-								<h2 class="slds-text-heading_medium slds-text-color_weak">{surveyName}</h2>
-							</template>
-						</div>
-					</template>
+<div class="content-container">
+<!-- Dynamic Invitation Header -->
+<template if:true={invitationHeader}>
+<div class="invitation-header slds-m-bottom_large">
+<p class="slds-text-body_regular">{invitationHeader}</p>
+</div>
+</template>
 
-					<!-- Progress Bar -->
-					<div class="slds-m-bottom_medium">
-						<div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
-							<div class="slds-text-body_small slds-text-color_weak">
-								Question {currentQuestionNumber} of {totalQuestions}
-							</div>
-							<div class="slds-text-body_small slds-text-color_weak">{progressPercentage}% Complete</div>
-						</div>
-						<lightning-progress-bar value={progressPercentage} size="large"></lightning-progress-bar>
-					</div>
+<!-- Survey Header -->
+<template if:true={showSurveyName}>
+<div class="survey-header slds-text-align_center slds-m-bottom_xx-large">
+<template if:true={surveyHeader}>
+<h1 class="survey-title">{surveyHeader}</h1>
+</template>
+<template if:true={surveyName}>
+<p class="survey-subtitle">{surveyName}</p>
+</template>
+</div>
+</template>
 
-					<!-- Current Question Card -->
-					<template if:true={currentQuestion}>
-						<lightning-card class="slds-card_boundary">
-							<div class="slds-p-around_large">
-								<!-- Question -->
-								<div class="slds-m-bottom_large">
-									<h3 class="slds-text-heading_medium slds-m-bottom_medium">
-										{currentQuestion.question}
-										<template if:true={currentQuestion.required}>
-											<abbr class="slds-required" title="required">*</abbr>
-										</template>
-									</h3>
+<!-- Current Question -->
+<template if:true={currentQuestion}>
+<div class="question-container">
+<!-- Question with accent line -->
+<div class="question-block">
+<div class="accent-line"></div>
+<h2 class="question-text">
+{currentQuestion.question}
+<template if:true={currentQuestion.required}>
+<span class="required-indicator">*</span>
+</template>
+</h2>
+</div>
 
-									<!-- Free Text -->
-									<template if:true={isFreeText}>
-										<lightning-textarea
-											name={currentQuestion.id}
-											value={currentResponse}
-											rows={currentQuestion.rowsForTextArea}
-											onchange={handleCurrentResponseChange}
-											class="slds-m-top_small"></lightning-textarea>
-									</template>
+<!-- Answer Options -->
+<div class="answer-container">
+<!-- Free Text -->
+<template if:true={isFreeText}>
+<lightning-textarea
+name={currentQuestion.id}
+value={currentResponse}
+rows={currentQuestion.rowsForTextArea}
+onchange={handleCurrentResponseChange}
+class="text-input"></lightning-textarea>
+</template>
 
-									<!-- Single Select -->
-									<template if:true={isSingleSelect}>
-										<template if:true={isHorizontalLayout}>
-											<lightning-radio-group
-												name={currentQuestion.id}
-												options={currentQuestion.choices}
-												value={currentResponse}
-												type="button"
-												onchange={handleCurrentResponseChange}
-												class="slds-m-top_small"></lightning-radio-group>
-										</template>
-										<template if:false={isHorizontalLayout}>
-											<lightning-radio-group
-												name={currentQuestion.id}
-												options={currentQuestion.choices}
-												value={currentResponse}
-												type="radio"
-												onchange={handleCurrentResponseChange}
-												class="slds-m-top_small"></lightning-radio-group>
-										</template>
-									</template>
+<!-- Single Select - Horizontal -->
+<template if:true={isSingleSelect}>
+<template if:true={isHorizontalLayout}>
+<lightning-radio-group
+name={currentQuestion.id}
+options={currentQuestion.choices}
+value={currentResponse}
+type="button"
+onchange={handleCurrentResponseChange}
+class="radio-horizontal"></lightning-radio-group>
+</template>
+<template if:false={isHorizontalLayout}>
+<lightning-radio-group
+name={currentQuestion.id}
+options={currentQuestion.choices}
+value={currentResponse}
+type="radio"
+onchange={handleCurrentResponseChange}
+class="radio-vertical"></lightning-radio-group>
+</template>
+</template>
 
-									<!-- Multi-Select -->
-									<template if:true={isMultiSelect}>
-										<template if:true={isHorizontalLayout}>
-											<div class="slds-grid slds-wrap slds-grid_pull-padded slds-m-top_small">
-												<template for:each={currentQuestion.choices} for:item="choice">
-													<div key={choice.value} class="slds-col slds-p-horizontal_x-small slds-m-bottom_small">
-														<input
-															type="checkbox"
-															id={choice.value}
-															value={choice.value}
-															checked={choice.checked}
-															onchange={handleCheckboxChange}
-															class="slds-assistive-text" />
-														<label for={choice.value} class="slds-button slds-button_neutral slds-checkbox_button">
-															<span class="slds-checkbox_faux">{choice.label}</span>
-														</label>
-													</div>
-												</template>
-											</div>
-										</template>
-										<template if:false={isHorizontalLayout}>
-											<div class="slds-form-element slds-m-top_small">
-												<template for:each={currentQuestion.choices} for:item="choice">
-													<div key={choice.value} class="slds-checkbox slds-m-bottom_small">
-														<input
-															type="checkbox"
-															id={choice.value}
-															value={choice.value}
-															checked={choice.checked}
-															onchange={handleCheckboxChange} />
-														<label class="slds-checkbox__label" for={choice.value}>
-															<span class="slds-checkbox_faux"></span>
-															<span class="slds-form-element__label">{choice.label}</span>
-														</label>
-													</div>
-												</template>
-											</div>
-										</template>
-									</template>
-								</div>
+<!-- Multi-Select -->
+<template if:true={isMultiSelect}>
+<div class="checkbox-container">
+<template for:each={currentQuestion.choices} for:item="choice">
+<div key={choice.value} class="slds-checkbox slds-m-bottom_small">
+<input
+type="checkbox"
+id={choice.value}
+value={choice.value}
+checked={choice.checked}
+onchange={handleCheckboxChange} />
+<label class="slds-checkbox__label" for={choice.value}>
+<span class="slds-checkbox_faux"></span>
+<span class="slds-form-element__label">{choice.label}</span>
+</label>
+</div>
+</template>
+</div>
+</template>
+</div>
 
-								<!-- Navigation Buttons -->
-								<div class="slds-grid slds-grid_align-spread slds-m-top_large">
-									<div>
-										<template if:false={isFirstQuestion}>
-											<lightning-button
-												label="Back"
-												icon-name="utility:back"
-												onclick={handlePrevious}
-												class="slds-m-right_x-small"></lightning-button>
-										</template>
-									</div>
-									<div>
-										<template if:false={isLastQuestion}>
-											<lightning-button
-												variant="brand"
-												label="Next"
-												icon-name="utility:forward"
-												icon-position="right"
-												onclick={handleNext}></lightning-button>
-										</template>
-										<template if:true={isLastQuestion}>
-											<template if:true={canChooseAnonymous}>
-												<lightning-button
-													variant="brand"
-													label="Continue to Submit"
-													icon-name="utility:forward"
-													icon-position="right"
-													onclick={handleNext}></lightning-button>
-											</template>
-											<template if:false={canChooseAnonymous}>
-												<lightning-button
-													variant="brand"
-													label="Submit Survey"
-													icon-name="utility:check"
-													icon-position="right"
-													onclick={handleSubmit}
-													disabled={isSubmitting}></lightning-button>
-											</template>
-										</template>
-									</div>
-								</div>
-							</div>
-						</lightning-card>
-					</template>
+<!-- Navigation -->
+<div class="navigation-container">
+<template if:false={isFirstQuestion}>
+<button class="back-button" onclick={handlePrevious}>Back</button>
+</template>
+<div class="nav-spacer"></div>
+<template if:false={isLastQuestion}>
+<button class="next-button" onclick={handleNext}>Next</button>
+</template>
+<template if:true={isLastQuestion}>
+<template if:true={canChooseAnonymous}>
+<button class="next-button" onclick={handleNext}>Continue</button>
+</template>
+<template if:false={canChooseAnonymous}>
+<button class="next-button" onclick={handleSubmit} disabled={isSubmitting}>Submit</button>
+</template>
+</template>
+</div>
+</div>
+</template>
 
-					<!-- Anonymous Selection (shown after last question if applicable) -->
-					<template if:true={showAnonymousSelection}>
-						<lightning-card class="slds-card_boundary slds-m-top_medium">
-							<div class="slds-p-around_large">
-								<h3 class="slds-text-heading_medium slds-m-bottom_medium">Choose how to submit</h3>
-								<lightning-radio-group
-									name="anonymousChoice"
-									options={anonymousOptions}
-									value={anonymousValue}
-									type="radio"
-									onchange={handleAnonymousChange}></lightning-radio-group>
+<!-- Anonymous Selection -->
+<template if:true={showAnonymousSelection}>
+<div class="question-container">
+<div class="question-block">
+<div class="accent-line"></div>
+<h2 class="question-text">Choose how to submit</h2>
+</div>
+<div class="answer-container">
+<lightning-radio-group
+name="anonymousChoice"
+options={anonymousOptions}
+value={anonymousValue}
+type="radio"
+onchange={handleAnonymousChange}
+class="radio-vertical"></lightning-radio-group>
+</div>
+<div class="navigation-container">
+<button class="back-button" onclick={handleBackToLastQuestion}>Back</button>
+<div class="nav-spacer"></div>
+<button class="next-button" onclick={handleSubmit} disabled={isSubmitting}>Submit</button>
+</div>
+</div>
+</template>
 
-								<div class="slds-grid slds-grid_align-spread slds-m-top_large">
-									<div>
-										<lightning-button label="Back" icon-name="utility:back" onclick={handleBackToLastQuestion}></lightning-button>
-									</div>
-									<div>
-										<lightning-button
-											variant="brand"
-											label="Submit Survey"
-											icon-name="utility:check"
-											icon-position="right"
-											onclick={handleSubmit}
-											disabled={isSubmitting}></lightning-button>
-									</div>
-								</div>
-							</div>
-						</lightning-card>
-					</template>
-				</template>
-			</template>
-		</template>
-	</div>
+<!-- Decorative Footer -->
+<div class="decorative-footer"></div>
+</div>
+</template>
+</template>
+</template>
+</div>
 </template>
