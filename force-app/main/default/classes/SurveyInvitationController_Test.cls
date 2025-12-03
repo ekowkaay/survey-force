@@ -15,7 +15,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test Participant', null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test Participant', null, null, null);
 			Test.stopTest();
 
 			System.assertEquals(true, result.success, 'Invitation should be created successfully');
@@ -36,7 +36,7 @@ private class SurveyInvitationController_Test {
 		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
 		System.runAs(u) {
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(null, null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(null, null, null, null, null, null);
 			Test.stopTest();
 
 			System.assertEquals(false, result.success, 'Should fail with null survey ID');
@@ -51,7 +51,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			Test.startTest();
-			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 5);
+			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 5, null, null);
 			Test.stopTest();
 
 			System.assertEquals(true, result.success, 'Bulk creation should succeed');
@@ -76,11 +76,11 @@ private class SurveyInvitationController_Test {
 
 			Test.startTest();
 			// Test with invalid count
-			SurveyInvitationController.BulkInvitationResult result1 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 0);
+			SurveyInvitationController.BulkInvitationResult result1 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 0, null, null);
 			System.assertEquals(false, result1.success, 'Should fail with count 0');
 
 			// Test with too many
-			SurveyInvitationController.BulkInvitationResult result2 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 201);
+			SurveyInvitationController.BulkInvitationResult result2 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 201, null, null);
 			System.assertEquals(false, result2.success, 'Should fail with count > 200');
 			Test.stopTest();
 		}
@@ -125,7 +125,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
 
 			Test.startTest();
 			Boolean success = SurveyInvitationController.completeInvitation(createResult.token, tu.surveyTakerId);
@@ -147,7 +147,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create and complete invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
 			SurveyInvitationController.completeInvitation(createResult.token, tu.surveyTakerId);
 
 			Test.startTest();
@@ -166,8 +166,8 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitations
-			SurveyInvitationController.createInvitation(tu.surveyId, 'test1@example.com', 'User 1', null);
-			SurveyInvitationController.createInvitation(tu.surveyId, 'test2@example.com', 'User 2', null);
+			SurveyInvitationController.createInvitation(tu.surveyId, 'test1@example.com', 'User 1', null, null, null);
+			SurveyInvitationController.createInvitation(tu.surveyId, 'test2@example.com', 'User 2', null, null, null);
 
 			Test.startTest();
 			List<SurveyInvitationController.InvitationData> invitations = SurveyInvitationController.getInvitationsForSurvey(tu.surveyId);
@@ -211,7 +211,7 @@ private class SurveyInvitationController_Test {
 			insert settings;
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
 			Test.stopTest();
 
 			// Verify expiration date is null
@@ -227,7 +227,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
 
 			// Manually set expiration date to past
 			SurveyInvitation__c invitation = [SELECT Id FROM SurveyInvitation__c WHERE Id = :createResult.invitationId];
@@ -239,6 +239,110 @@ private class SurveyInvitationController_Test {
 			Test.stopTest();
 
 			System.assertEquals(false, result.isValid, 'Expired invitation should be invalid');
+			System.assert(result.message.contains('expired'), 'Message should indicate expiration');
+		}
+	}
+
+	@IsTest
+	private static void testInvitationWithEventDateExpiration() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create custom setting with 14 day expiration
+			SurveySettings__c settings = new SurveySettings__c();
+			settings.InvitationExpirationDays__c = 14;
+			insert settings;
+
+			// Set event date to 10 days from now (e.g., training event date)
+			DateTime eventDate = DateTime.now().addDays(10);
+			String relatedRecordId = 'a1B000000000001'; // Example training event ID
+
+			Test.startTest();
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, eventDate, relatedRecordId);
+			Test.stopTest();
+
+			// Verify invitation was created successfully
+			System.assertEquals(true, result.success, 'Invitation should be created successfully');
+
+			// Verify event date and related record are stored
+			SurveyInvitation__c invitation = [
+				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c
+				FROM SurveyInvitation__c
+				WHERE Id = :result.invitationId
+			];
+			System.assertEquals(eventDate, invitation.EventDate__c, 'Event date should be stored');
+			System.assertEquals(relatedRecordId, invitation.RelatedRecordId__c, 'Related record ID should be stored');
+
+			// Verify expiration date is calculated from event date (event date + 14 days)
+			System.assertNotEquals(null, invitation.ExpirationDate__c, 'Expiration date should be set');
+			DateTime expectedExpiration = eventDate.addDays(14);
+			System.assertEquals(expectedExpiration, invitation.ExpirationDate__c, 'Expiration should be 14 days after event date');
+		}
+	}
+
+	@IsTest
+	private static void testBulkInvitationsWithEventDate() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create custom setting with 14 day expiration
+			SurveySettings__c settings = new SurveySettings__c();
+			settings.InvitationExpirationDays__c = 14;
+			insert settings;
+
+			// Set event date
+			DateTime eventDate = DateTime.now().addDays(7);
+			String relatedRecordId = 'a1B000000000002';
+
+			Test.startTest();
+			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 3, eventDate, relatedRecordId);
+			Test.stopTest();
+
+			System.assertEquals(true, result.success, 'Bulk creation should succeed');
+			System.assertEquals(3, result.totalGenerated, 'Should generate 3 invitations');
+
+			// Verify all invitations have the event date and calculated expiration
+			List<SurveyInvitation__c> invitations = [
+				SELECT Id, ExpirationDate__c, EventDate__c, RelatedRecordId__c
+				FROM SurveyInvitation__c
+				WHERE Survey__c = :tu.surveyId
+			];
+			System.assertEquals(3, invitations.size(), 'Should have 3 invitations');
+
+			DateTime expectedExpiration = eventDate.addDays(14);
+			for (SurveyInvitation__c inv : invitations) {
+				System.assertEquals(eventDate, inv.EventDate__c, 'Event date should match');
+				System.assertEquals(relatedRecordId, inv.RelatedRecordId__c, 'Related record ID should match');
+				System.assertEquals(expectedExpiration, inv.ExpirationDate__c, 'Expiration should be 14 days after event date');
+			}
+		}
+	}
+
+	@IsTest
+	private static void testEventBasedExpirationValidation() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create custom setting with 14 day expiration
+			SurveySettings__c settings = new SurveySettings__c();
+			settings.InvitationExpirationDays__c = 14;
+			insert settings;
+
+			// Set event date to 20 days ago (past event)
+			DateTime pastEventDate = DateTime.now().addDays(-20);
+
+			// Create invitation - should expire 14 days after event (6 days ago)
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, pastEventDate, null);
+
+			Test.startTest();
+			SurveyInvitationController.ValidationResult result = SurveyInvitationController.validateInvitation(createResult.token);
+			Test.stopTest();
+
+			// Invitation should be expired (event was 20 days ago, expiration is 14 days after event)
+			System.assertEquals(false, result.isValid, 'Invitation should be expired');
 			System.assert(result.message.contains('expired'), 'Message should indicate expiration');
 		}
 	}
