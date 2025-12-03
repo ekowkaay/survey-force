@@ -239,7 +239,7 @@ private class SurveyInvitationController_Test {
 			Test.stopTest();
 
 			System.assertEquals(false, result.isValid, 'Expired invitation should be invalid');
-			System.assert(result.message.contains('expired'), 'Message should indicate expiration');
+			System.assert(result.message.contains('survey window'), 'Message should indicate survey window closed');
 		}
 	}
 
@@ -343,7 +343,7 @@ private class SurveyInvitationController_Test {
 
 			// Invitation should be expired (event was 20 days ago, expiration is 14 days after event)
 			System.assertEquals(false, result.isValid, 'Invitation should be expired');
-			System.assert(result.message.contains('expired'), 'Message should indicate expiration');
+			System.assert(result.message.contains('survey window'), 'Message should indicate survey window closed');
 		}
 	}
 }

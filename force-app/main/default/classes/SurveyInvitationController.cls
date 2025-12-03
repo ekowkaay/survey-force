@@ -318,12 +318,12 @@ public with sharing class SurveyInvitationController {
 					updateInvitationStatus(invitation.Id, STATUS_EXPIRED, null);
 					result.status = STATUS_EXPIRED;
 				}
-				result.message = 'This invitation has expired';
+				result.message = 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
 				return result;
 			}
 
 			if (invitation.Status__c == STATUS_EXPIRED) {
-				result.message = 'This invitation has expired';
+				result.message = 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
 				return result;
 			}
 
