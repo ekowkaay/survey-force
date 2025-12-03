@@ -103,8 +103,64 @@ export default class SurveyTaker extends LightningElement {
 	@track anonymousValue = 'named';
 	@track canChooseAnonymous = false;
 
+	// New properties for one-question-at-a-time navigation
+	@track currentQuestionIndex = 0;
+	@track showAnonymousSelection = false;
+
 	get visibleQuestions() {
 		return this.questions.filter((q) => !q.hideOnSurvey);
+	}
+
+	get currentQuestion() {
+		const visible = this.visibleQuestions;
+		return visible[this.currentQuestionIndex] || null;
+	}
+
+	get currentQuestionNumber() {
+		return this.currentQuestionIndex + 1;
+	}
+
+	get totalQuestions() {
+		return this.visibleQuestions.length;
+	}
+
+	get progressPercentage() {
+		if (this.totalQuestions === 0) return 0;
+		return Math.round((this.currentQuestionNumber / this.totalQuestions) * 100);
+	}
+
+	get isFirstQuestion() {
+		return this.currentQuestionIndex === 0;
+	}
+
+	get isLastQuestion() {
+		return this.currentQuestionIndex === this.totalQuestions - 1;
+	}
+
+	get isFreeText() {
+		return this.currentQuestion && this.currentQuestion.questionType === 'Free Text';
+	}
+
+	get isSingleSelect() {
+		if (!this.currentQuestion) return false;
+		const type = this.currentQuestion.questionType;
+		return type === 'Single Select--Vertical' || type === 'Single Select--Horizontal';
+	}
+
+	get isMultiSelect() {
+		if (!this.currentQuestion) return false;
+		return this.currentQuestion.questionType === 'Multi-Select--Vertical';
+	}
+
+	get isHorizontalLayout() {
+		if (!this.currentQuestion) return false;
+		return this.currentQuestion.questionType === 'Single Select--Horizontal';
+	}
+
+	get currentResponse() {
+		if (!this.currentQuestion) return '';
+		const response = this.responses[this.currentQuestion.id];
+		return response ? response.response : '';
 	}
 
 	get anonymousOptions() {
@@ -184,10 +240,95 @@ export default class SurveyTaker extends LightningElement {
 		this.questions.forEach((q) => {
 			if (q.questionType === 'Multi-Select--Vertical') {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: [] };
+				// Initialize checkbox checked state
+				if (q.choices) {
+					q.choices.forEach((choice) => {
+						choice.checked = false;
+					});
+				}
 			} else {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: null };
 			}
 		});
+		// Reset to first question
+		this.currentQuestionIndex = 0;
+		this.showAnonymousSelection = false;
+	}
+
+	handleCurrentResponseChange(event) {
+		if (!this.currentQuestion) return;
+
+		const value = event.detail.value;
+		const questionId = this.currentQuestion.id;
+
+		if (!this.responses[questionId]) {
+			this.responses[questionId] = { questionId, response: '', responses: null };
+		}
+
+		this.responses[questionId].response = value;
+	}
+
+	handleCheckboxChange(event) {
+		if (!this.currentQuestion) return;
+
+		const value = event.target.value;
+		const checked = event.target.checked;
+		const questionId = this.currentQuestion.id;
+
+		if (!this.responses[questionId]) {
+			this.responses[questionId] = { questionId, response: '', responses: [] };
+		}
+
+		if (!this.responses[questionId].responses) {
+			this.responses[questionId].responses = [];
+		}
+
+		if (checked) {
+			if (!this.responses[questionId].responses.includes(value)) {
+				this.responses[questionId].responses.push(value);
+			}
+		} else {
+			this.responses[questionId].responses = this.responses[questionId].responses.filter((v) => v !== value);
+		}
+
+		// Update checked state in the choice object
+		const choice = this.currentQuestion.choices.find((c) => c.value === value);
+		if (choice) {
+			choice.checked = checked;
+		}
+	}
+
+	handleNext() {
+		// Validate current question if required
+		if (this.currentQuestion && this.currentQuestion.required) {
+			const response = this.responses[this.currentQuestion.id];
+			if (!response || (!response.response && (!response.responses || response.responses.length === 0))) {
+				this.showToast('Required Field', 'Please answer this question before continuing.', 'error');
+				return;
+			}
+		}
+
+		if (this.isLastQuestion) {
+			// Show anonymous selection if applicable, otherwise submit
+			if (this.canChooseAnonymous) {
+				this.showAnonymousSelection = true;
+			} else {
+				this.handleSubmit();
+			}
+		} else {
+			this.currentQuestionIndex++;
+		}
+	}
+
+	handlePrevious() {
+		if (this.currentQuestionIndex > 0) {
+			this.currentQuestionIndex--;
+			this.showAnonymousSelection = false;
+		}
+	}
+
+	handleBackToLastQuestion() {
+		this.showAnonymousSelection = false;
 	}
 
 	handleResponseChange(event) {

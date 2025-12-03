@@ -1,0 +1,47 @@
+/* Custom styling for modern survey UI */
+
+/* Checkbox button styling for horizontal multi-select */
+.slds-checkbox_button {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	border: 1px solid #c9c9c9;
+	border-radius: 0.25rem;
+	background-color: #ffffff;
+	color: #080707;
+	cursor: pointer;
+	text-align: center;
+	transition: all 0.2s ease;
+}
+
+.slds-checkbox_button:hover {
+	background-color: #f3f3f3;
+	border-color: #0070d2;
+}
+
+input[type='checkbox']:checked + .slds-checkbox_button {
+	background-color: #0070d2;
+	border-color: #0070d2;
+	color: #ffffff;
+}
+
+input[type='checkbox']:focus + .slds-checkbox_button {
+	box-shadow: 0 0 3px #0070d2;
+	outline: none;
+}
+
+/* Card styling enhancements */
+.slds-card_boundary {
+	border: 1px solid #dddbda;
+	border-radius: 0.25rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar container */
+.slds-container_center {
+	padding: 1rem;
+}
+
+/* Question text styling */
+.slds-text-heading_medium {
+	line-height: 1.5;
+}
