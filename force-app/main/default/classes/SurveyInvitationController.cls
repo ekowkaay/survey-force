@@ -2,6 +2,8 @@
  * @description Controller for managing survey invitations with unique tokens.
  * Handles generation of unique survey URLs, validation of invitation tokens,
  * and completion tracking to ensure each invitation can only be used once.
+ * Supports dynamic expiration based on event dates (e.g., training event dates)
+ * from related objects, calculating expiration as event date + configured days.
  */
 public with sharing class SurveyInvitationController {
 	/** Status value for pending invitations */
