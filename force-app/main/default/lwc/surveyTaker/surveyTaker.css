@@ -37,7 +37,6 @@ max-width: 850px;
 margin: 0 auto;
 padding: 30px 40px;
 background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-border-left: 4px solid #ff6b35;
 border-radius: 8px;
 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
