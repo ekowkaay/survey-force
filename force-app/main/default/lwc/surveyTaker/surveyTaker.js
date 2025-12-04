@@ -157,6 +157,10 @@ export default class SurveyTaker extends LightningElement {
 		return this.currentQuestion.questionType === 'Single Select--Horizontal';
 	}
 
+	get radioGroupClass() {
+		return this.isHorizontalLayout ? 'radio-horizontal' : 'radio-vertical';
+	}
+
 	get currentResponse() {
 		if (!this.currentQuestion) return '';
 		const response = this.responses[this.currentQuestion.id];

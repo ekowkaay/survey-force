@@ -84,24 +84,13 @@ class="text-input"></lightning-textarea>
 
 <!-- Single Select - Horizontal -->
 <template if:true={isSingleSelect}>
-<template if:true={isHorizontalLayout}>
-<lightning-radio-group
-name={currentQuestion.id}
-options={currentQuestion.choices}
-value={currentResponse}
-type="button"
-onchange={handleCurrentResponseChange}
-class="radio-horizontal"></lightning-radio-group>
-</template>
-<template if:false={isHorizontalLayout}>
 <lightning-radio-group
 name={currentQuestion.id}
 options={currentQuestion.choices}
 value={currentResponse}
 type="radio"
 onchange={handleCurrentResponseChange}
-class="radio-vertical"></lightning-radio-group>
-</template>
+class={radioGroupClass}></lightning-radio-group>
 </template>
 
 <!-- Multi-Select -->
