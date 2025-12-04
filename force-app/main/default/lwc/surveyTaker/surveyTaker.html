@@ -39,20 +39,8 @@
 <div class="content-container">
 <!-- Dynamic Invitation Header -->
 <template if:true={invitationHeader}>
-<div class="invitation-header slds-m-bottom_large">
-<p class="slds-text-body_regular">{invitationHeader}</p>
-</div>
-</template>
-
-<!-- Survey Header -->
-<template if:true={showSurveyName}>
-<div class="survey-header slds-text-align_center slds-m-bottom_xx-large">
-<template if:true={surveyHeader}>
-<h1 class="survey-title">{surveyHeader}</h1>
-</template>
-<template if:true={surveyName}>
-<p class="survey-subtitle">{surveyName}</p>
-</template>
+<div class="invitation-header slds-m-bottom_xx-large">
+<p class="invitation-text">{invitationHeader}</p>
 </div>
 </template>
 

@@ -33,30 +33,21 @@ padding: 60px 40px 200px;
 /* Invitation Header */
 .invitation-header {
 text-align: center;
-color: #54698d;
-font-size: 0.95rem;
-line-height: 1.6;
-max-width: 800px;
+max-width: 850px;
 margin: 0 auto;
+padding: 30px 40px;
+background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+border-left: 4px solid #ff6b35;
+border-radius: 8px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Survey Header */
-.survey-header {
-margin-bottom: 80px;
-}
-
-.survey-title {
-font-size: 2.5rem;
-font-weight: 400;
+.invitation-text {
 color: #54698d;
-margin-bottom: 0.5rem;
-letter-spacing: 0.02em;
-}
-
-.survey-subtitle {
 font-size: 1.1rem;
-color: #8a94a6;
-font-weight: 300;
+line-height: 1.8;
+font-weight: 400;
+margin: 0;
 }
 
 /* Question Container */
