@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+	<description>Generate and manage unique survey invitation links</description>
+	<flexiPage>Survey_Link_Generator</flexiPage>
+	<label>Survey Link Generator</label>
+	<motif>Custom85: Checklist</motif>
+</CustomTab>

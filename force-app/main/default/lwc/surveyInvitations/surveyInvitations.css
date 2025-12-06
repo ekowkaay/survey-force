@@ -1,0 +1,81 @@
+.invitations-container {
+	background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+	min-height: 100vh;
+}
+
+/* Stats Cards Enhancement */
+.stat-card {
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	cursor: default;
+}
+
+.stat-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Generated Links Modal Enhancement */
+.generated-link-item {
+	transition: background-color 0.2s ease;
+}
+
+.generated-link-item:hover {
+	background-color: var(--slds-g-color-neutral-base-95, #f4f6f9);
+}
+
+/* Empty State Enhancement */
+.empty-state-icon {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+/* Button Animations */
+.action-button {
+	transition: all 0.3s ease;
+}
+
+.action-button:hover:not(:disabled) {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Link Copy Success Animation */
+@keyframes copySuccess {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.copy-success {
+	animation: copySuccess 0.3s ease;
+}
+
+/* Loading State */
+.loading-container {
+	min-height: 300px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.invitations-container {
+		padding: 1rem;
+	}
+}

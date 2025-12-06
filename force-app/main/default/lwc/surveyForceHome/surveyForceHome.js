@@ -19,6 +19,15 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			action: 'handleCreateSurvey'
 		},
 		{
+			id: 'generate',
+			title: 'Generate Survey Links',
+			description: 'Create unique invitation links to share with participants',
+			icon: 'utility:link',
+			iconBg: 'slds-icon-standard-link',
+			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
+			action: 'handleGenerateLinks'
+		},
+		{
 			id: 'manage',
 			title: 'Manage Surveys',
 			description: 'View, edit, and analyze your existing surveys',
@@ -35,15 +44,6 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			iconBg: 'slds-icon-standard-metrics',
 			steps: ['Review metrics', 'Analyze responses', 'Export data'],
 			action: 'handleViewAnalytics'
-		},
-		{
-			id: 'share',
-			title: 'Share & Distribute',
-			description: 'Send surveys to your audience via multiple channels',
-			icon: 'utility:share',
-			iconBg: 'slds-icon-standard-email',
-			steps: ['Generate links', 'Send invitations', 'Track engagement'],
-			action: 'handleShareSurveys'
 		}
 	];
 
@@ -93,6 +93,15 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 		});
 	}
 
+	handleGenerateLinks() {
+		this[NavigationMixin.Navigate]({
+			type: 'standard__navItemPage',
+			attributes: {
+				apiName: 'Survey_Link_Generator'
+			}
+		});
+	}
+
 	handleManageSurveys() {
 		this[NavigationMixin.Navigate]({
 			type: 'standard__navItemPage',
@@ -107,15 +116,6 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			type: 'standard__navItemPage',
 			attributes: {
 				apiName: 'Survey_Analytics'
-			}
-		});
-	}
-
-	handleShareSurveys() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Dashboard'
 			}
 		});
 	}

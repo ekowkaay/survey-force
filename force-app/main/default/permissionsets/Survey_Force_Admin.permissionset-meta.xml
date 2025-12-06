@@ -208,6 +208,10 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>Survey_Link_Generator</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>SurveyTaker__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
