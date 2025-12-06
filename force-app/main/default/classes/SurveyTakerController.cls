@@ -590,4 +590,40 @@ public with sharing class SurveyTakerController {
 			throw new AuraHandledException('Error loading survey: ' + e.getMessage());
 		}
 	}
+
+	/**
+	 * Get survey responses for analytics dashboard
+	 * @param surveyId The survey ID
+	 * @return List of SurveyTaker__c records with related responses
+	 */
+	@AuraEnabled(cacheable=true)
+	public static List<SurveyTaker__c> getSurveyResponses(Id surveyId) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.SurveyTaker__c.fields.Id,
+				Schema.SurveyTaker__c.fields.Name,
+				Schema.SurveyTaker__c.fields.Survey__c,
+				Schema.SurveyTaker__c.fields.CreatedDate,
+				Schema.SurveyTaker__c.fields.Contact__c,
+				Schema.SurveyTaker__c.fields.Case__c,
+				Schema.SurveyTaker__c.fields.Anonymous__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.SurveyTaker__c.getSobjectType(), fields);
+
+			return [
+				SELECT Id, Name, Survey__c, CreatedDate, Contact__c, Case__c, Anonymous__c
+				FROM SurveyTaker__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+				ORDER BY CreatedDate DESC
+			];
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyTakerController:getSurveyResponses():' + e.getMessage());
+			throw new AuraHandledException('Error loading survey responses: ' + e.getMessage());
+		}
+	}
 }
