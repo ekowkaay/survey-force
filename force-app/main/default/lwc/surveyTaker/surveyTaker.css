@@ -1,26 +1,28 @@
-/* Survey Container - Clean white background */
+/* Survey Container - Modern Clean Background */
 .survey-container {
-background-color: #ffffff;
+background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
 min-height: 100vh;
 position: relative;
 overflow: hidden;
 }
 
-/* Progress Bar at Top - Orange */
+/* Progress Bar at Top - Modern Gradient */
 .progress-bar-container {
 position: fixed;
 top: 0;
 left: 0;
 right: 0;
-height: 6px;
-background-color: #f3f2f2;
+height: 5px;
+background-color: #f5f5f5;
 z-index: 1000;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .progress-bar {
 height: 100%;
-background-color: #ff6b35;
-transition: width 0.3s ease;
+background: linear-gradient(90deg, #ff6b35 0%, #ff8c61 50%, #ff6b35 100%);
+transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
 }
 
 /* Content Container */
@@ -30,20 +32,21 @@ margin: 0 auto;
 padding: 60px 40px 200px;
 }
 
-/* Invitation Header */
+/* Invitation Header - Modern Card Design */
 .invitation-header {
 text-align: center;
 max-width: 850px;
-margin: 0 auto;
-padding: 30px 40px;
-background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-border-radius: 8px;
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+margin: 0 auto 60px;
+padding: 35px 50px;
+background: #ffffff;
+border: 1px solid #e5e5e5;
+border-radius: 12px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .invitation-text {
-color: #54698d;
-font-size: 1.1rem;
+color: #2c3e50;
+font-size: 1.05rem;
 line-height: 1.8;
 font-weight: 400;
 margin: 0;
@@ -60,23 +63,23 @@ padding: 40px 0;
 .question-block {
 display: flex;
 align-items: flex-start;
-margin-bottom: 60px;
+margin-bottom: 50px;
 }
 
 .accent-line {
-width: 4px;
-min-height: 80px;
-background-color: #ff6b35;
-margin-right: 30px;
-border-radius: 2px;
+width: 5px;
+min-height: 70px;
+background: linear-gradient(180deg, #ff6b35 0%, #ff8c61 100%);
+margin-right: 25px;
+border-radius: 3px;
 flex-shrink: 0;
 }
 
 .question-text {
-font-size: 1.5rem;
-color: #54698d;
-font-weight: 400;
-line-height: 1.5;
+font-size: 1.4rem;
+color: #2c3e50;
+font-weight: 500;
+line-height: 1.6;
 flex: 1;
 }
 
@@ -87,35 +90,64 @@ margin-left: 4px;
 
 /* Answer Container */
 .answer-container {
-margin-bottom: 80px;
-padding-left: 34px;
+margin-bottom: 60px;
+padding-left: 30px;
 }
 
-/* Radio Buttons - Horizontal */
+/* Radio Buttons - Horizontal with Modern Styling */
 .radio-horizontal {
 display: flex;
-justify-content: center;
-gap: 20px;
+justify-content: flex-start;
+gap: 16px;
+flex-wrap: wrap;
+}
+
+.radio-horizontal lightning-radio-group {
+--slds-c-radio-color-border: #d0d0d0;
+--slds-c-radio-sizing-border: 2px;
 }
 
 /* Radio Buttons - Vertical */
 .radio-vertical {
 display: flex;
 flex-direction: column;
-gap: 12px;
+gap: 14px;
 }
 
-/* Text Input */
+/* Text Input - Modern Style */
 .text-input {
 width: 100%;
-max-width: 600px;
+max-width: 650px;
 }
 
-/* Checkbox Container */
+.text-input textarea {
+border: 2px solid #e0e4e8;
+border-radius: 8px;
+padding: 14px;
+font-size: 1rem;
+transition: all 0.3s ease;
+}
+
+.text-input textarea:focus {
+border-color: #ff6b35;
+box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+/* Checkbox Container - Modern */
 .checkbox-container {
 display: flex;
 flex-direction: column;
-gap: 12px;
+gap: 16px;
+}
+
+.checkbox-container .slds-checkbox {
+padding: 12px 16px;
+border-radius: 8px;
+transition: background-color 0.2s ease;
+}
+
+.checkbox-container .slds-checkbox:hover {
+background-color: #f8f9fa;
 }
 
 /* Navigation Container */
@@ -123,63 +155,72 @@ gap: 12px;
 display: flex;
 justify-content: space-between;
 align-items: center;
-padding-left: 34px;
-margin-top: 60px;
+padding-left: 30px;
+margin-top: 50px;
 }
 
 .nav-spacer {
 flex: 1;
 }
 
-/* Buttons */
+/* Buttons - Modern Design */
 .next-button,
 .back-button {
-padding: 12px 40px;
+padding: 14px 48px;
 font-size: 1rem;
 border: none;
-border-radius: 4px;
+border-radius: 8px;
 cursor: pointer;
-transition: all 0.2s ease;
-font-weight: 500;
+transition: all 0.3s ease;
+font-weight: 600;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+font-size: 0.9rem;
 }
 
 .next-button {
-background-color: #ff6b35;
+background: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
 color: #ffffff;
+box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
 }
 
 .next-button:hover:not(:disabled) {
-background-color: #ff5722;
-transform: translateY(-1px);
-box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+transform: translateY(-2px);
+box-shadow: 0 6px 16px rgba(255, 107, 53, 0.35);
 }
 
 .next-button:disabled {
-background-color: #cccccc;
+background: linear-gradient(135deg, #cccccc 0%, #b3b3b3 100%);
 cursor: not-allowed;
+box-shadow: none;
 }
 
 .back-button {
-background-color: transparent;
-color: #54698d;
-border: 1px solid #d8dde6;
+background-color: #ffffff;
+color: #5a6c7d;
+border: 2px solid #e0e4e8;
+box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .back-button:hover {
 background-color: #f8f9fa;
-border-color: #54698d;
+border-color: #5a6c7d;
+transform: translateY(-1px);
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Decorative Footer */
+/* Decorative Footer - Modern Design */
 .decorative-footer {
 position: fixed;
 bottom: 0;
 left: 0;
 right: 0;
-height: 120px;
-background: linear-gradient(to top, #e8e8e8 0%, rgba(232, 232, 232, 0.5) 50%, transparent 100%);
+height: 100px;
+background: linear-gradient(to top, #f0f0f0 0%, rgba(240, 240, 240, 0.3) 60%, transparent 100%);
 pointer-events: none;
 overflow: hidden;
+z-index: 1;
 }
 
 .decorative-footer::before {
@@ -188,23 +229,35 @@ position: absolute;
 bottom: 0;
 left: 0;
 right: 0;
-height: 60px;
-background: linear-gradient(90deg, #6c757d 0%, #8a94a6 20%, #ff6b35 40%, #ff8c61 50%, #ff6b35 60%, #8a94a6 80%, #6c757d 100%);
-opacity: 0.2;
-transform: skewY(-2deg);
+height: 40px;
+background: linear-gradient(90deg, 
+#95a5a6 0%, 
+#b0bec5 15%, 
+#ff6b35 30%, 
+#ff8c61 40%, 
+#ffab91 50%, 
+#ff8c61 60%, 
+#ff6b35 70%, 
+#b0bec5 85%, 
+#95a5a6 100%);
+opacity: 0.15;
+transform: skewY(-1.5deg);
 transform-origin: bottom left;
 }
 
 .decorative-footer::after {
 content: '';
 position: absolute;
-bottom: 0;
-right: 15%;
-width: 300px;
-height: 300px;
-background: radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 40%, transparent 70%);
+bottom: -50px;
+right: 10%;
+width: 350px;
+height: 350px;
+background: radial-gradient(circle at center, 
+rgba(255, 107, 53, 0.12) 0%, 
+rgba(255, 107, 53, 0.06) 35%, 
+rgba(255, 140, 97, 0.03) 60%, 
+transparent 80%);
 border-radius: 50%;
-transform: translateY(50%);
 }
 
 /* Submitted Container */
@@ -222,33 +275,45 @@ lightning-radio-group {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
 .content-container {
-padding: 40px 20px 180px;
+padding: 40px 20px 160px;
 }
 
-.survey-title {
-font-size: 2rem;
+.invitation-header {
+padding: 25px 30px;
+margin-bottom: 40px;
+}
+
+.invitation-text {
+font-size: 1rem;
 }
 
 .question-text {
-font-size: 1.25rem;
+font-size: 1.2rem;
 }
 
 .accent-line {
-margin-right: 20px;
+margin-right: 18px;
 min-height: 60px;
+width: 4px;
 }
 
 .answer-container {
-padding-left: 24px;
+padding-left: 22px;
+margin-bottom: 50px;
 }
 
 .navigation-container {
-padding-left: 24px;
+padding-left: 22px;
+margin-top: 40px;
 }
 
 .next-button,
 .back-button {
-padding: 10px 30px;
-font-size: 0.95rem;
+padding: 12px 32px;
+font-size: 0.85rem;
+}
+
+.radio-horizontal {
+gap: 12px;
 }
 }
