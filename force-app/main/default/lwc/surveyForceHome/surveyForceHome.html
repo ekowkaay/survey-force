@@ -1,0 +1,108 @@
+<template>
+	<div class="survey-force-home">
+		<!-- Hero Section -->
+		<div class="hero-section slds-p-around_x-large slds-text-align_center">
+			<lightning-icon icon-name="standard:survey" size="large" class="slds-m-bottom_medium hero-icon"></lightning-icon>
+			<h1 class="slds-text-heading_large slds-m-bottom_small">Welcome to Survey Force</h1>
+			<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_large">Create, distribute, and analyze surveys with ease</p>
+		</div>
+
+		<!-- Main Workflows -->
+		<div class="workflows-section slds-p-horizontal_large slds-p-bottom_large">
+			<h2 class="slds-text-heading_medium slds-m-bottom_medium">What would you like to do?</h2>
+
+			<div class="slds-grid slds-wrap slds-gutters">
+				<template for:each={workflows} for:item="workflow">
+					<div key={workflow.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
+						<div class="workflow-card slds-box slds-theme_default" data-workflow-id={workflow.id} onclick={handleWorkflowSelect}>
+							<div class="workflow-header slds-m-bottom_small">
+								<div class="workflow-icon-container slds-m-bottom_small">
+									<lightning-icon icon-name={workflow.icon} size="medium" alternative-text={workflow.title}></lightning-icon>
+								</div>
+								<h3 class="slds-text-heading_small slds-m-bottom_x-small">{workflow.title}</h3>
+								<p class="slds-text-body_small slds-text-color_weak">{workflow.description}</p>
+							</div>
+
+							<div class="workflow-steps">
+								<ul class="slds-list_dotted">
+									<template for:each={workflow.steps} for:item="step">
+										<li key={step} class="slds-item slds-text-body_small">{step}</li>
+									</template>
+								</ul>
+							</div>
+
+							<div class="workflow-action slds-m-top_medium">
+								<lightning-button label="Get Started" variant="brand" class="slds-button_stretch"></lightning-button>
+							</div>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+
+		<!-- Quick Stats Section -->
+		<div class="quick-stats-section slds-p-horizontal_large slds-p-bottom_large">
+			<div class="slds-card">
+				<div class="slds-card__header slds-grid">
+					<header class="slds-media slds-media_center slds-has-flexi-truncate">
+						<div class="slds-media__figure">
+							<lightning-icon icon-name="utility:metrics" size="small"></lightning-icon>
+						</div>
+						<div class="slds-media__body">
+							<h2 class="slds-card__header-title">Quick Actions</h2>
+						</div>
+					</header>
+				</div>
+				<div class="slds-card__body slds-card__body_inner">
+					<div class="slds-grid slds-wrap slds-gutters_small">
+						<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+							<lightning-button label="View All Surveys" icon-name="utility:list" onclick={handleManageSurveys} class="slds-button_stretch"></lightning-button>
+						</div>
+						<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+							<lightning-button label="Create New Survey" icon-name="utility:add" variant="brand" onclick={handleCreateSurvey} class="slds-button_stretch"></lightning-button>
+						</div>
+						<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+							<lightning-button label="View Analytics" icon-name="utility:chart" onclick={handleViewAnalytics} class="slds-button_stretch"></lightning-button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Resources Section -->
+		<div class="resources-section slds-p-horizontal_large slds-p-bottom_x-large">
+			<h2 class="slds-text-heading_medium slds-m-bottom_medium">Resources & Help</h2>
+
+			<div class="slds-grid slds-wrap slds-gutters">
+				<template for:each={resources} for:item="resource">
+					<div key={resource.title} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+						<div class="resource-card slds-box slds-theme_shade">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name={resource.icon} size="small"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<h3 class="slds-text-body_regular slds-m-bottom_xx-small">{resource.title}</h3>
+									<p class="slds-text-body_small slds-text-color_weak">{resource.description}</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+
+		<!-- Footer Tips -->
+		<div class="tips-section slds-p-around_large slds-theme_shade">
+			<div class="slds-grid slds-grid_align-center">
+				<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3 slds-text-align_center">
+					<lightning-icon icon-name="utility:info" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+					<span class="slds-text-body_small">
+						<strong>Pro Tip:</strong>
+						Use the Survey Creator to build surveys quickly, or clone existing surveys to save time
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>

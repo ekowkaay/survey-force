@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+	<flexiPageRegions>
+		<itemInstances>
+			<componentInstance>
+				<componentName>surveyAnalyticsDashboard</componentName>
+				<identifier>c_surveyAnalyticsDashboard</identifier>
+			</componentInstance>
+		</itemInstances>
+		<name>region1</name>
+		<type>Region</type>
+	</flexiPageRegions>
+	<masterLabel>Survey Analytics Dashboard</masterLabel>
+	<template>
+		<name>flexipage:defaultAppHomeTemplate</name>
+	</template>
+	<type>AppPage</type>
+</FlexiPage>
