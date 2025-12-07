@@ -7,7 +7,7 @@
 				<identifier>c_surveyForceHome</identifier>
 			</componentInstance>
 		</itemInstances>
-		<name>region1</name>
+		<name>main</name>
 		<type>Region</type>
 	</flexiPageRegions>
 	<masterLabel>Survey Force Home</masterLabel>

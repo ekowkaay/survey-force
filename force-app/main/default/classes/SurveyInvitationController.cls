@@ -436,11 +436,6 @@ public with sharing class SurveyInvitationController {
 				data.eventTopic = inv.EventTopic__c;
 				results.add(data);
 			}
-				data.expirationDate = inv.ExpirationDate__c;
-				data.eventDate = inv.EventDate__c;
-				data.relatedRecordId = inv.RelatedRecordId__c;
-				results.add(data);
-			}
 
 			return results;
 		} catch (Exception e) {
