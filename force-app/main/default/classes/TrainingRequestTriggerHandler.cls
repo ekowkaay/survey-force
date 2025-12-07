@@ -84,7 +84,7 @@ public with sharing class TrainingRequestTriggerHandler {
 
 	/**
 	 * @description Create surveys for training requests
-	 * Creates participant, customer, and trainer surveys automatically
+	 * Creates participant, customer, and trainer surveys automatically with token-based invitations
 	 * @param trainingRequests List of Training Request records
 	 */
 	private void createSurveysForTrainingRequests(List<Training_Request__c> trainingRequests) {
@@ -98,7 +98,7 @@ public with sharing class TrainingRequestTriggerHandler {
 
 				// Create Participant Survey
 				if (String.isBlank(tr.Participant_Survey__c)) {
-					String participantSurveyUrl = createSurveyForRequest(
+					String participantSurveyUrl = createSurveyWithTokenForRequest(
 						tr.Id,
 						SURVEY_TYPE_PARTICIPANT,
 						DEFAULT_LANGUAGE,
@@ -110,9 +110,9 @@ public with sharing class TrainingRequestTriggerHandler {
 					}
 				}
 
-				// Create Customer Survey
+				// Create Customer Survey with token-based invitation
 				if (String.isBlank(tr.Customer_Survey__c)) {
-					String customerSurveyUrl = createSurveyForRequest(
+					String customerSurveyUrl = createSurveyWithTokenForRequest(
 						tr.Id,
 						SURVEY_TYPE_CUSTOMER,
 						DEFAULT_LANGUAGE,
@@ -124,9 +124,9 @@ public with sharing class TrainingRequestTriggerHandler {
 					}
 				}
 
-				// Create Trainer Survey
+				// Create Trainer Survey with token-based invitation
 				if (String.isBlank(tr.Trainer_Survey__c)) {
-					String trainerSurveyUrl = createSurveyForRequest(
+					String trainerSurveyUrl = createSurveyWithTokenForRequest(
 						tr.Id,
 						SURVEY_TYPE_TRAINER,
 						DEFAULT_LANGUAGE,
@@ -158,15 +158,16 @@ public with sharing class TrainingRequestTriggerHandler {
 	}
 
 	/**
-	 * @description Create a survey for a training request
+	 * @description Create a survey for a training request and generate a token-based invitation
 	 * @param trainingRequestId The training request ID
 	 * @param surveyType The type of survey (Participant, Customer, Trainer)
 	 * @param language The language for the survey
 	 * @param surveyName The name for the survey
-	 * @return String The survey URL or null if creation failed
+	 * @return String The token-based survey URL or null if creation failed
 	 */
-	private String createSurveyForRequest(Id trainingRequestId, String surveyType, String language, String surveyName) {
+	private String createSurveyWithTokenForRequest(Id trainingRequestId, String surveyType, String language, String surveyName) {
 		try {
+			// First create the survey
 			SurveyUtilities.SurveyCreationResult result = SurveyUtilities.createSurveyWithResult(
 				trainingRequestId,
 				surveyType,
@@ -174,20 +175,27 @@ public with sharing class TrainingRequestTriggerHandler {
 				surveyName
 			);
 
-			if (result.success) {
-				return result.surveyUrl;
-			} else {
+			if (!result.success) {
 				SurveyForceUtil.log(
-					'TrainingRequestTriggerHandler.createSurveyForRequest: Failed to create ' +
+					'TrainingRequestTriggerHandler.createSurveyWithTokenForRequest: Failed to create ' +
 					surveyType +
 					' survey - ' +
 					result.message
 				);
 				return null;
 			}
+
+			// Now create a token-based invitation for this survey
+			String tokenUrl = SurveyUtilities.generateSingleSurveyInvitation(
+				result.surveyId,
+				trainingRequestId,
+				surveyType
+			);
+
+			return tokenUrl;
 		} catch (Exception e) {
 			SurveyForceUtil.log(
-				'TrainingRequestTriggerHandler.createSurveyForRequest: ' +
+				'TrainingRequestTriggerHandler.createSurveyWithTokenForRequest: ' +
 				e.getMessage() +
 				' for ' +
 				surveyType

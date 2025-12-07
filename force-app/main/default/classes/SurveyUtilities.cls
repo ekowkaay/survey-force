@@ -416,4 +416,35 @@ public with sharing class SurveyUtilities {
 		}
 		return baseUrl + '/survey?token=' + token;
 	}
+
+	/**
+	 * @description Generate a single survey invitation with token for Customer/Trainer surveys
+	 * @param surveyId The Survey ID
+	 * @param trainingRequestId The Training Request ID (for related record tracking)
+	 * @param surveyType The type of survey (Customer, Trainer, etc.)
+	 * @return String Token-based survey URL or null if failed
+	 */
+	public static String generateSingleSurveyInvitation(Id surveyId, Id trainingRequestId, String surveyType) {
+		try {
+			if (surveyId == null) {
+				return null;
+			}
+
+			String token = generateUniqueToken();
+
+			SurveyInvitation__c invitation = new SurveyInvitation__c();
+			invitation.Survey__c = surveyId;
+			invitation.Token__c = token;
+			invitation.Status__c = 'Pending';
+			invitation.ParticipantName__c = surveyType + ' Survey';
+			invitation.RelatedRecordId__c = trainingRequestId;
+
+			Database.insert(invitation, AccessLevel.USER_MODE);
+
+			return buildSurveyUrlWithToken(token);
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyUtilities.generateSingleSurveyInvitation: ' + e.getMessage());
+			return null;
+		}
+	}
 }
