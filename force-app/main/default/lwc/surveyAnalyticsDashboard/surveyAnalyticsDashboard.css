@@ -1,0 +1,77 @@
+.analytics-dashboard {
+	background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+	min-height: 100vh;
+}
+
+.loading-container {
+	min-height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.dashboard-header {
+	background: var(--slds-g-color-neutral-base-100, #ffffff);
+	border-bottom: 1px solid var(--slds-g-color-border-base-1, #c9c9c9);
+}
+
+.search-input {
+	max-width: 600px;
+}
+
+.metrics-section {
+	animation: fadeIn 0.3s ease-in;
+}
+
+.metric-card {
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+	height: 100%;
+}
+
+.metric-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metric-value {
+	color: var(--slds-g-color-brand-base-60, #0176d3);
+	font-weight: 700;
+}
+
+.survey-item {
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.survey-item:hover {
+	transform: translateX(4px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.survey-name:hover {
+	color: var(--slds-g-color-brand-base-60, #0176d3);
+	text-decoration: underline;
+}
+
+.empty-state {
+	background: var(--slds-g-color-neutral-base-100, #ffffff);
+	border-radius: 0.25rem;
+	margin: 2rem;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.dashboard-content {
+	animation: fadeIn 0.4s ease-in;
+}

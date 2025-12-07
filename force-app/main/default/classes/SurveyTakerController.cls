@@ -567,7 +567,7 @@ public with sharing class SurveyTakerController {
 
 			// Get survey data using the validated survey ID
 			SurveyData data = getSurveyData(validation.surveyId, null, null);
-			
+
 			// Build dynamic invitation header if event information is available
 			if (validation.eventTopic != null || validation.eventDate != null) {
 				String topic = validation.eventTopic != null ? validation.eventTopic : 'the training';
@@ -575,15 +575,55 @@ public with sharing class SurveyTakerController {
 				if (validation.eventDate != null) {
 					dateStr = ' on ' + validation.eventDate.format('MMMM d, yyyy');
 				}
-				data.invitationHeader = 'We value your feedback. Please take a moment to complete the evaluation survey for ' + topic + dateStr + '. If you\'ve already shared your thoughts at the end of the training thank you. We truly appreciate your input.';
+				data.invitationHeader =
+					'We value your feedback. Please take a moment to complete the evaluation survey for ' +
+					topic +
+					dateStr +
+					'. If you\'ve already shared your thoughts at the end of the training thank you. We truly appreciate your input.';
 			}
-			
+
 			return data;
 		} catch (AuraHandledException e) {
 			throw e;
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyTakerController:getSurveyDataByToken():' + e.getMessage());
 			throw new AuraHandledException('Error loading survey: ' + e.getMessage());
+		}
+	}
+
+	/**
+	 * Get survey responses for analytics dashboard
+	 * @param surveyId The survey ID
+	 * @return List of SurveyTaker__c records with related responses
+	 */
+	@AuraEnabled(cacheable=true)
+	public static List<SurveyTaker__c> getSurveyResponses(Id surveyId) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.SurveyTaker__c.fields.Id,
+				Schema.SurveyTaker__c.fields.Name,
+				Schema.SurveyTaker__c.fields.Survey__c,
+				Schema.SurveyTaker__c.fields.CreatedDate,
+				Schema.SurveyTaker__c.fields.Contact__c,
+				Schema.SurveyTaker__c.fields.Case__c,
+				Schema.SurveyTaker__c.fields.Anonymous__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.SurveyTaker__c.getSobjectType(), fields);
+
+			return [
+				SELECT Id, Name, Survey__c, CreatedDate, Contact__c, Case__c, Anonymous__c
+				FROM SurveyTaker__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+				ORDER BY CreatedDate DESC
+			];
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyTakerController:getSurveyResponses():' + e.getMessage());
+			throw new AuraHandledException('Error loading survey responses: ' + e.getMessage());
 		}
 	}
 }
