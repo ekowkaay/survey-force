@@ -36,7 +36,7 @@ private class SurveyInvitationController_Test {
 		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
 		System.runAs(u) {
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(null, null, null, null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(null, null, null, null, null, null, null);
 			Test.stopTest();
 
 			System.assertEquals(false, result.success, 'Should fail with null survey ID');
@@ -51,7 +51,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			Test.startTest();
-			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 5, null, null);
+			SurveyInvitationController.BulkInvitationResult result = SurveyInvitationController.createBulkInvitations(tu.surveyId, 5, null, null, null);
 			Test.stopTest();
 
 			System.assertEquals(true, result.success, 'Bulk creation should succeed');
@@ -76,7 +76,7 @@ private class SurveyInvitationController_Test {
 
 			Test.startTest();
 			// Test with invalid count
-			SurveyInvitationController.BulkInvitationResult result1 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 0, null, null);
+			SurveyInvitationController.BulkInvitationResult result1 = SurveyInvitationController.createBulkInvitations(tu.surveyId, 0, null, null, null);
 			System.assertEquals(false, result1.success, 'Should fail with count 0');
 
 			// Test with too many
@@ -93,7 +93,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 
 			Test.startTest();
 			SurveyInvitationController.ValidationResult result = SurveyInvitationController.validateInvitation(createResult.token);
@@ -167,7 +167,7 @@ private class SurveyInvitationController_Test {
 
 			// Create invitations
 			SurveyInvitationController.createInvitation(tu.surveyId, 'test1@example.com', 'User 1', null, null, null, null);
-			SurveyInvitationController.createInvitation(tu.surveyId, 'test2@example.com', 'User 2', null, null, null);
+			SurveyInvitationController.createInvitation(tu.surveyId, 'test2@example.com', 'User 2', null, null, null, null);
 
 			Test.startTest();
 			List<SurveyInvitationController.InvitationData> invitations = SurveyInvitationController.getInvitationsForSurvey(tu.surveyId);
@@ -211,7 +211,7 @@ private class SurveyInvitationController_Test {
 			insert settings;
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 			Test.stopTest();
 
 			// Verify expiration date is null

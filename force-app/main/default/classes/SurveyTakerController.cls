@@ -609,13 +609,12 @@ public with sharing class SurveyTakerController {
 				Schema.SurveyTaker__c.fields.Survey__c,
 				Schema.SurveyTaker__c.fields.CreatedDate,
 				Schema.SurveyTaker__c.fields.Contact__c,
-				Schema.SurveyTaker__c.fields.Case__c,
-				Schema.SurveyTaker__c.fields.Anonymous__c
+				Schema.SurveyTaker__c.fields.Case__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.SurveyTaker__c.getSobjectType(), fields);
 
 			return [
-				SELECT Id, Name, Survey__c, CreatedDate, Contact__c, Case__c, Anonymous__c
+				SELECT Id, Name, Survey__c, CreatedDate, Contact__c, Case__c
 				FROM SurveyTaker__c
 				WHERE Survey__c = :surveyId
 				WITH USER_MODE
