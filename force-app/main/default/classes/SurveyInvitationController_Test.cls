@@ -125,7 +125,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 
 			Test.startTest();
 			Boolean success = SurveyInvitationController.completeInvitation(createResult.token, tu.surveyTakerId);
@@ -147,7 +147,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create and complete invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 			SurveyInvitationController.completeInvitation(createResult.token, tu.surveyTakerId);
 
 			Test.startTest();
@@ -189,7 +189,7 @@ private class SurveyInvitationController_Test {
 			insert settings;
 
 			Test.startTest();
-			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null);
+			SurveyInvitationController.InvitationResult result = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 			Test.stopTest();
 
 			// Verify expiration date is set
@@ -227,7 +227,7 @@ private class SurveyInvitationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			// Create invitation
-			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null);
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, null, null, null, null, null, null);
 
 			// Manually set expiration date to past
 			SurveyInvitation__c invitation = [SELECT Id FROM SurveyInvitation__c WHERE Id = :createResult.invitationId];
