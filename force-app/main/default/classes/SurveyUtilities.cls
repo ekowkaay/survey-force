@@ -617,7 +617,80 @@ public with sharing class SurveyUtilities {
 	}
 
 	/**
+	 * @description Generate survey invitations in bulk with tokens
+	 * Optimized for bulk operations to avoid DML in loops
+	 * @param invitationRequests List of invitation requests with survey ID, related record ID, and survey type
+	 * @return Map<String, String> Map of key (surveyId + '_' + surveyType) to token-based URL
+	 */
+	public static Map<String, String> generateSurveyInvitationsInBulk(List<InvitationRequest> invitationRequests) {
+		Map<String, String> results = new Map<String, String>();
+		
+		try {
+			if (invitationRequests == null || invitationRequests.isEmpty()) {
+				return results;
+			}
+
+			List<SurveyInvitation__c> invitationsToInsert = new List<SurveyInvitation__c>();
+			Map<Integer, InvitationRequest> indexToRequestMap = new Map<Integer, InvitationRequest>();
+			
+			for (Integer i = 0; i < invitationRequests.size(); i++) {
+				InvitationRequest req = invitationRequests[i];
+				
+				if (req.surveyId == null) {
+					continue;
+				}
+
+				String token = generateUniqueToken();
+				
+				SurveyInvitation__c invitation = new SurveyInvitation__c();
+				invitation.Survey__c = req.surveyId;
+				invitation.Token__c = token;
+				invitation.Status__c = 'Pending';
+				invitation.ParticipantName__c = req.surveyType + ' Survey';
+				invitation.RelatedRecordId__c = req.relatedRecordId;
+				
+				invitationsToInsert.add(invitation);
+				indexToRequestMap.put(i, req);
+			}
+
+			// Bulk insert all invitations
+			if (!invitationsToInsert.isEmpty()) {
+				Database.insert(invitationsToInsert, AccessLevel.USER_MODE);
+
+				// Build results map
+				for (Integer i = 0; i < invitationsToInsert.size(); i++) {
+					SurveyInvitation__c invitation = invitationsToInsert[i];
+					InvitationRequest req = indexToRequestMap.get(i);
+					String key = req.relatedRecordId + '_' + req.surveyType;
+					results.put(key, buildSurveyUrlWithToken(invitation.Token__c));
+				}
+			}
+
+			return results;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyUtilities.generateSurveyInvitationsInBulk: ' + e.getMessage() + ' - ' + e.getStackTraceString());
+			return results;
+		}
+	}
+
+	/**
+	 * @description Wrapper class for bulk invitation requests
+	 */
+	public class InvitationRequest {
+		public Id surveyId { get; set; }
+		public Id relatedRecordId { get; set; }
+		public String surveyType { get; set; }
+
+		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType) {
+			this.surveyId = surveyId;
+			this.relatedRecordId = relatedRecordId;
+			this.surveyType = surveyType;
+		}
+	}
+
+	/**
 	 * @description Generate a single survey invitation with token for Customer/Trainer surveys
+	 * Note: For bulk operations, use generateSurveyInvitationsInBulk instead
 	 * @param surveyId The Survey ID
 	 * @param trainingRequestId The Training Request ID (for related record tracking)
 	 * @param surveyType The type of survey (Customer, Trainer, etc.)
