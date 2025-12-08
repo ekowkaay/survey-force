@@ -64,6 +64,7 @@ public with sharing class SurveyUtilities {
 
 	/**
 	 * @description Create a new survey from a template with detailed result
+	 * Delegates to bulkified method to avoid SOQL in loops
 	 * @param parentId The Training Request ID
 	 * @param surveyType Type of survey (Participant, Customer, Trainer)
 	 * @param lang Language of the survey (English, Spanish)
@@ -71,113 +72,19 @@ public with sharing class SurveyUtilities {
 	 * @return SurveyCreationResult with details of the operation
 	 */
 	public static SurveyCreationResult createSurveyWithResult(Id parentId, String surveyType, String lang, String surveyName) {
-		SurveyCreationResult result = new SurveyCreationResult();
-
-		try {
-			// Validate inputs
-			if (parentId == null) {
-				result.message = 'Training Request ID is required';
-				return result;
-			}
-
-			if (String.isBlank(surveyName)) {
-				result.message = 'Survey name is required';
-				return result;
-			}
-
-			// Get survey template name
-			String surveyTemplateName = getSurveyTemplateName(surveyType, lang);
-			if (String.isBlank(surveyTemplateName)) {
-				result.message = 'Invalid survey type or language combination';
-				return result;
-			}
-
-			// Query the survey template
-			List<Survey__c> surveyTemplates = [
-				SELECT Id, Name, Thank_You_Text__c, Thank_You_Link__c, Survey_Header__c
-				FROM Survey__c
-				WHERE Name = :surveyTemplateName
-				WITH USER_MODE
-				LIMIT 1
-			];
-
-			if (surveyTemplates.isEmpty()) {
-				result.message = 'Survey template not found: ' + surveyTemplateName;
-				return result;
-			}
-
-			// Query the training request
-			List<Training_Request__c> trainingRequests = [
-				SELECT Id, Training_Type__c
-				FROM Training_Request__c
-				WHERE Id = :parentId
-				WITH USER_MODE
-				LIMIT 1
-			];
-
-			if (trainingRequests.isEmpty()) {
-				result.message = 'Training Request not found';
-				return result;
-			}
-
-			Training_Request__c tReq = trainingRequests[0];
-			Survey__c template = surveyTemplates[0];
-
-			// Get questions for the template
-			List<Survey_Question__c> templateQuestions = [
-				SELECT
-					Id,
-					Name,
-					Question__c,
-					Type__c,
-					Choices__c,
-					OrderNumber__c,
-					Required__c
-				FROM Survey_Question__c
-				WHERE Survey__c = :template.Id
-				WITH USER_MODE
-				ORDER BY OrderNumber__c ASC
-			];
-
-			// Get site URL
-			String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
-			if (String.isBlank(siteURL)) {
-				result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
-				return result;
-			}
-
-			// Clone the survey
-			Survey__c newSurvey = template.clone(false, true, false, false);
-			newSurvey.Name = surveyName;
-
-			Database.insert(newSurvey, AccessLevel.USER_MODE);
-
-			// Clone all questions
-			List<Survey_Question__c> newQuestions = new List<Survey_Question__c>();
-			for (Survey_Question__c q : templateQuestions) {
-				Survey_Question__c newQ = q.clone(false, true, false, false);
-				newQ.Survey__c = newSurvey.Id;
-				newQuestions.add(newQ);
-			}
-
-			if (!newQuestions.isEmpty()) {
-				Database.insert(newQuestions, AccessLevel.USER_MODE);
-			}
-
-			// Build survey URL
-			String surveyURL = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
-
-			result.success = true;
-			result.message = 'Survey created successfully';
-			result.surveyId = newSurvey.Id;
-			result.surveyUrl = surveyURL;
-
-			return result;
-		} catch (Exception e) {
-			SurveyForceUtil.log('SurveyUtilities.createSurveyWithResult: ' + e.getMessage() + ' - ' + e.getStackTraceString());
-			result.message = 'Error creating survey: ' + e.getMessage();
-			return result;
+		// Use bulkified method for consistency and to avoid LIMIT 1 queries
+		SurveyCreationRequest request = new SurveyCreationRequest(parentId, surveyType, lang, surveyName);
+		Map<String, SurveyCreationResult> results = createSurveysInBulk(new List<SurveyCreationRequest>{ request });
+		
+		String key = parentId + '_' + surveyType;
+		if (results.containsKey(key)) {
+			return results.get(key);
 		}
+		
+		// Fallback if key not found
+		SurveyCreationResult result = new SurveyCreationResult();
+		result.message = 'Survey creation failed';
+		return result;
 	}
 
 	/**
@@ -452,26 +359,6 @@ public with sharing class SurveyUtilities {
 				WITH USER_MODE
 			]);
 
-			// Verify survey exists
-			List<Survey__c> surveys = [
-				SELECT Id, Name
-				FROM Survey__c
-				WHERE Id = :surveyId
-				WITH USER_MODE
-				LIMIT 1
-			];
-
-			if (surveys.isEmpty()) {
-				for (Id participantId : participantIds) {
-					ParticipantSurveyResult result = new ParticipantSurveyResult();
-					result.participantId = participantId;
-					result.success = false;
-					result.message = 'Survey not found';
-					results.put(participantId, result);
-				}
-				return results;
-			}
-
 			// Bulk create invitations
 			List<SurveyInvitation__c> invitations = new List<SurveyInvitation__c>();
 			Map<String, Id> tokenToParticipantMap = new Map<String, Id>();
@@ -491,7 +378,7 @@ public with sharing class SurveyUtilities {
 				tokenToParticipantMap.put(token, participant.Id);
 			}
 
-			// Insert all invitations at once
+			// Insert all invitations at once (will fail if survey doesn't exist due to lookup validation)
 			if (!invitations.isEmpty()) {
 				Database.insert(invitations, AccessLevel.USER_MODE);
 
