@@ -85,67 +85,110 @@ public with sharing class TrainingRequestTriggerHandler {
 	/**
 	 * @description Create surveys for training requests
 	 * Creates participant, customer, and trainer surveys automatically with token-based invitations
+	 * Uses bulkified survey creation to avoid SOQL in loops
 	 * @param trainingRequests List of Training Request records
 	 */
 	private void createSurveysForTrainingRequests(List<Training_Request__c> trainingRequests) {
 		try {
-			List<Training_Request__c> requestsToUpdate = new List<Training_Request__c>();
+			// Build bulk survey creation requests
+			List<SurveyUtilities.SurveyCreationRequest> surveyRequests = new List<SurveyUtilities.SurveyCreationRequest>();
+			Map<Id, List<String>> trainingRequestToSurveyTypes = new Map<Id, List<String>>();
 
 			for (Training_Request__c tr : trainingRequests) {
-				Training_Request__c trToUpdate = new Training_Request__c();
-				trToUpdate.Id = tr.Id;
-				Boolean hasUpdates = false;
+				List<String> surveyTypes = new List<String>();
 
 				// Create Participant Survey
 				if (String.isBlank(tr.Participant_Survey__c)) {
-					String participantSurveyUrl = createSurveyWithTokenForRequest(
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
 						tr.Id,
 						SURVEY_TYPE_PARTICIPANT,
 						DEFAULT_LANGUAGE,
 						buildSurveyName(tr.Name, SURVEY_TYPE_PARTICIPANT)
-					);
-					if (participantSurveyUrl != null) {
-						trToUpdate.Participant_Survey__c = participantSurveyUrl;
-						hasUpdates = true;
-					}
+					));
+					surveyTypes.add(SURVEY_TYPE_PARTICIPANT);
 				}
 
-				// Create Customer Survey with token-based invitation
+				// Create Customer Survey
 				if (String.isBlank(tr.Customer_Survey__c)) {
-					String customerSurveyUrl = createSurveyWithTokenForRequest(
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
 						tr.Id,
 						SURVEY_TYPE_CUSTOMER,
 						DEFAULT_LANGUAGE,
 						buildSurveyName(tr.Name, SURVEY_TYPE_CUSTOMER)
-					);
-					if (customerSurveyUrl != null) {
-						trToUpdate.Customer_Survey__c = customerSurveyUrl;
-						hasUpdates = true;
-					}
+					));
+					surveyTypes.add(SURVEY_TYPE_CUSTOMER);
 				}
 
-				// Create Trainer Survey with token-based invitation
+				// Create Trainer Survey
 				if (String.isBlank(tr.Trainer_Survey__c)) {
-					String trainerSurveyUrl = createSurveyWithTokenForRequest(
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
 						tr.Id,
 						SURVEY_TYPE_TRAINER,
 						DEFAULT_LANGUAGE,
 						buildSurveyName(tr.Name, SURVEY_TYPE_TRAINER)
-					);
-					if (trainerSurveyUrl != null) {
-						trToUpdate.Trainer_Survey__c = trainerSurveyUrl;
-						hasUpdates = true;
-					}
+					));
+					surveyTypes.add(SURVEY_TYPE_TRAINER);
 				}
 
-				if (hasUpdates) {
-					requestsToUpdate.add(trToUpdate);
+				if (!surveyTypes.isEmpty()) {
+					trainingRequestToSurveyTypes.put(tr.Id, surveyTypes);
 				}
 			}
 
-			// Update training requests with survey URLs
-			if (!requestsToUpdate.isEmpty()) {
-				Database.update(requestsToUpdate, AccessLevel.USER_MODE);
+			// Bulk create all surveys
+			if (!surveyRequests.isEmpty()) {
+				Map<String, SurveyUtilities.SurveyCreationResult> surveyResults = SurveyUtilities.createSurveysInBulk(surveyRequests);
+
+				// Generate token-based invitations for all created surveys
+				Map<String, String> surveyTokenUrls = new Map<String, String>();
+				for (String key : surveyResults.keySet()) {
+					SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
+					if (result.success && result.surveyId != null) {
+						String tokenUrl = SurveyUtilities.generateSingleSurveyInvitation(
+							result.surveyId,
+							result.sourceRecordId,
+							key.substringAfter('_')
+						);
+						if (tokenUrl != null) {
+							surveyTokenUrls.put(key, tokenUrl);
+						}
+					}
+				}
+
+				// Update training requests with token-based URLs
+				List<Training_Request__c> requestsToUpdate = new List<Training_Request__c>();
+				for (Id trId : trainingRequestToSurveyTypes.keySet()) {
+					Training_Request__c trToUpdate = new Training_Request__c();
+					trToUpdate.Id = trId;
+					Boolean hasUpdates = false;
+
+					for (String surveyType : trainingRequestToSurveyTypes.get(trId)) {
+						String key = trId + '_' + surveyType;
+						String tokenUrl = surveyTokenUrls.get(key);
+
+						if (tokenUrl != null) {
+							if (surveyType == SURVEY_TYPE_PARTICIPANT) {
+								trToUpdate.Participant_Survey__c = tokenUrl;
+								hasUpdates = true;
+							} else if (surveyType == SURVEY_TYPE_CUSTOMER) {
+								trToUpdate.Customer_Survey__c = tokenUrl;
+								hasUpdates = true;
+							} else if (surveyType == SURVEY_TYPE_TRAINER) {
+								trToUpdate.Trainer_Survey__c = tokenUrl;
+								hasUpdates = true;
+							}
+						}
+					}
+
+					if (hasUpdates) {
+						requestsToUpdate.add(trToUpdate);
+					}
+				}
+
+				// Update training requests with survey URLs
+				if (!requestsToUpdate.isEmpty()) {
+					Database.update(requestsToUpdate, AccessLevel.USER_MODE);
+				}
 			}
 		} catch (Exception e) {
 			SurveyForceUtil.log(
@@ -154,53 +197,6 @@ public with sharing class TrainingRequestTriggerHandler {
 				' - ' +
 				e.getStackTraceString()
 			);
-		}
-	}
-
-	/**
-	 * @description Create a survey for a training request and generate a token-based invitation
-	 * @param trainingRequestId The training request ID
-	 * @param surveyType The type of survey (Participant, Customer, Trainer)
-	 * @param language The language for the survey
-	 * @param surveyName The name for the survey
-	 * @return String The token-based survey URL or null if creation failed
-	 */
-	private String createSurveyWithTokenForRequest(Id trainingRequestId, String surveyType, String language, String surveyName) {
-		try {
-			// First create the survey
-			SurveyUtilities.SurveyCreationResult result = SurveyUtilities.createSurveyWithResult(
-				trainingRequestId,
-				surveyType,
-				language,
-				surveyName
-			);
-
-			if (!result.success) {
-				SurveyForceUtil.log(
-					'TrainingRequestTriggerHandler.createSurveyWithTokenForRequest: Failed to create ' +
-					surveyType +
-					' survey - ' +
-					result.message
-				);
-				return null;
-			}
-
-			// Now create a token-based invitation for this survey
-			String tokenUrl = SurveyUtilities.generateSingleSurveyInvitation(
-				result.surveyId,
-				trainingRequestId,
-				surveyType
-			);
-
-			return tokenUrl;
-		} catch (Exception e) {
-			SurveyForceUtil.log(
-				'TrainingRequestTriggerHandler.createSurveyWithTokenForRequest: ' +
-				e.getMessage() +
-				' for ' +
-				surveyType
-			);
-			return null;
 		}
 	}
 

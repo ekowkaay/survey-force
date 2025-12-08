@@ -181,6 +181,205 @@ public with sharing class SurveyUtilities {
 	}
 
 	/**
+	 * @description Bulk create surveys for multiple training requests
+	 * Optimized to avoid SOQL in loops and reduce governor limit usage
+	 * @param requests List of survey creation requests with training request ID, survey type, language, and name
+	 * @return Map<String, SurveyCreationResult> Map of unique key (trainingRequestId + surveyType) to result
+	 */
+	public static Map<String, SurveyCreationResult> createSurveysInBulk(List<SurveyCreationRequest> requests) {
+		Map<String, SurveyCreationResult> results = new Map<String, SurveyCreationResult>();
+		
+		if (requests == null || requests.isEmpty()) {
+			return results;
+		}
+
+		try {
+			// Collect all template names and training request IDs
+			Set<String> templateNames = new Set<String>();
+			Set<Id> trainingRequestIds = new Set<Id>();
+			
+			for (SurveyCreationRequest req : requests) {
+				String templateName = getSurveyTemplateName(req.surveyType, req.language);
+				if (String.isNotBlank(templateName)) {
+					templateNames.add(templateName);
+				}
+				if (req.trainingRequestId != null) {
+					trainingRequestIds.add(req.trainingRequestId);
+				}
+			}
+
+			// Single SOQL query for all templates
+			Map<String, Survey__c> templateMap = new Map<String, Survey__c>();
+			for (Survey__c template : [
+				SELECT Id, Name, Thank_You_Text__c, Thank_You_Link__c, Survey_Header__c
+				FROM Survey__c
+				WHERE Name IN :templateNames
+				WITH USER_MODE
+			]) {
+				templateMap.put(template.Name, template);
+			}
+
+			// Single SOQL query for all training requests
+			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>([
+				SELECT Id, Training_Type__c
+				FROM Training_Request__c
+				WHERE Id IN :trainingRequestIds
+				WITH USER_MODE
+			]);
+
+			// Collect all template IDs for questions query
+			Set<Id> templateIds = new Set<Id>();
+			for (Survey__c template : templateMap.values()) {
+				templateIds.add(template.Id);
+			}
+
+			// Single SOQL query for all template questions
+			Map<Id, List<Survey_Question__c>> templateQuestionsMap = new Map<Id, List<Survey_Question__c>>();
+			for (Survey_Question__c question : [
+				SELECT Id, Name, Question__c, Type__c, Choices__c, OrderNumber__c, Required__c, Survey__c
+				FROM Survey_Question__c
+				WHERE Survey__c IN :templateIds
+				WITH USER_MODE
+				ORDER BY Survey__c, OrderNumber__c ASC
+			]) {
+				if (!templateQuestionsMap.containsKey(question.Survey__c)) {
+					templateQuestionsMap.put(question.Survey__c, new List<Survey_Question__c>());
+				}
+				templateQuestionsMap.get(question.Survey__c).add(question);
+			}
+
+			// Process each request
+			List<Survey__c> surveysToInsert = new List<Survey__c>();
+			Map<Integer, SurveyCreationRequest> indexToRequestMap = new Map<Integer, SurveyCreationRequest>();
+			
+			for (Integer i = 0; i < requests.size(); i++) {
+				SurveyCreationRequest req = requests[i];
+				String key = req.trainingRequestId + '_' + req.surveyType;
+				SurveyCreationResult result = new SurveyCreationResult();
+				result.sourceRecordId = req.trainingRequestId;
+
+				// Validate request
+				if (req.trainingRequestId == null) {
+					result.message = 'Training Request ID is required';
+					results.put(key, result);
+					continue;
+				}
+
+				if (String.isBlank(req.surveyName)) {
+					result.message = 'Survey name is required';
+					results.put(key, result);
+					continue;
+				}
+
+				String templateName = getSurveyTemplateName(req.surveyType, req.language);
+				if (String.isBlank(templateName)) {
+					result.message = 'Invalid survey type or language combination';
+					results.put(key, result);
+					continue;
+				}
+
+				if (!templateMap.containsKey(templateName)) {
+					result.message = 'Survey template not found: ' + templateName;
+					results.put(key, result);
+					continue;
+				}
+
+				if (!trainingRequestMap.containsKey(req.trainingRequestId)) {
+					result.message = 'Training Request not found';
+					results.put(key, result);
+					continue;
+				}
+
+				// Clone survey
+				Survey__c template = templateMap.get(templateName);
+				Survey__c newSurvey = template.clone(false, true, false, false);
+				newSurvey.Name = req.surveyName;
+				
+				surveysToInsert.add(newSurvey);
+				indexToRequestMap.put(i, req);
+				results.put(key, result);
+			}
+
+			// Bulk insert surveys
+			if (!surveysToInsert.isEmpty()) {
+				Database.insert(surveysToInsert, AccessLevel.USER_MODE);
+
+				// Clone questions for each survey
+				List<Survey_Question__c> allQuestionsToInsert = new List<Survey_Question__c>();
+				
+				for (Integer i = 0; i < surveysToInsert.size(); i++) {
+					Survey__c newSurvey = surveysToInsert[i];
+					SurveyCreationRequest req = indexToRequestMap.get(i);
+					String key = req.trainingRequestId + '_' + req.surveyType;
+					String templateName = getSurveyTemplateName(req.surveyType, req.language);
+					Survey__c template = templateMap.get(templateName);
+					Training_Request__c tReq = trainingRequestMap.get(req.trainingRequestId);
+
+					// Clone questions for this survey
+					List<Survey_Question__c> templateQuestions = templateQuestionsMap.get(template.Id);
+					if (templateQuestions != null) {
+						for (Survey_Question__c q : templateQuestions) {
+							Survey_Question__c newQ = q.clone(false, true, false, false);
+							newQ.Survey__c = newSurvey.Id;
+							allQuestionsToInsert.add(newQ);
+						}
+					}
+
+					// Build result
+					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
+					SurveyCreationResult result = results.get(key);
+					
+					if (String.isBlank(siteURL)) {
+						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
+					} else {
+						result.success = true;
+						result.message = 'Survey created successfully';
+						result.surveyId = newSurvey.Id;
+						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+					}
+				}
+
+				// Bulk insert all questions
+				if (!allQuestionsToInsert.isEmpty()) {
+					Database.insert(allQuestionsToInsert, AccessLevel.USER_MODE);
+				}
+			}
+
+			return results;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyUtilities.createSurveysInBulk: ' + e.getMessage() + ' - ' + e.getStackTraceString());
+			// Return error results for all requests
+			for (SurveyCreationRequest req : requests) {
+				String key = req.trainingRequestId + '_' + req.surveyType;
+				if (!results.containsKey(key)) {
+					SurveyCreationResult result = new SurveyCreationResult();
+					result.sourceRecordId = req.trainingRequestId;
+					result.message = 'Error: ' + e.getMessage();
+					results.put(key, result);
+				}
+			}
+			return results;
+		}
+	}
+
+	/**
+	 * @description Wrapper class for bulk survey creation requests
+	 */
+	public class SurveyCreationRequest {
+		public Id trainingRequestId { get; set; }
+		public String surveyType { get; set; }
+		public String language { get; set; }
+		public String surveyName { get; set; }
+
+		public SurveyCreationRequest(Id trainingRequestId, String surveyType, String language, String surveyName) {
+			this.trainingRequestId = trainingRequestId;
+			this.surveyType = surveyType;
+			this.language = language;
+			this.surveyName = surveyName;
+		}
+	}
+
+	/**
 	 * @description Get the survey template name based on survey type and language
 	 * @param surveyType Type of survey (Participant, Customer, Trainer)
 	 * @param lang Language (English, Spanish)
