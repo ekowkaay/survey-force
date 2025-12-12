@@ -93,12 +93,14 @@ export default class SurveyTaker extends LightningElement {
 
 	@track surveyName = '';
 	@track surveyHeader = '';
-	@track invitationHeader = '';
-	@track showSurveyName = true;
-	@track thankYouText = '';
-	@track questions = [];
-	@track responses = {};
-	@track isInternal = true;
+        @track invitationHeader = '';
+        @track showSurveyName = true;
+        @track thankYouText = '';
+        @track eventTopic = '';
+        @track eventDate = '';
+        @track questions = [];
+        @track responses = {};
+        @track isInternal = true;
 	@track anonymousOption = 'User';
 	@track anonymousValue = 'named';
 	@track canChooseAnonymous = false;
@@ -116,13 +118,61 @@ export default class SurveyTaker extends LightningElement {
 		return visible[this.currentQuestionIndex] || null;
 	}
 
-	get currentQuestionNumber() {
-		return this.currentQuestionIndex + 1;
-	}
+        get currentQuestionNumber() {
+                return this.currentQuestionIndex + 1;
+        }
 
-	get totalQuestions() {
-		return this.visibleQuestions.length;
-	}
+        get totalQuestions() {
+                return this.visibleQuestions.length;
+        }
+
+        get hasQuestions() {
+                return this.totalQuestions > 0;
+        }
+
+        get headerTitle() {
+                if (this.showSurveyName && this.surveyName) {
+                        return this.surveyName;
+                }
+                return 'SurveyApp';
+        }
+
+        get introHeading() {
+                return 'We value your feedback!!!';
+        }
+
+        get introSubheading() {
+                if (this.eventTopic || this.eventDate) {
+                        const topic = this.eventTopic || this.surveyName || 'the training';
+                        const dateText = this.eventDate ? ` on ${this.eventDate}` : '';
+                        return `Please take a moment to complete the evaluation survey for ${topic}${dateText}.`;
+                }
+
+                if (this.invitationHeader) {
+                        return this.invitationHeader;
+                }
+
+                if (this.surveyHeader) {
+                        return this.surveyHeader;
+                }
+
+                const fallbackTopic = this.surveyName || 'this training';
+                return `Please take a moment to complete the evaluation survey for ${fallbackTopic}.`;
+        }
+
+        get questionHelpText() {
+                if (this.currentQuestion) {
+                        if (this.currentQuestion.helpText) {
+                                return this.currentQuestion.helpText;
+                        }
+
+                        if (this.currentQuestion.description) {
+                                return this.currentQuestion.description;
+                        }
+                }
+
+                return 'Please share your perspective with the options below.';
+        }
 
 	get progressPercentage() {
 		if (this.totalQuestions === 0) return 0;
@@ -152,10 +202,26 @@ export default class SurveyTaker extends LightningElement {
 		return this.currentQuestion.questionType === 'Multi-Select--Vertical';
 	}
 
-	get isHorizontalLayout() {
-		if (!this.currentQuestion) return false;
-		return this.currentQuestion.questionType === 'Single Select--Horizontal';
-	}
+        get isHorizontalLayout() {
+                if (!this.currentQuestion) return false;
+                return this.currentQuestion.questionType === 'Single Select--Horizontal';
+        }
+
+        get scaleChoices() {
+                if (!this.currentQuestion || !this.currentQuestion.choices) {
+                        return [];
+                }
+
+                const total = this.currentQuestion.choices.length;
+                const selected = this.currentResponse;
+
+                return this.currentQuestion.choices.map((choice, index) => ({
+                        ...choice,
+                        buttonText: choice.label || choice.value,
+                        showLabel: !!choice.label && (index === 0 || index === total - 1),
+                        buttonClass: selected === choice.value ? 'scaleButton active' : 'scaleButton'
+                }));
+        }
 
 	get radioGroupClass() {
 		return this.isHorizontalLayout ? 'radio-horizontal' : 'radio-vertical';
@@ -212,13 +278,15 @@ export default class SurveyTaker extends LightningElement {
 				this._loadedRecordId = recordIdToLoad;
 				this._loadedToken = tokenToLoad;
 
-				if (result && result.survey) {
-					this.surveyName = result.survey.Name;
-					this.surveyHeader = result.survey.Survey_Header__c || '';
-					this.invitationHeader = result.invitationHeader || '';
-					this.showSurveyName = !result.survey.Hide_Survey_Name__c;
-					this.thankYouText = result.survey.Thank_You_Text__c || 'Your survey response has been recorded. Thank you!';
-					this.questions = result.questions || [];
+                                if (result && result.survey) {
+                                        this.surveyName = result.survey.Name;
+                                        this.surveyHeader = result.survey.Survey_Header__c || '';
+                                        this.invitationHeader = result.invitationHeader || '';
+                                        this.eventTopic = result.eventTopic || '';
+                                        this.eventDate = result.eventDate || '';
+                                        this.showSurveyName = !result.survey.Hide_Survey_Name__c;
+                                        this.thankYouText = result.survey.Thank_You_Text__c || 'Your survey response has been recorded. Thank you!';
+                                        this.questions = result.questions || [];
 					this.isInternal = result.isInternal;
 					this.anonymousOption = result.anonymousOption;
 
@@ -263,18 +331,31 @@ export default class SurveyTaker extends LightningElement {
 		this.showAnonymousSelection = false;
 	}
 
-	handleCurrentResponseChange(event) {
-		if (!this.currentQuestion) return;
+        handleCurrentResponseChange(event) {
+                if (!this.currentQuestion) return;
 
-		const value = event.detail.value;
-		const questionId = this.currentQuestion.id;
+                const value = event.detail.value;
+                const questionId = this.currentQuestion.id;
 
 		if (!this.responses[questionId]) {
 			this.responses[questionId] = { questionId, response: '', responses: null };
-		}
+                }
 
-		this.responses[questionId].response = value;
-	}
+                this.responses[questionId].response = value;
+        }
+
+        handleScaleSelection(event) {
+                if (!this.currentQuestion) return;
+
+                const value = event.currentTarget.dataset.value;
+                const questionId = this.currentQuestion.id;
+
+                if (!this.responses[questionId]) {
+                        this.responses[questionId] = { questionId, response: '', responses: null };
+                }
+
+                this.responses[questionId].response = value;
+        }
 
 	handleCheckboxChange(event) {
 		if (!this.currentQuestion) return;

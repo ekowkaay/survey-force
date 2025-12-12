@@ -6,18 +6,22 @@ public with sharing class SurveyTakerController {
 	/**
 	 * Survey data wrapper for LWC
 	 */
-	public class SurveyData {
-		@AuraEnabled
-		public Survey__c survey { get; set; }
-		@AuraEnabled
-		public List<QuestionData> questions { get; set; }
-		@AuraEnabled
-		public Boolean isInternal { get; set; }
-		@AuraEnabled
-		public String anonymousOption { get; set; }
-		@AuraEnabled
-		public String invitationHeader { get; set; }
-	}
+        public class SurveyData {
+                @AuraEnabled
+                public Survey__c survey { get; set; }
+                @AuraEnabled
+                public List<QuestionData> questions { get; set; }
+                @AuraEnabled
+                public Boolean isInternal { get; set; }
+                @AuraEnabled
+                public String anonymousOption { get; set; }
+                @AuraEnabled
+                public String invitationHeader { get; set; }
+                @AuraEnabled
+                public String eventTopic { get; set; }
+                @AuraEnabled
+                public String eventDate { get; set; }
+        }
 
 	/**
 	 * Question data wrapper for LWC
@@ -122,6 +126,11 @@ public with sharing class SurveyTakerController {
 			}
 
 			result.survey = survey;
+
+			// Default invitation header and event metadata
+			result.invitationHeader = survey.Survey_Header__c;
+			result.eventTopic = null;
+			result.eventDate = null;
 
 			// Set anonymous option
 			result.anonymousOption = (System.UserInfo.getUserType() == 'Guest' || survey.All_Responses_Anonymous__c) ? 'Anonymous' : 'User';
@@ -568,19 +577,21 @@ public with sharing class SurveyTakerController {
 			// Get survey data using the validated survey ID
 			SurveyData data = getSurveyData(validation.surveyId, null, null);
 
-			// Build dynamic invitation header if event information is available
-			if (validation.eventTopic != null || validation.eventDate != null) {
-				String topic = validation.eventTopic != null ? validation.eventTopic : 'the training';
-				String dateStr = '';
-				if (validation.eventDate != null) {
-					dateStr = ' on ' + validation.eventDate.format('MMMM d, yyyy');
-				}
-				data.invitationHeader =
-					'We value your feedback. Please take a moment to complete the evaluation survey for ' +
-					topic +
-					dateStr +
-					'. If you\'ve already shared your thoughts at the end of the training thank you. We truly appreciate your input.';
-			}
+                        // Build dynamic invitation header if event information is available
+                        if (validation.eventTopic != null || validation.eventDate != null) {
+                                String topic = validation.eventTopic != null ? validation.eventTopic : 'the training';
+                                String dateStr = '';
+                                if (validation.eventDate != null) {
+                                        dateStr = ' on ' + validation.eventDate.format('MMMM d, yyyy');
+                                }
+                                data.eventTopic = validation.eventTopic;
+                                data.eventDate = validation.eventDate != null ? validation.eventDate.format('MMMM d, yyyy') : null;
+                                data.invitationHeader =
+                                        'We value your feedback. Please take a moment to complete the evaluation survey for ' +
+                                        topic +
+                                        dateStr +
+                                        '. If you\'ve already shared your thoughts at the end of the training thank you. We truly appreciate your input.';
+                        }
 
 			return data;
 		} catch (AuraHandledException e) {
