@@ -8,16 +8,7 @@ private class TrainingRequestTriggerHandler_Test {
 	 */
 	@TestSetup
 	static void setupTestData() {
-		// Create custom settings for site URLs
-		SiteURL__c eapTraining = new SiteURL__c();
-		eapTraining.Name = 'EAP Training';
-		eapTraining.URL__c = 'https://example.force.com';
-		insert eapTraining;
-
-		SiteURL__c resellerTraining = new SiteURL__c();
-		resellerTraining.Name = 'Reseller Training';
-		resellerTraining.URL__c = 'https://reseller.force.com';
-		insert resellerTraining;
+		// Custom Metadata Types (SiteURL__mdt) are deployed and automatically available in tests
 
 		// Create survey settings
 		SurveySettings__c settings = new SurveySettings__c();
