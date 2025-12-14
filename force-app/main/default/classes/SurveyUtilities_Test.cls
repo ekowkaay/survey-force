@@ -73,7 +73,6 @@ private class SurveyUtilities_Test {
 
 		// Create Training Request
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Test Training Request';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 	}
