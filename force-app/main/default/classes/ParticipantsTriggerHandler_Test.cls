@@ -8,11 +8,8 @@ private class ParticipantsTriggerHandler_Test {
 	 */
 	@TestSetup
 	static void setupTestData() {
-		// Create custom settings for site URLs
-		SiteURL__c eapTraining = new SiteURL__c();
-		eapTraining.Name = 'EAP Training';
-		eapTraining.URL__c = 'https://example.force.com';
-		insert eapTraining;
+		// Note: Custom metadata (SiteURL__mdt) cannot be inserted in tests,
+		// so tests will work without site URL configuration
 
 		// Create survey settings
 		SurveySettings__c settings = new SurveySettings__c();
@@ -37,10 +34,8 @@ private class ParticipantsTriggerHandler_Test {
 		questions.add(q1);
 		insert questions;
 
-		// Create Training Request
+		// Create Training Request (Name field is auto-number, cannot be set)
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Test Training Request';
-		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		// Create main survey for the training request

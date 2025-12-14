@@ -19,10 +19,9 @@ public with sharing class SurveyUtilities {
 		SPANISH
 	}
 
-	/** Training type constants */
-	private static final String TRAINING_TYPE_EAP = 'EAP Training';
-	private static final String SITE_URL_EAP_TRAINING = 'EAP Training';
-	private static final String SITE_URL_RESELLER_TRAINING = 'Reseller Training';
+	/** Site URL constants for custom metadata DeveloperNames */
+	private static final String SITE_URL_EAP_TRAINING = 'EAP_Training';
+	private static final String SITE_URL_RESELLER_TRAINING = 'Reseller_Training';
 
 	/**
 	 * @description Wrapper class for survey creation results
@@ -126,9 +125,9 @@ public with sharing class SurveyUtilities {
 				templateMap.put(template.Name, template);
 			}
 
-			// Single SOQL query for all training requests
+			// Single SOQL query for all training requests (for validation)
 			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>([
-				SELECT Id, Training_Type__c
+				SELECT Id
 				FROM Training_Request__c
 				WHERE Id IN :trainingRequestIds
 				WITH USER_MODE
@@ -220,7 +219,6 @@ public with sharing class SurveyUtilities {
 					String key = req.trainingRequestId + '_' + req.surveyType;
 					String templateName = getSurveyTemplateName(req.surveyType, req.language);
 					Survey__c template = templateMap.get(templateName);
-					Training_Request__c tReq = trainingRequestMap.get(req.trainingRequestId);
 
 					// Clone questions for this survey
 					List<Survey_Question__c> templateQuestions = templateQuestionsMap.get(template.Id);
@@ -233,11 +231,11 @@ public with sharing class SurveyUtilities {
 					}
 
 					// Build result
-					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
+					String siteURL = getDefaultSiteURL();
 					SurveyCreationResult result = results.get(key);
 					
 					if (String.isBlank(siteURL)) {
-						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
+						result.message = 'Site URL not configured';
 					} else {
 						result.success = true;
 						result.message = 'Survey created successfully';
@@ -316,25 +314,24 @@ public with sharing class SurveyUtilities {
 	}
 
 	/**
-	 * @description Get the site URL for a given training type
-	 * @param trainingType The training type
+	 * @description Get the default site URL from custom metadata
 	 * @return String Site URL or null if not found
 	 */
-	private static String getSiteURLForTrainingType(String trainingType) {
-		Map<String, SiteURL__c> csSite = SiteURL__c.getAll();
+	private static String getDefaultSiteURL() {
+		// Query custom metadata for site URLs
+		List<SiteURL__mdt> siteURLs = [
+			SELECT URL__c 
+			FROM SiteURL__mdt 
+			WHERE DeveloperName = :SITE_URL_EAP_TRAINING
+			OR DeveloperName = :SITE_URL_RESELLER_TRAINING
+			LIMIT 1
+		];
 
-		if (csSite == null || csSite.isEmpty()) {
-			return null;
+		if (!siteURLs.isEmpty() && String.isNotBlank(siteURLs[0].URL__c)) {
+			return siteURLs[0].URL__c;
 		}
 
-		String siteURL = null;
-		if (trainingType == TRAINING_TYPE_EAP && csSite.containsKey(SITE_URL_EAP_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_EAP_TRAINING).URL__c;
-		} else if (csSite.containsKey(SITE_URL_RESELLER_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_RESELLER_TRAINING).URL__c;
-		}
-
-		return siteURL;
+		return null;
 	}
 
 	/**
