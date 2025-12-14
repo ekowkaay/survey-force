@@ -8,8 +8,16 @@ private class TrainingRequestTriggerHandler_Test {
 	 */
 	@TestSetup
 	static void setupTestData() {
-		// Note: Custom metadata (SiteURL__mdt) cannot be inserted in tests,
-		// so tests will work without site URL configuration
+		// Create custom settings for site URLs
+		SiteURL__c eapTraining = new SiteURL__c();
+		eapTraining.Name = 'EAP Training';
+		eapTraining.URL__c = 'https://example.force.com';
+		insert eapTraining;
+
+		SiteURL__c resellerTraining = new SiteURL__c();
+		resellerTraining.Name = 'Reseller Training';
+		resellerTraining.URL__c = 'https://reseller.force.com';
+		insert resellerTraining;
 
 		// Create survey settings
 		SurveySettings__c settings = new SurveySettings__c();
@@ -71,6 +79,8 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create a new training request
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Test Training Request';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.stopTest();
@@ -170,6 +180,8 @@ private class TrainingRequestTriggerHandler_Test {
 		List<Training_Request__c> trainingRequests = new List<Training_Request__c>();
 		for (Integer i = 0; i < 10; i++) {
 			Training_Request__c tr = new Training_Request__c();
+			tr.Name = 'Bulk Training Request ' + i;
+			tr.Training_Type__c = 'EAP Training';
 			trainingRequests.add(tr);
 		}
 		insert trainingRequests;
@@ -229,6 +241,8 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create training request with existing survey URL
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Training with Existing Survey';
+		tr.Training_Type__c = 'EAP Training';
 		tr.Participant_Survey__c = existingUrl; // Already has participant survey
 		insert tr;
 
@@ -266,11 +280,15 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create training request
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Recursion Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		// Update the training request multiple times
+		tr.Name = 'Updated Name 1';
 		update tr;
 
+		tr.Name = 'Updated Name 2';
 		update tr;
 
 		Test.stopTest();
@@ -292,6 +310,8 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Before Insert Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.stopTest();
@@ -312,11 +332,14 @@ private class TrainingRequestTriggerHandler_Test {
 	static void testAfterUpdate() {
 		// Create training request
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Update Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.startTest();
 
 		// Update training request
+		tr.Name = 'Updated Training Request';
 		update tr;
 
 		Test.stopTest();
@@ -336,6 +359,8 @@ private class TrainingRequestTriggerHandler_Test {
 	@IsTest
 	static void testAfterDelete() {
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Delete Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.startTest();
@@ -359,6 +384,8 @@ private class TrainingRequestTriggerHandler_Test {
 	@IsTest
 	static void testAfterUndelete() {
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Undelete Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		delete tr;
@@ -386,6 +413,8 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Corporate Training 2024';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.stopTest();
@@ -430,6 +459,8 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
+		tr.Name = 'Missing Template Test';
+		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.stopTest();
