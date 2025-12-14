@@ -100,17 +100,13 @@ public with sharing class SurveyUtilities {
 		}
 
 		try {
-			// Collect all template names and training request IDs
+			// Collect all template names
 			Set<String> templateNames = new Set<String>();
-			Set<Id> trainingRequestIds = new Set<Id>();
 			
 			for (SurveyCreationRequest req : requests) {
 				String templateName = getSurveyTemplateName(req.surveyType, req.language);
 				if (String.isNotBlank(templateName)) {
 					templateNames.add(templateName);
-				}
-				if (req.trainingRequestId != null) {
-					trainingRequestIds.add(req.trainingRequestId);
 				}
 			}
 
@@ -124,14 +120,6 @@ public with sharing class SurveyUtilities {
 			]) {
 				templateMap.put(template.Name, template);
 			}
-
-			// Single SOQL query for all training requests (for validation)
-			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>([
-				SELECT Id
-				FROM Training_Request__c
-				WHERE Id IN :trainingRequestIds
-				WITH USER_MODE
-			]);
 
 			// Collect all template IDs for questions query
 			Set<Id> templateIds = new Set<Id>();
@@ -186,12 +174,6 @@ public with sharing class SurveyUtilities {
 
 				if (!templateMap.containsKey(templateName)) {
 					result.message = 'Survey template not found: ' + templateName;
-					results.put(key, result);
-					continue;
-				}
-
-				if (!trainingRequestMap.containsKey(req.trainingRequestId)) {
-					result.message = 'Training Request not found';
 					results.put(key, result);
 					continue;
 				}
