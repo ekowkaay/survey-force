@@ -321,17 +321,25 @@ public with sharing class SurveyUtilities {
 	 * @return String Site URL or null if not found
 	 */
 	private static String getSiteURLForTrainingType(String trainingType) {
-		Map<String, SiteURL__c> csSite = SiteURL__c.getAll();
+		List<SiteURL__mdt> siteURLs = [
+			SELECT Label, URL__c
+			FROM SiteURL__mdt
+			WHERE Label IN (:SITE_URL_EAP_TRAINING, :SITE_URL_RESELLER_TRAINING)
+			WITH SECURITY_ENFORCED
+		];
 
-		if (csSite == null || csSite.isEmpty()) {
+		if (siteURLs == null || siteURLs.isEmpty()) {
 			return null;
 		}
 
 		String siteURL = null;
-		if (trainingType == TRAINING_TYPE_EAP && csSite.containsKey(SITE_URL_EAP_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_EAP_TRAINING).URL__c;
-		} else if (csSite.containsKey(SITE_URL_RESELLER_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_RESELLER_TRAINING).URL__c;
+		for (SiteURL__mdt site : siteURLs) {
+			if (trainingType == TRAINING_TYPE_EAP && site.Label == SITE_URL_EAP_TRAINING) {
+				siteURL = site.URL__c;
+				break;
+			} else if (site.Label == SITE_URL_RESELLER_TRAINING) {
+				siteURL = site.URL__c;
+			}
 		}
 
 		return siteURL;
