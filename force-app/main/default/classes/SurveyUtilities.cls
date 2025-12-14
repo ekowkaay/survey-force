@@ -339,6 +339,7 @@ public with sharing class SurveyUtilities {
 				break;
 			} else if (site.Label == SITE_URL_RESELLER_TRAINING) {
 				siteURL = site.URL__c;
+				break;
 			}
 		}
 
