@@ -149,8 +149,6 @@ private class ParticipantsTriggerHandler_Test {
 	static void testParticipantInsert_NoSurvey() {
 		// Create a training request without a survey
 		Training_Request__c trNoSurvey = new Training_Request__c();
-		trNoSurvey.Name = 'Training Without Survey';
-		trNoSurvey.Training_Type__c = 'EAP Training';
 		insert trNoSurvey;
 
 		Test.startTest();
