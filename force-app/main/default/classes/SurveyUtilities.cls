@@ -318,12 +318,13 @@ public with sharing class SurveyUtilities {
 	 * @return String Site URL or null if not found
 	 */
 	private static String getDefaultSiteURL() {
-		// Query custom metadata for site URLs
+		// Query custom metadata for site URLs, ordered by DeveloperName for deterministic behavior
 		List<SiteURL__mdt> siteURLs = [
 			SELECT URL__c 
 			FROM SiteURL__mdt 
 			WHERE DeveloperName = :SITE_URL_EAP_TRAINING
 			OR DeveloperName = :SITE_URL_RESELLER_TRAINING
+			ORDER BY DeveloperName ASC
 			LIMIT 1
 		];
 
