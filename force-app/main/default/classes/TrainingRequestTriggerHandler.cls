@@ -147,7 +147,8 @@ public with sharing class TrainingRequestTriggerHandler {
 						invitationRequests.add(new SurveyUtilities.InvitationRequest(
 							result.surveyId,
 							result.sourceRecordId,
-							key.substringAfter('_')
+							key.substringAfter('_'),
+							result.trainingType
 						));
 					}
 				}
