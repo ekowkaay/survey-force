@@ -446,20 +446,38 @@ public with sharing class SurveyInvitationController {
 
 	/**
 	 * @description Build the survey URL with the invitation token
+	 * Uses SiteURL custom metadata when available to ensure correct Experience Site URL
 	 * @param token The invitation token
 	 * @return String The complete survey URL
 	 */
 	private static String buildSurveyUrl(String token) {
-		// Get the base URL - use Site URL if available, otherwise use instance URL
 		String baseUrl = '';
-		if (Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
+		
+		// Try to get site URL from custom metadata for any configured sites
+		List<SiteURL__mdt> siteURLs = [
+			SELECT Label, URL__c
+			FROM SiteURL__mdt
+			WITH SECURITY_ENFORCED
+			LIMIT 1
+		];
+		
+		if (!siteURLs.isEmpty() && String.isNotBlank(siteURLs[0].URL__c)) {
+			baseUrl = siteURLs[0].URL__c;
+		}
+		
+		// If no metadata URL, try Site.getBaseUrl() for Experience Sites/Communities
+		if (String.isBlank(baseUrl) && Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
 			baseUrl = Site.getBaseUrl();
-		} else {
+		}
+		
+		// Final fallback to org domain URL for internal org access
+		if (String.isBlank(baseUrl)) {
 			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
 		}
-		// Survey page path - can be customized via custom label or custom metadata in future
-		String surveyPagePath = '/survey';
-		return baseUrl + surveyPagePath + '?token=' + token;
+		
+		// Use /survey path for token-based access
+		// This should match the Experience Site page URL path
+		return baseUrl + '/survey?token=' + token;
 	}
 
 	/**

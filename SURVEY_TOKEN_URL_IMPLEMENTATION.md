@@ -65,23 +65,7 @@ https://example.my.site.com/survey?token=a1b2c3d4-e5f6-7890-abcd-ef1234567890
 #### Additional Token Generation (Optional)
 If additional tokens are needed beyond the automatic ones, use one of these methods:
 
-##### Method 1: Using Flow with Invocable Action
-1. Create a Flow (Screen Flow, Record-Triggered Flow, etc.)
-2. Add Action: "Generate Survey Invitation"
-3. Configure inputs:
-   - Survey ID (extract from Training Request token URL)
-   - Training Request ID
-   - Survey Type ("Customer", "Trainer", or "Participant")
-   - Recipient Email (optional)
-   - Recipient Name (optional)
-4. The action returns:
-   - Success indicator
-   - Survey URL with token
-   - Token value
-   - Invitation ID
-   - Error message (if failed)
-
-##### Method 2: Using Apex
+##### Method 1: Using Apex
 ```apex
 // Extract Survey ID from token URL if needed
 Id surveyId = /* extract from token URL via SurveyInvitation query */;
@@ -95,7 +79,7 @@ String tokenUrl = SurveyUtilities.generateSingleSurveyInvitation(
 );
 ```
 
-##### Method 3: Manual SurveyInvitation Creation
+##### Method 2: Manual SurveyInvitation Creation
 1. Create a SurveyInvitation__c record manually
 2. Set Survey__c to the survey ID (extract from existing token URL)
 3. Leave Token__c blank (will be auto-generated)
@@ -162,31 +146,31 @@ Token URLs use the correct Experience Site base URL determined in this priority 
 
 This is optional - Customer surveys already have a token URL in the Training Request. Use this only if you need additional tokens for the same survey.
 
-### Flow Configuration
-1. **Object:** Training_Request__c
-2. **Trigger:** Record is updated or button clicked
-3. **Condition:** Need additional Customer survey invitation
+### Using Apex
+You can use the `SurveyInvitationController.createInvitation()` method from a Flow or custom code:
 
-### Flow Elements
-1. **Decision:** Extract Survey ID from existing token URL
-   - Query SurveyInvitation__c WHERE Token__c = [extracted from Customer_Survey__c URL]
-   - Get Survey__c field
-   
-2. **Action:** Generate Additional Survey Invitation
-   - Action: Generate Survey Invitation
-   - Survey ID: From previous step
-   - Training Request ID: {!$Record.Id}
-   - Survey Type: 'Customer'
-   - Recipient Email: {!$Record.Additional_Customer_Email__c}
-   - Recipient Name: {!$Record.Additional_Customer_Name__c}
+```apex
+// From Flow via Apex Action or from custom Apex code
+Id surveyId = /* extract from token URL via SurveyInvitation query */;
+String email = 'customer@example.com';
+String participantName = 'John Doe';
 
-3. **Assignment:** Store additional token URL (if needed)
-   - Could update a custom field on Training Request
-   - Or send email with the token URL
+SurveyInvitationController.InvitationResult result = 
+    SurveyInvitationController.createInvitation(
+        surveyId, 
+        email, 
+        participantName, 
+        null, // contactId
+        null, // eventDate
+        trainingRequestId, 
+        'Customer Training' // eventTopic
+    );
 
-4. **Send Email:** Email the survey link to customer
-   - To: {!$Record.Customer_Email__c}
-   - Body: Contains {!InvitationResult.surveyUrl}
+if (result.success) {
+    // Use result.surveyUrl to send to customer
+    System.debug('Survey URL: ' + result.surveyUrl);
+}
+```
 
 ## Security Considerations
 
@@ -227,7 +211,7 @@ This is optional - Customer surveys already have a token URL in the Training Req
 
 ## Best Practices
 
-1. **Always use Invocable Action in Flows** for generating Customer/Trainer invitations
+1. **Use SurveyInvitationController methods** for generating additional invitations when needed
 2. **Don't share token URLs publicly** - each is meant for one recipient
 3. **Monitor SurveyInvitation records** for completed/expired tokens
 4. **Configure appropriate expiration** in SurveySettings__c
@@ -241,14 +225,14 @@ This is optional - Customer surveys already have a token URL in the Training Req
 - `SurveyUtilities_Test.cls`: Tests bulk token generation
 - `TrainingRequestTriggerHandler_Test.cls`: Tests survey creation without tokens
 - `ParticipantsTriggerHandler_Test.cls`: Tests participant token generation
-- `GenerateSurveyInvitationAction_Test.cls`: Tests Invocable Action
+- `SurveyInvitationController_Test.cls`: Tests invitation creation and management
 
 ### Manual Testing Steps
 1. Create a Training Request
 2. Verify three survey URLs (non-token) are created
 3. Create a Participant record
 4. Verify participant gets unique token URL
-5. Create a Flow to generate Customer invitation
+5. Use SurveyInvitationController to generate additional invitation if needed
 6. Verify unique token URL is generated
 7. Access token URL in Experience Site
 8. Verify survey loads correctly

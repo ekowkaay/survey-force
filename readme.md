@@ -104,6 +104,8 @@ You should be able to see the survey, add questions, and view results. Test this
 4. Share the survey URL with external users
 5. **Important**: For each survey you want to make publicly available to guest users, check the "Publicly Available" field on the Survey record. By default, this field is unchecked for security reasons.
 
+For detailed guest user configuration instructions, see [Site Guest User Configuration Guide](./SITE_GUEST_USER_CONFIGURATION.md).
+
 ## Survey Connecting to Contact or Case Records
 
 1. Complete "General Surveys" steps.
