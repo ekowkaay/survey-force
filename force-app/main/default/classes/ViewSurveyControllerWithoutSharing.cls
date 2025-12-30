@@ -72,6 +72,28 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	}
 
 	/**
+	 * Query Survey without sharing rules enforcement for token-based access
+	 * This allows guest users to access surveys via validated invitation tokens
+	 * Token validation ensures authorized access, so Share_with_Guest_User__c check is not required
+	 * @param surveyId The ID of the survey to query
+	 * @return The Survey record if it exists, null otherwise
+	 */
+	public static Survey__c getSurveyForGuestUserByToken(Id surveyId) {
+		try {
+			List<Survey__c> surveys = [
+				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Hide_Survey_Name__c, Survey_Container_CSS__c, Share_with_Guest_User__c
+				FROM Survey__c
+				WHERE Id = :surveyId
+				LIMIT 1
+			];
+			return surveys.isEmpty() ? null : surveys[0];
+		} catch (Exception e) {
+			System.debug('Error querying survey: ' + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
 	 * Query Survey Questions without sharing rules enforcement for surveys marked as publicly available
 	 * This allows guest users to view survey questions via direct link without requiring sharing rules
 	 * @param surveyId The ID of the survey whose questions to query

@@ -153,35 +153,20 @@ private class SurveyUtilities_Test {
 		Test.startTest();
 
 		// Test successful creation
-		SurveyUtilities.SurveyCreationResult result1 = SurveyUtilities.createSurveyWithResult(
-			tr.Id,
-			'Participant',
-			'English',
-			'Test Survey 1'
-		);
+		SurveyUtilities.SurveyCreationResult result1 = SurveyUtilities.createSurveyWithResult(tr.Id, 'Participant', 'English', 'Test Survey 1');
 
 		System.assertEquals(true, result1.success, 'Should be successful');
 		System.assertNotEquals(null, result1.surveyId, 'Should have survey ID');
 		System.assertNotEquals(null, result1.surveyUrl, 'Should have survey URL');
 
 		// Test with null parent ID
-		SurveyUtilities.SurveyCreationResult result2 = SurveyUtilities.createSurveyWithResult(
-			null,
-			'Participant',
-			'English',
-			'Test Survey 2'
-		);
+		SurveyUtilities.SurveyCreationResult result2 = SurveyUtilities.createSurveyWithResult(null, 'Participant', 'English', 'Test Survey 2');
 
 		System.assertEquals(false, result2.success, 'Should fail with null parent ID');
 		System.assert(result2.message.contains('required'), 'Should have error message');
 
 		// Test with blank survey name
-		SurveyUtilities.SurveyCreationResult result3 = SurveyUtilities.createSurveyWithResult(
-			tr.Id,
-			'Participant',
-			'English',
-			''
-		);
+		SurveyUtilities.SurveyCreationResult result3 = SurveyUtilities.createSurveyWithResult(tr.Id, 'Participant', 'English', '');
 
 		System.assertEquals(false, result3.success, 'Should fail with blank survey name');
 
@@ -219,10 +204,7 @@ private class SurveyUtilities_Test {
 
 		Test.startTest();
 
-		Map<Id, SurveyUtilities.ParticipantSurveyResult> results = SurveyUtilities.generateParticipantSurveyLinks(
-			participantIds,
-			survey.Id
-		);
+		Map<Id, SurveyUtilities.ParticipantSurveyResult> results = SurveyUtilities.generateParticipantSurveyLinks(participantIds, survey.Id);
 
 		Test.stopTest();
 
@@ -330,17 +312,11 @@ private class SurveyUtilities_Test {
 		Test.startTest();
 
 		// Test with null IDs
-		Map<Id, SurveyUtilities.ParticipantSurveyResult> results1 = SurveyUtilities.generateParticipantSurveyLinks(
-			null,
-			null
-		);
+		Map<Id, SurveyUtilities.ParticipantSurveyResult> results1 = SurveyUtilities.generateParticipantSurveyLinks(null, null);
 		System.assertEquals(0, results1.size(), 'Should return empty map for null inputs');
 
 		// Test with empty set
-		Map<Id, SurveyUtilities.ParticipantSurveyResult> results2 = SurveyUtilities.generateParticipantSurveyLinks(
-			new Set<Id>(),
-			null
-		);
+		Map<Id, SurveyUtilities.ParticipantSurveyResult> results2 = SurveyUtilities.generateParticipantSurveyLinks(new Set<Id>(), null);
 		System.assertEquals(0, results2.size(), 'Should return empty map for empty set');
 
 		// Test single link with null participant

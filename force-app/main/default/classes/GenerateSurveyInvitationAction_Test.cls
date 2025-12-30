@@ -53,7 +53,7 @@ private class GenerateSurveyInvitationAction_Test {
 		// Verify result
 		System.assertEquals(1, results.size(), 'Should return one result');
 		GenerateSurveyInvitationAction.InvitationResult result = results[0];
-		
+
 		System.assertEquals(true, result.success, 'Generation should be successful');
 		System.assertNotEquals(null, result.surveyUrl, 'Should have survey URL');
 		System.assertNotEquals(null, result.token, 'Should have token');
@@ -104,7 +104,7 @@ private class GenerateSurveyInvitationAction_Test {
 
 		// Verify results
 		System.assertEquals(2, results.size(), 'Should return two results');
-		
+
 		for (GenerateSurveyInvitationAction.InvitationResult result : results) {
 			System.assertEquals(true, result.success, 'Each generation should be successful');
 			System.assertNotEquals(null, result.surveyUrl, 'Each should have survey URL');
@@ -112,9 +112,7 @@ private class GenerateSurveyInvitationAction_Test {
 		}
 
 		// Verify invitations were created
-		List<SurveyInvitation__c> invitations = [
-			SELECT Id FROM SurveyInvitation__c WHERE Survey__c = :survey.Id
-		];
+		List<SurveyInvitation__c> invitations = [SELECT Id FROM SurveyInvitation__c WHERE Survey__c = :survey.Id];
 		System.assertEquals(2, invitations.size(), 'Should create two invitations');
 
 		// Verify tokens are unique
@@ -145,7 +143,7 @@ private class GenerateSurveyInvitationAction_Test {
 		// Verify result
 		System.assertEquals(1, results.size(), 'Should return one result');
 		GenerateSurveyInvitationAction.InvitationResult result = results[0];
-		
+
 		System.assertEquals(false, result.success, 'Generation should fail');
 		System.assertEquals('Survey ID is required', result.errorMessage, 'Should have error message');
 		System.assertEquals(null, result.surveyUrl, 'Should not have survey URL');
@@ -171,7 +169,7 @@ private class GenerateSurveyInvitationAction_Test {
 		// Verify result
 		System.assertEquals(1, results.size(), 'Should return one result');
 		GenerateSurveyInvitationAction.InvitationResult result = results[0];
-		
+
 		System.assertEquals(false, result.success, 'Generation should fail');
 		System.assertEquals('Survey not found', result.errorMessage, 'Should have error message');
 	}
@@ -216,7 +214,7 @@ private class GenerateSurveyInvitationAction_Test {
 		// Verify result
 		System.assertEquals(1, results.size(), 'Should return one result');
 		GenerateSurveyInvitationAction.InvitationResult result = results[0];
-		
+
 		System.assertEquals(true, result.success, 'Generation should be successful even without training request');
 		System.assertNotEquals(null, result.surveyUrl, 'Should have survey URL');
 		System.assertNotEquals(null, result.token, 'Should have token');

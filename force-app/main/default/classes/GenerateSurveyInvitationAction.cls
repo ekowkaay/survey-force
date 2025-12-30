@@ -3,69 +3,64 @@
  * Can be called from Flows to generate on-demand invitation links for Customer and Trainer surveys.
  */
 public with sharing class GenerateSurveyInvitationAction {
-	
 	/**
 	 * @description Request wrapper for generating survey invitations
 	 */
 	public class InvitationRequest {
 		@InvocableVariable(label='Survey ID' description='The ID of the Survey record' required=true)
 		public Id surveyId;
-		
+
 		@InvocableVariable(label='Training Request ID' description='The ID of the related Training Request' required=false)
 		public Id trainingRequestId;
-		
+
 		@InvocableVariable(label='Survey Type' description='Type of survey (Customer, Trainer, etc.)' required=false)
 		public String surveyType;
-		
+
 		@InvocableVariable(label='Recipient Email' description='Email address of the recipient' required=false)
 		public String recipientEmail;
-		
+
 		@InvocableVariable(label='Recipient Name' description='Name of the recipient' required=false)
 		public String recipientName;
 	}
-	
+
 	/**
 	 * @description Result wrapper for generated survey invitations
 	 */
 	public class InvitationResult {
 		@InvocableVariable(label='Success' description='Whether the invitation was generated successfully')
 		public Boolean success;
-		
+
 		@InvocableVariable(label='Survey URL' description='The unique survey URL with token')
 		public String surveyUrl;
-		
+
 		@InvocableVariable(label='Token' description='The unique token generated')
 		public String token;
-		
+
 		@InvocableVariable(label='Error Message' description='Error message if generation failed')
 		public String errorMessage;
-		
+
 		@InvocableVariable(label='Invitation ID' description='The ID of the created SurveyInvitation record')
 		public Id invitationId;
 	}
-	
+
 	/**
 	 * @description Generate unique survey invitation URLs with tokens
 	 * Can be called from Flows to create on-demand invitations for surveys
 	 * @param requests List of invitation generation requests
 	 * @return List<InvitationResult> Results with generated URLs and tokens
 	 */
-	@InvocableMethod(
-		label='Generate Survey Invitation' 
-		description='Generates a unique survey invitation URL with a token for secure one-time access'
-		category='Survey Force'
-	)
+	@InvocableMethod(label='Generate Survey Invitation' description='Generates a unique survey invitation URL with a token for secure one-time access' category='Survey Force')
 	public static List<InvitationResult> generateInvitations(List<InvitationRequest> requests) {
 		List<InvitationResult> results = new List<InvitationResult>();
-		
+
 		if (requests == null || requests.isEmpty()) {
 			return results;
 		}
-		
+
 		// Collect all survey IDs and training request IDs for bulk queries
 		Set<Id> surveyIds = new Set<Id>();
 		Set<Id> trainingRequestIds = new Set<Id>();
-		
+
 		for (InvitationRequest req : requests) {
 			if (req.surveyId != null) {
 				surveyIds.add(req.surveyId);
@@ -74,71 +69,70 @@ public with sharing class GenerateSurveyInvitationAction {
 				trainingRequestIds.add(req.trainingRequestId);
 			}
 		}
-		
+
 		// Verify surveys exist
-		Map<Id, Survey__c> surveyMap = new Map<Id, Survey__c>([
-			SELECT Id, Name
-			FROM Survey__c
-			WHERE Id IN :surveyIds
-			WITH USER_MODE
-		]);
-		
+		Map<Id, Survey__c> surveyMap = new Map<Id, Survey__c>(
+			[
+				SELECT Id, Name
+				FROM Survey__c
+				WHERE Id IN :surveyIds
+				WITH USER_MODE
+			]
+		);
+
 		// Get training request info for training type
 		Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>();
 		if (!trainingRequestIds.isEmpty()) {
-			trainingRequestMap = new Map<Id, Training_Request__c>([
-				SELECT Id, Training_Type__c
-				FROM Training_Request__c
-				WHERE Id IN :trainingRequestIds
-				WITH USER_MODE
-			]);
+			trainingRequestMap = new Map<Id, Training_Request__c>(
+				[
+					SELECT Id, Training_Type__c
+					FROM Training_Request__c
+					WHERE Id IN :trainingRequestIds
+					WITH USER_MODE
+				]
+			);
 		}
-		
+
 		// Process each request
 		List<SurveyUtilities.InvitationRequest> bulkRequests = new List<SurveyUtilities.InvitationRequest>();
 		Map<Integer, InvitationRequest> indexToRequestMap = new Map<Integer, InvitationRequest>();
-		
+
 		for (Integer i = 0; i < requests.size(); i++) {
 			InvitationRequest req = requests[i];
 			InvitationResult result = new InvitationResult();
 			result.success = false;
-			
+
 			// Validate request
 			if (req.surveyId == null) {
 				result.errorMessage = 'Survey ID is required';
 				results.add(result);
 				continue;
 			}
-			
+
 			if (!surveyMap.containsKey(req.surveyId)) {
 				result.errorMessage = 'Survey not found';
 				results.add(result);
 				continue;
 			}
-			
+
 			// Get training type if available
 			String trainingType = null;
 			if (req.trainingRequestId != null && trainingRequestMap.containsKey(req.trainingRequestId)) {
 				trainingType = trainingRequestMap.get(req.trainingRequestId).Training_Type__c;
 			}
-			
+
 			// Create bulk invitation request
 			String surveyType = String.isNotBlank(req.surveyType) ? req.surveyType : 'Survey';
-			bulkRequests.add(new SurveyUtilities.InvitationRequest(
-				req.surveyId,
-				req.trainingRequestId,
-				surveyType,
-				trainingType
-			));
+			bulkRequests.add(new SurveyUtilities.InvitationRequest(req.surveyId, req.trainingRequestId, surveyType, trainingType));
 			indexToRequestMap.put(i, req);
 			results.add(result);
 		}
-		
+
 		// Generate invitations in bulk
 		if (!bulkRequests.isEmpty()) {
 			try {
 				Map<String, String> generatedUrls = SurveyUtilities.generateSurveyInvitationsInBulk(bulkRequests);
-				
+
 				// Collect tokens from generated URLs to query the right invitations
 				Set<String> tokens = new Set<String>();
 				for (String url : generatedUrls.values()) {
@@ -154,7 +148,7 @@ public with sharing class GenerateSurveyInvitationAction {
 						tokens.add(token);
 					}
 				}
-				
+
 				// Query invitations by tokens to get exact matches
 				Map<String, SurveyInvitation__c> tokenToInvitationMap = new Map<String, SurveyInvitation__c>();
 				if (!tokens.isEmpty()) {
@@ -164,22 +158,22 @@ public with sharing class GenerateSurveyInvitationAction {
 						WHERE Token__c IN :tokens
 						WITH USER_MODE
 					];
-					
+
 					for (SurveyInvitation__c inv : createdInvitations) {
 						tokenToInvitationMap.put(inv.Token__c, inv);
 					}
 				}
-				
+
 				// Update results with generated URLs
 				for (Integer i = 0; i < bulkRequests.size(); i++) {
 					SurveyUtilities.InvitationRequest bulkReq = bulkRequests[i];
 					String key = bulkReq.relatedRecordId + '_' + bulkReq.surveyType;
 					InvitationResult result = results[i];
-					
+
 					if (generatedUrls.containsKey(key)) {
 						result.success = true;
 						result.surveyUrl = generatedUrls.get(key);
-						
+
 						// Extract token from URL to find the invitation
 						Integer tokenIndex = result.surveyUrl.indexOf('token=');
 						if (tokenIndex != -1) {
@@ -188,7 +182,7 @@ public with sharing class GenerateSurveyInvitationAction {
 							if (ampIndex != -1) {
 								token = token.substring(0, ampIndex);
 							}
-							
+
 							if (tokenToInvitationMap.containsKey(token)) {
 								SurveyInvitation__c inv = tokenToInvitationMap.get(token);
 								result.token = token;
@@ -208,7 +202,7 @@ public with sharing class GenerateSurveyInvitationAction {
 				}
 			}
 		}
-		
+
 		return results;
 	}
 }

@@ -40,7 +40,7 @@ private class ParticipantsTriggerHandler_Test {
 
 		// Create main survey for the training request
 		String surveyUrl = SurveyUtilities.createSurvey(tr.Id, 'Participant', 'English', 'Main Participant Survey');
-		
+
 		// Update training request with survey URL
 		tr.Participant_Survey__c = surveyUrl;
 		update tr;
@@ -73,10 +73,7 @@ private class ParticipantsTriggerHandler_Test {
 		];
 
 		System.assertNotEquals(null, insertedParticipant.Participant_Survey__c, 'Participant should have survey link');
-		System.assert(
-			insertedParticipant.Participant_Survey__c.contains('token='),
-			'Participant survey URL should contain token'
-		);
+		System.assert(insertedParticipant.Participant_Survey__c.contains('token='), 'Participant survey URL should contain token');
 
 		// Verify invitation was created
 		List<SurveyInvitation__c> invitations = [
@@ -122,7 +119,7 @@ private class ParticipantsTriggerHandler_Test {
 
 		Integer participantsWithLinks = 0;
 		Set<String> uniqueUrls = new Set<String>();
-		
+
 		for (Participants__c p : insertedParticipants) {
 			if (String.isNotBlank(p.Participant_Survey__c)) {
 				participantsWithLinks++;

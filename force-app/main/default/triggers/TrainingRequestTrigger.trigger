@@ -2,14 +2,7 @@
  * @description Trigger for Training_Request__c object.
  * Follows the one trigger per object pattern.
  */
-trigger TrainingRequestTrigger on Training_Request__c(
-	before insert,
-	before update,
-	after insert,
-	after update,
-	after delete,
-	after undelete
-) {
+trigger TrainingRequestTrigger on Training_Request__c(before insert, before update, after insert, after update, after delete, after undelete) {
 	TrainingRequestTriggerHandler handler = new TrainingRequestTriggerHandler();
 
 	if (Trigger.isBefore) {
