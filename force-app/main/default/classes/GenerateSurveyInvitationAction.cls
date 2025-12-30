@@ -139,21 +139,34 @@ public with sharing class GenerateSurveyInvitationAction {
 			try {
 				Map<String, String> generatedUrls = SurveyUtilities.generateSurveyInvitationsInBulk(bulkRequests);
 				
-				// Query created invitations to get IDs and tokens
-				List<SurveyInvitation__c> createdInvitations = [
-					SELECT Id, Token__c, Survey__c, RelatedRecordId__c
-					FROM SurveyInvitation__c
-					WHERE Survey__c IN :surveyIds
-					ORDER BY CreatedDate DESC
-					LIMIT :bulkRequests.size()
-				];
+				// Collect tokens from generated URLs to query the right invitations
+				Set<String> tokens = new Set<String>();
+				for (String url : generatedUrls.values()) {
+					// Extract token from URL (format: .../survey?token=TOKEN)
+					Integer tokenIndex = url.indexOf('token=');
+					if (tokenIndex != -1) {
+						String token = url.substring(tokenIndex + 6);
+						// Remove any trailing query parameters
+						Integer ampIndex = token.indexOf('&');
+						if (ampIndex != -1) {
+							token = token.substring(0, ampIndex);
+						}
+						tokens.add(token);
+					}
+				}
 				
-				// Map invitations to requests
-				Map<String, SurveyInvitation__c> keyToInvitationMap = new Map<String, SurveyInvitation__c>();
-				for (SurveyInvitation__c inv : createdInvitations) {
-					String key = String.valueOf(inv.RelatedRecordId__c);
-					if (!keyToInvitationMap.containsKey(key)) {
-						keyToInvitationMap.put(key, inv);
+				// Query invitations by tokens to get exact matches
+				Map<String, SurveyInvitation__c> tokenToInvitationMap = new Map<String, SurveyInvitation__c>();
+				if (!tokens.isEmpty()) {
+					List<SurveyInvitation__c> createdInvitations = [
+						SELECT Id, Token__c, Survey__c, RelatedRecordId__c
+						FROM SurveyInvitation__c
+						WHERE Token__c IN :tokens
+						WITH USER_MODE
+					];
+					
+					for (SurveyInvitation__c inv : createdInvitations) {
+						tokenToInvitationMap.put(inv.Token__c, inv);
 					}
 				}
 				
@@ -167,12 +180,20 @@ public with sharing class GenerateSurveyInvitationAction {
 						result.success = true;
 						result.surveyUrl = generatedUrls.get(key);
 						
-						// Find the invitation to get token and ID
-						String invKey = String.valueOf(bulkReq.relatedRecordId);
-						if (keyToInvitationMap.containsKey(invKey)) {
-							SurveyInvitation__c inv = keyToInvitationMap.get(invKey);
-							result.token = inv.Token__c;
-							result.invitationId = inv.Id;
+						// Extract token from URL to find the invitation
+						Integer tokenIndex = result.surveyUrl.indexOf('token=');
+						if (tokenIndex != -1) {
+							String token = result.surveyUrl.substring(tokenIndex + 6);
+							Integer ampIndex = token.indexOf('&');
+							if (ampIndex != -1) {
+								token = token.substring(0, ampIndex);
+							}
+							
+							if (tokenToInvitationMap.containsKey(token)) {
+								SurveyInvitation__c inv = tokenToInvitationMap.get(token);
+								result.token = token;
+								result.invitationId = inv.Id;
+							}
 						}
 					} else {
 						result.errorMessage = 'Failed to generate invitation URL';
