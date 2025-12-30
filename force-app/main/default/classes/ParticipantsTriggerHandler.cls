@@ -159,6 +159,7 @@ public with sharing class ParticipantsTriggerHandler {
 
 	/**
 	 * @description Extract Survey ID from a survey URL
+	 * Handles ID-based URLs (e.g., /TakeSurvey?id=SURVEY_ID)
 	 * @param surveyUrl The survey URL containing the ID parameter
 	 * @return Id The extracted Survey ID or null if not found
 	 */
@@ -168,7 +169,7 @@ public with sharing class ParticipantsTriggerHandler {
 		}
 
 		try {
-			// Look for id= parameter in URL
+			// Extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
 			Integer idParamIndex = surveyUrl.indexOf('id=');
 			if (idParamIndex != -1) {
 				String idPortion = surveyUrl.substring(idParamIndex + 3);
@@ -176,8 +177,8 @@ public with sharing class ParticipantsTriggerHandler {
 				Integer endIndex = idPortion.indexOf('&');
 				String idValue = endIndex != -1 ? idPortion.substring(0, endIndex) : idPortion;
 				
-				// Validate it's a valid Survey ID
-				if (idValue.startsWith('a0') && idValue.length() >= 15) {
+				// Validate it's a valid Survey ID and return
+				if (idValue.length() >= 15) {
 					return (Id) idValue;
 				}
 			}
