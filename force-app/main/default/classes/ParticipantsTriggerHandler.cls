@@ -159,8 +159,8 @@ public with sharing class ParticipantsTriggerHandler {
 
 	/**
 	 * @description Extract Survey ID from a survey URL
-	 * Handles ID-based URLs (e.g., /TakeSurvey?id=SURVEY_ID)
-	 * @param surveyUrl The survey URL containing the ID parameter
+	 * Handles both traditional ID-based URLs and token-based URLs
+	 * @param surveyUrl The survey URL containing the ID parameter or token
 	 * @return Id The extracted Survey ID or null if not found
 	 */
 	private Id extractSurveyIdFromUrl(String surveyUrl) {
@@ -169,7 +169,7 @@ public with sharing class ParticipantsTriggerHandler {
 		}
 
 		try {
-			// Extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
+			// First try to extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
 			Integer idParamIndex = surveyUrl.indexOf('id=');
 			if (idParamIndex != -1) {
 				String idPortion = surveyUrl.substring(idParamIndex + 3);
@@ -177,9 +177,31 @@ public with sharing class ParticipantsTriggerHandler {
 				Integer endIndex = idPortion.indexOf('&');
 				String idValue = endIndex != -1 ? idPortion.substring(0, endIndex) : idPortion;
 				
-				// Validate it's a valid Survey ID and return
+				// Validate it's a valid Survey ID
 				if (idValue.length() >= 15) {
 					return (Id) idValue;
+				}
+			}
+			
+			// If no ID found, try token-based URL (format: /survey?token=TOKEN)
+			Integer tokenParamIndex = surveyUrl.indexOf('token=');
+			if (tokenParamIndex != -1) {
+				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
+				// Get everything up to the next & or end of string
+				Integer endIndex = tokenPortion.indexOf('&');
+				String tokenValue = endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
+				
+				// Query SurveyInvitation to get Survey ID from token
+				List<SurveyInvitation__c> invitations = [
+					SELECT Id, Survey__c
+					FROM SurveyInvitation__c
+					WHERE Token__c = :tokenValue
+					WITH USER_MODE
+					LIMIT 1
+				];
+				
+				if (!invitations.isEmpty() && invitations[0].Survey__c != null) {
+					return invitations[0].Survey__c;
 				}
 			}
 		} catch (Exception e) {

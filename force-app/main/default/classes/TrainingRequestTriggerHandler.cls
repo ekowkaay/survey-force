@@ -84,11 +84,11 @@ public with sharing class TrainingRequestTriggerHandler {
 
 	/**
 	 * @description Create surveys for training requests
-	 * Creates participant, customer, and trainer surveys automatically
-	 * Survey URLs with IDs are stored in Training Request fields
-	 * Token-based invitations are NOT created here - they are generated when needed:
-	 * - Participant tokens: Generated when participants are created
-	 * - Customer/Trainer tokens: Generated on-demand via UI or API
+	 * Creates participant, customer, and trainer surveys automatically with token-based invitations
+	 * Token-based URLs are generated for all survey types automatically:
+	 * - Participant tokens: Generated here for initial access, new tokens created when participants are added
+	 * - Customer/Trainer tokens: Generated here automatically for easy sharing
+	 * Uses bulkified survey creation to avoid SOQL in loops
 	 * @param trainingRequests List of Training Request records
 	 */
 	private void createSurveysForTrainingRequests(List<Training_Request__c> trainingRequests) {
@@ -142,7 +142,27 @@ public with sharing class TrainingRequestTriggerHandler {
 			if (!surveyRequests.isEmpty()) {
 				Map<String, SurveyUtilities.SurveyCreationResult> surveyResults = SurveyUtilities.createSurveysInBulk(surveyRequests);
 
-				// Update training requests with survey URLs (non-token URLs with survey IDs)
+				// Collect all successful surveys for bulk invitation generation
+				List<SurveyUtilities.InvitationRequest> invitationRequests = new List<SurveyUtilities.InvitationRequest>();
+				for (String key : surveyResults.keySet()) {
+					SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
+					if (result.success && result.surveyId != null) {
+						invitationRequests.add(new SurveyUtilities.InvitationRequest(
+							result.surveyId,
+							result.sourceRecordId,
+							key.substringAfter('_'),
+							result.trainingType
+						));
+					}
+				}
+
+				// Generate token-based invitations in bulk
+				Map<String, String> surveyTokenUrls = new Map<String, String>();
+				if (!invitationRequests.isEmpty()) {
+					surveyTokenUrls = SurveyUtilities.generateSurveyInvitationsInBulk(invitationRequests);
+				}
+
+				// Update training requests with token-based URLs
 				List<Training_Request__c> requestsToUpdate = new List<Training_Request__c>();
 				for (Id trId : trainingRequestToSurveyTypes.keySet()) {
 					Training_Request__c trToUpdate = new Training_Request__c();
@@ -151,17 +171,17 @@ public with sharing class TrainingRequestTriggerHandler {
 
 					for (String surveyType : trainingRequestToSurveyTypes.get(trId)) {
 						String key = trId + '_' + surveyType;
-						SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
+						String tokenUrl = surveyTokenUrls.get(key);
 
-						if (result != null && result.success && result.surveyUrl != null) {
+						if (tokenUrl != null) {
 							if (surveyType == SURVEY_TYPE_PARTICIPANT) {
-								trToUpdate.Participant_Survey__c = result.surveyUrl;
+								trToUpdate.Participant_Survey__c = tokenUrl;
 								hasUpdates = true;
 							} else if (surveyType == SURVEY_TYPE_CUSTOMER) {
-								trToUpdate.Customer_Survey__c = result.surveyUrl;
+								trToUpdate.Customer_Survey__c = tokenUrl;
 								hasUpdates = true;
 							} else if (surveyType == SURVEY_TYPE_TRAINER) {
-								trToUpdate.Trainer_Survey__c = result.surveyUrl;
+								trToUpdate.Trainer_Survey__c = tokenUrl;
 								hasUpdates = true;
 							}
 						}
