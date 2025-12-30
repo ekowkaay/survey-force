@@ -91,19 +91,20 @@ private class TrainingRequestTriggerHandler_Test {
 		System.assertNotEquals(null, insertedTr.Customer_Survey__c, 'Customer survey should be created automatically');
 		System.assertNotEquals(null, insertedTr.Trainer_Survey__c, 'Trainer survey should be created automatically');
 
-		// Verify survey URLs use token-based format for all three
-		// Token URLs are automatically generated for easy sharing with customers and trainers
+		// Verify survey URL formats:
+		// - Participant: Token URL (for automatic participant token generation)
+		// - Customer/Trainer: Survey ID URL (token created in background for initial use)
 		System.assert(
 			insertedTr.Participant_Survey__c.contains('/survey?token='),
-			'Participant survey URL should contain token'
+			'Participant survey URL should contain token for automatic participant linking'
 		);
 		System.assert(
-			insertedTr.Customer_Survey__c.contains('/survey?token='),
-			'Customer survey URL should contain token'
+			insertedTr.Customer_Survey__c.contains('/TakeSurvey?id='),
+			'Customer survey URL should contain survey ID'
 		);
 		System.assert(
-			insertedTr.Trainer_Survey__c.contains('/survey?token='),
-			'Trainer survey URL should contain token'
+			insertedTr.Trainer_Survey__c.contains('/TakeSurvey?id='),
+			'Trainer survey URL should contain survey ID'
 		);
 
 		// Verify surveys have different URLs (different tokens)
@@ -143,6 +144,7 @@ private class TrainingRequestTriggerHandler_Test {
 		}
 
 		// Verify SurveyInvitation records were created for all three survey types
+		// Even though Customer/Trainer store Survey ID URLs, token invitations are created in background
 		List<SurveyInvitation__c> invitations = [
 			SELECT Id, Token__c, Survey__c, Status__c, ParticipantName__c
 			FROM SurveyInvitation__c

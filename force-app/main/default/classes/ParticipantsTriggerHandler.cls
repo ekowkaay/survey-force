@@ -159,7 +159,7 @@ public with sharing class ParticipantsTriggerHandler {
 
 	/**
 	 * @description Extract Survey ID from a survey URL
-	 * Handles both traditional ID-based URLs and token-based URLs
+	 * Handles both Survey ID-based URLs and token-based URLs
 	 * @param surveyUrl The survey URL containing the ID parameter or token
 	 * @return Id The extracted Survey ID or null if not found
 	 */
@@ -184,6 +184,7 @@ public with sharing class ParticipantsTriggerHandler {
 			}
 			
 			// If no ID found, try token-based URL (format: /survey?token=TOKEN)
+			// This handles the Participant survey field which stores a token URL
 			Integer tokenParamIndex = surveyUrl.indexOf('token=');
 			if (tokenParamIndex != -1) {
 				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
