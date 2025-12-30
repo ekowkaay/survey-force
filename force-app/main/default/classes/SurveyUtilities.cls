@@ -33,6 +33,7 @@ public with sharing class SurveyUtilities {
 		public Id surveyId { get; set; }
 		public String surveyUrl { get; set; }
 		public Id sourceRecordId { get; set; }
+		public String trainingType { get; set; }
 
 		public SurveyCreationResult() {
 			this.success = false;
@@ -235,6 +236,7 @@ public with sharing class SurveyUtilities {
 					// Build result
 					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
 					SurveyCreationResult result = results.get(key);
+					result.trainingType = tReq.Training_Type__c;
 					
 					if (String.isBlank(siteURL)) {
 						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
@@ -498,18 +500,42 @@ public with sharing class SurveyUtilities {
 	}
 
 	/**
-	 * @description Build survey URL with token
+	 * @description Build survey URL with token for Experience Site/Community access
+	 * Uses SiteURL custom metadata when available to ensure correct Experience Site URL
+	 * @param token The invitation token
+	 * @param trainingType Optional training type to get specific site URL from metadata
+	 * @return String Complete survey URL
+	 */
+	private static String buildSurveyUrlWithToken(String token, String trainingType) {
+		String baseUrl = '';
+		
+		// Try to get site URL from metadata if training type is provided
+		if (String.isNotBlank(trainingType)) {
+			baseUrl = getSiteURLForTrainingType(trainingType);
+		}
+		
+		// If no metadata URL, try Site.getBaseUrl() for Experience Sites/Communities
+		if (String.isBlank(baseUrl) && Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
+			baseUrl = Site.getBaseUrl();
+		}
+		
+		// Final fallback to org domain URL for internal org access
+		if (String.isBlank(baseUrl)) {
+			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
+		}
+		
+		// Use /survey path for token-based access
+		// This should match the Experience Site page URL path
+		return baseUrl + '/survey?token=' + token;
+	}
+	
+	/**
+	 * @description Build survey URL with token (overload without training type)
 	 * @param token The invitation token
 	 * @return String Complete survey URL
 	 */
 	private static String buildSurveyUrlWithToken(String token) {
-		String baseUrl = '';
-		if (Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
-			baseUrl = Site.getBaseUrl();
-		} else {
-			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
-		}
-		return baseUrl + '/survey?token=' + token;
+		return buildSurveyUrlWithToken(token, null);
 	}
 
 	/**
@@ -558,7 +584,13 @@ public with sharing class SurveyUtilities {
 					SurveyInvitation__c invitation = invitationsToInsert[i];
 					InvitationRequest req = indexToRequestMap.get(i);
 					String key = req.relatedRecordId + '_' + req.surveyType;
-					results.put(key, buildSurveyUrlWithToken(invitation.Token__c));
+					
+					// Build URL with training type if available for proper site URL
+					String surveyUrl = String.isNotBlank(req.trainingType) 
+						? buildSurveyUrlWithToken(invitation.Token__c, req.trainingType)
+						: buildSurveyUrlWithToken(invitation.Token__c);
+					
+					results.put(key, surveyUrl);
 				}
 			}
 
@@ -576,11 +608,17 @@ public with sharing class SurveyUtilities {
 		public Id surveyId { get; set; }
 		public Id relatedRecordId { get; set; }
 		public String surveyType { get; set; }
+		public String trainingType { get; set; }
 
 		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType) {
+			this(surveyId, relatedRecordId, surveyType, null);
+		}
+
+		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType, String trainingType) {
 			this.surveyId = surveyId;
 			this.relatedRecordId = relatedRecordId;
 			this.surveyType = surveyType;
+			this.trainingType = trainingType;
 		}
 	}
 
