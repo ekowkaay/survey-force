@@ -185,12 +185,18 @@ public with sharing class SurveyInvitationController {
 			invitation.EventTopic__c = eventTopic;
 
 			insert invitation;
+			
+			// Get training type if relatedRecordId is a Training Request
+			String trainingType = null;
+			if (String.isNotBlank(relatedRecordId)) {
+				trainingType = getTrainingTypeFromRelatedRecord(relatedRecordId);
+			}
 
 			result.success = true;
 			result.message = 'Invitation created successfully';
 			result.invitationId = invitation.Id;
 			result.token = token;
-			result.surveyUrl = buildSurveyUrl(token);
+			result.surveyUrl = buildSurveyUrl(token, trainingType);
 
 			return result;
 		} catch (Exception e) {
@@ -268,6 +274,12 @@ public with sharing class SurveyInvitationController {
 			}
 
 			insert invitations;
+			
+			// Get training type if relatedRecordId is provided
+			String trainingType = null;
+			if (String.isNotBlank(relatedRecordId)) {
+				trainingType = getTrainingTypeFromRelatedRecord(relatedRecordId);
+			}
 
 			// Build result data
 			for (SurveyInvitation__c inv : invitations) {
@@ -275,7 +287,7 @@ public with sharing class SurveyInvitationController {
 				data.id = inv.Id;
 				data.token = inv.Token__c;
 				data.status = inv.Status__c;
-				data.surveyUrl = buildSurveyUrl(inv.Token__c);
+				data.surveyUrl = buildSurveyUrl(inv.Token__c, trainingType);
 				result.invitations.add(data);
 			}
 
@@ -418,6 +430,17 @@ public with sharing class SurveyInvitationController {
 				ORDER BY CreatedDate DESC
 				LIMIT 1000
 			];
+			
+			// Collect related record IDs that might be Training Requests
+			Set<Id> relatedRecordIds = new Set<Id>();
+			for (SurveyInvitation__c inv : invitations) {
+				if (String.isNotBlank(inv.RelatedRecordId__c) && inv.RelatedRecordId__c instanceof Id) {
+					relatedRecordIds.add((Id)inv.RelatedRecordId__c);
+				}
+			}
+			
+			// Query training types in bulk
+			Map<Id, String> trainingTypeMap = getTrainingTypeMap(relatedRecordIds);
 
 			for (SurveyInvitation__c inv : invitations) {
 				InvitationData data = new InvitationData();
@@ -427,7 +450,14 @@ public with sharing class SurveyInvitationController {
 				data.email = inv.Email__c;
 				data.participantName = inv.ParticipantName__c;
 				data.status = inv.Status__c;
-				data.surveyUrl = buildSurveyUrl(inv.Token__c);
+				
+				// Get training type for this invitation
+				String trainingType = null;
+				if (String.isNotBlank(inv.RelatedRecordId__c) && inv.RelatedRecordId__c instanceof Id) {
+					trainingType = trainingTypeMap.get((Id)inv.RelatedRecordId__c);
+				}
+				
+				data.surveyUrl = buildSurveyUrl(inv.Token__c, trainingType);
 				data.createdDate = inv.CreatedDate;
 				data.completedDate = inv.CompletedDate__c;
 				data.expirationDate = inv.ExpirationDate__c;
@@ -448,21 +478,15 @@ public with sharing class SurveyInvitationController {
 	 * @description Build the survey URL with the invitation token
 	 * Uses SiteURL custom metadata when available to ensure correct Experience Site URL
 	 * @param token The invitation token
+	 * @param trainingType Optional training type to get specific site URL
 	 * @return String The complete survey URL
 	 */
-	private static String buildSurveyUrl(String token) {
+	private static String buildSurveyUrl(String token, String trainingType) {
 		String baseUrl = '';
 		
-		// Try to get site URL from custom metadata for any configured sites
-		List<SiteURL__mdt> siteURLs = [
-			SELECT Label, URL__c
-			FROM SiteURL__mdt
-			WITH SECURITY_ENFORCED
-			LIMIT 1
-		];
-		
-		if (!siteURLs.isEmpty() && String.isNotBlank(siteURLs[0].URL__c)) {
-			baseUrl = siteURLs[0].URL__c;
+		// Try to get site URL from custom metadata based on training type
+		if (String.isNotBlank(trainingType)) {
+			baseUrl = getSiteURLForTrainingType(trainingType);
 		}
 		
 		// If no metadata URL, try Site.getBaseUrl() for Experience Sites/Communities
@@ -478,6 +502,48 @@ public with sharing class SurveyInvitationController {
 		// Use /survey path for token-based access
 		// This should match the Experience Site page URL path
 		return baseUrl + '/survey?token=' + token;
+	}
+	
+	/**
+	 * @description Build survey URL with token (overload without training type)
+	 * @param token The invitation token
+	 * @return String Complete survey URL
+	 */
+	private static String buildSurveyUrl(String token) {
+		return buildSurveyUrl(token, null);
+	}
+	
+	/**
+	 * @description Get the site URL for a given training type using custom metadata type methods
+	 * @param trainingType The training type
+	 * @return String Site URL or null if not found
+	 */
+	private static String getSiteURLForTrainingType(String trainingType) {
+		// Use custom metadata type method instead of SOQL
+		Map<String, SiteURL__mdt> siteURLs = SiteURL__mdt.getAll();
+		
+		if (siteURLs == null || siteURLs.isEmpty()) {
+			return null;
+		}
+		
+		// Check for EAP Training
+		if (trainingType == 'EAP Training' && siteURLs.containsKey('EAP_Training')) {
+			return siteURLs.get('EAP_Training').URL__c;
+		}
+		
+		// Check for Reseller Training or use as default
+		if (siteURLs.containsKey('Reseller_Training')) {
+			return siteURLs.get('Reseller_Training').URL__c;
+		}
+		
+		// Return first available site URL as fallback
+		for (SiteURL__mdt site : siteURLs.values()) {
+			if (String.isNotBlank(site.URL__c)) {
+				return site.URL__c;
+			}
+		}
+		
+		return null;
 	}
 
 	/**
@@ -497,5 +563,86 @@ public with sharing class SurveyInvitationController {
 	 */
 	private static void updateInvitationStatus(Id invitationId, String status, Id surveyTakerId) {
 		ViewSurveyControllerWithoutSharing.updateInvitationStatus(invitationId, status, surveyTakerId);
+	}
+	
+	/**
+	 * @description Get training type from a related record ID (if it's a Training Request)
+	 * @param relatedRecordId The related record ID
+	 * @return String Training type or null
+	 */
+	private static String getTrainingTypeFromRelatedRecord(String relatedRecordId) {
+		if (String.isBlank(relatedRecordId)) {
+			return null;
+		}
+		
+		try {
+			Id recordId = (Id)relatedRecordId;
+			String objectType = recordId.getSObjectType().getDescribe().getName();
+			
+			// Only query if it's a Training Request
+			if (objectType == 'Training_Request__c') {
+				List<Training_Request__c> trainingRequests = [
+					SELECT Training_Type__c 
+					FROM Training_Request__c 
+					WHERE Id = :recordId 
+					WITH USER_MODE
+					LIMIT 1
+				];
+				
+				if (!trainingRequests.isEmpty()) {
+					return trainingRequests[0].Training_Type__c;
+				}
+			}
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyInvitationController:getTrainingTypeFromRelatedRecord():' + e.getMessage());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * @description Get training types for multiple related record IDs (bulk operation)
+	 * @param relatedRecordIds Set of related record IDs
+	 * @return Map<Id, String> Map of record ID to training type
+	 */
+	private static Map<Id, String> getTrainingTypeMap(Set<Id> relatedRecordIds) {
+		Map<Id, String> trainingTypeMap = new Map<Id, String>();
+		
+		if (relatedRecordIds == null || relatedRecordIds.isEmpty()) {
+			return trainingTypeMap;
+		}
+		
+		// Filter to only Training Request IDs
+		Set<Id> trainingRequestIds = new Set<Id>();
+		for (Id recordId : relatedRecordIds) {
+			try {
+				String objectType = recordId.getSObjectType().getDescribe().getName();
+				if (objectType == 'Training_Request__c') {
+					trainingRequestIds.add(recordId);
+				}
+			} catch (Exception e) {
+				// Skip invalid IDs
+				continue;
+			}
+		}
+		
+		if (!trainingRequestIds.isEmpty()) {
+			try {
+				List<Training_Request__c> trainingRequests = [
+					SELECT Id, Training_Type__c 
+					FROM Training_Request__c 
+					WHERE Id IN :trainingRequestIds 
+					WITH USER_MODE
+				];
+				
+				for (Training_Request__c tr : trainingRequests) {
+					trainingTypeMap.put(tr.Id, tr.Training_Type__c);
+				}
+			} catch (Exception e) {
+				SurveyForceUtil.log('SurveyInvitationController:getTrainingTypeMap():' + e.getMessage());
+			}
+		}
+		
+		return trainingTypeMap;
 	}
 }
