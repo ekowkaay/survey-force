@@ -9,12 +9,13 @@ import getSurveyDetails from '@salesforce/apex/SurveyCreationController.getSurve
 
 export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	// Survey properties
-	@track surveyId = null;
-	@track surveyName = '';
-	@track surveyHeader = '';
-	@track thankYouText = '';
-	@track thankYouLink = '';
-	@track hideSurveyName = false;
+        @track surveyId = null;
+        @track surveyName = '';
+        @track surveyHeader = '';
+        @track surveySubheader = '';
+        @track thankYouText = '';
+        @track thankYouLink = '';
+        @track hideSurveyName = false;
 	@track allResponsesAnonymous = false;
 
 	// UI state
@@ -77,13 +78,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.isLoading = true;
 		getSurveyDetails({ surveyId: surveyIdToLoad })
 			.then((result) => {
-				this.viewSurveyDetails = result;
-				this.surveyId = result.survey.Id;
-				this.surveyName = result.survey.Name;
-				this.surveyHeader = result.survey.Survey_Header__c || '';
-				this.thankYouText = result.survey.Thank_You_Text__c || '';
-				this.thankYouLink = result.survey.Thank_You_Link__c || '';
-				this.hideSurveyName = result.survey.Hide_Survey_Name__c || false;
+                                this.viewSurveyDetails = result;
+                                this.surveyId = result.survey.Id;
+                                this.surveyName = result.survey.Name;
+                                this.surveyHeader = result.survey.Survey_Header__c || '';
+                                this.surveySubheader = result.survey.Survey_Subheader__c || '';
+                                this.thankYouText = result.survey.Thank_You_Text__c || '';
+                                this.thankYouLink = result.survey.Thank_You_Link__c || '';
+                                this.hideSurveyName = result.survey.Hide_Survey_Name__c || false;
 				this.allResponsesAnonymous = result.survey.All_Responses_Anonymous__c || false;
 				this.totalResponses = result.totalResponses || 0;
 				this.createdDate = result.createdDate;
@@ -202,13 +204,17 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.surveyName = event.target.value;
 	}
 
-	handleHeaderChange(event) {
-		this.surveyHeader = event.target.value;
-	}
+        handleHeaderChange(event) {
+                this.surveyHeader = event.target.value;
+        }
 
-	handleThankYouTextChange(event) {
-		this.thankYouText = event.target.value;
-	}
+        handleSubheaderChange(event) {
+                this.surveySubheader = event.target.value;
+        }
+
+        handleThankYouTextChange(event) {
+                this.thankYouText = event.target.value;
+        }
 
 	handleThankYouLinkChange(event) {
 		this.thankYouLink = event.target.value;
@@ -356,12 +362,13 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 		this.isCreating = true;
 
-		const surveyData = {
-			surveyName: this.surveyName,
-			surveyHeader: this.surveyHeader,
-			thankYouText: this.thankYouText,
-			thankYouLink: this.thankYouLink,
-			hideSurveyName: this.hideSurveyName,
+                const surveyData = {
+                        surveyName: this.surveyName,
+                        surveyHeader: this.surveyHeader,
+                        surveySubheader: this.surveySubheader,
+                        thankYouText: this.thankYouText,
+                        thankYouLink: this.thankYouLink,
+                        hideSurveyName: this.hideSurveyName,
 			allResponsesAnonymous: this.allResponsesAnonymous
 		};
 
@@ -423,6 +430,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.surveyId = null;
 		this.surveyName = '';
 		this.surveyHeader = '';
+		this.surveySubheader = '';
 		this.thankYouText = '';
 		this.thankYouLink = '';
 		this.hideSurveyName = false;

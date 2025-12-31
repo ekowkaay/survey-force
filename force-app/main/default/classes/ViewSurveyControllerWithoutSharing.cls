@@ -59,7 +59,7 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	public static Survey__c getSurveyForGuestUser(Id surveyId) {
 		try {
 			List<Survey__c> surveys = [
-				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Hide_Survey_Name__c, Survey_Container_CSS__c, Share_with_Guest_User__c
+				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, Survey_Container_CSS__c, Share_with_Guest_User__c
 				FROM Survey__c
 				WHERE Id = :surveyId AND Share_with_Guest_User__c = TRUE
 				LIMIT 1
