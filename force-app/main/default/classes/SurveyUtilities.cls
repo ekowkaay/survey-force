@@ -374,6 +374,27 @@ public with sharing class SurveyUtilities {
 				]
 			);
 
+			// Collect unique Training Request IDs to query training types
+			Set<Id> trainingRequestIds = new Set<Id>();
+			for (Participants__c participant : participantsMap.values()) {
+				if (participant.Training_Request__c != null) {
+					trainingRequestIds.add(participant.Training_Request__c);
+				}
+			}
+
+			// Query Training Requests to get Training_Type__c for site URL selection
+			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>();
+			if (!trainingRequestIds.isEmpty()) {
+				trainingRequestMap = new Map<Id, Training_Request__c>(
+					[
+						SELECT Id, Training_Type__c
+						FROM Training_Request__c
+						WHERE Id IN :trainingRequestIds
+						WITH USER_MODE
+					]
+				);
+			}
+
 			// Bulk create invitations
 			List<SurveyInvitation__c> invitations = new List<SurveyInvitation__c>();
 			Map<String, Id> tokenToParticipantMap = new Map<String, Id>();
@@ -400,10 +421,18 @@ public with sharing class SurveyUtilities {
 				// Build results with URLs
 				for (SurveyInvitation__c inv : invitations) {
 					Id participantId = tokenToParticipantMap.get(inv.Token__c);
+					Participants__c participant = participantsMap.get(participantId);
+
+					// Get training type from related Training Request
+					String trainingType = null;
+					if (participant.Training_Request__c != null && trainingRequestMap.containsKey(participant.Training_Request__c)) {
+						trainingType = trainingRequestMap.get(participant.Training_Request__c).Training_Type__c;
+					}
+
 					ParticipantSurveyResult result = new ParticipantSurveyResult();
 					result.participantId = participantId;
 					result.success = true;
-					result.surveyUrl = buildSurveyUrlWithToken(inv.Token__c);
+					result.surveyUrl = buildSurveyUrlWithToken(inv.Token__c, trainingType);
 					result.message = 'Survey link generated successfully';
 					results.put(participantId, result);
 				}
@@ -638,6 +667,21 @@ public with sharing class SurveyUtilities {
 				return null;
 			}
 
+			// Query Training Request to get Training_Type__c for site URL selection
+			String trainingType = null;
+			if (trainingRequestId != null) {
+				List<Training_Request__c> trainingRequests = [
+					SELECT Id, Training_Type__c
+					FROM Training_Request__c
+					WHERE Id = :trainingRequestId
+					WITH USER_MODE
+					LIMIT 1
+				];
+				if (!trainingRequests.isEmpty()) {
+					trainingType = trainingRequests[0].Training_Type__c;
+				}
+			}
+
 			String token = generateUniqueToken();
 
 			SurveyInvitation__c invitation = new SurveyInvitation__c();
@@ -649,7 +693,7 @@ public with sharing class SurveyUtilities {
 
 			Database.insert(invitation, AccessLevel.USER_MODE);
 
-			return buildSurveyUrlWithToken(token);
+			return buildSurveyUrlWithToken(token, trainingType);
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyUtilities.generateSingleSurveyInvitation: ' + e.getMessage());
 			return null;
