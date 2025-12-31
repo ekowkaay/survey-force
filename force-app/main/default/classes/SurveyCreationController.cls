@@ -103,39 +103,42 @@ public with sharing class SurveyCreationController {
 	 * @return CreationResult with success status and survey ID
 	 */
 	@AuraEnabled
-	public static CreationResult createSurveyWithDetails(
-		String surveyName,
-		String surveyHeader,
-		String thankYouText,
-		String thankYouLink,
-		Boolean hideSurveyName,
-		Boolean allResponsesAnonymous
-	) {
-		CreationResult result = new CreationResult();
-		result.success = false;
+        public static CreationResult createSurveyWithDetails(
+                String surveyName,
+                String surveyHeader,
+                String surveySubheader,
+                String thankYouText,
+                String thankYouLink,
+                Boolean hideSurveyName,
+                Boolean allResponsesAnonymous
+        ) {
+                CreationResult result = new CreationResult();
+                result.success = false;
 
-		try {
-			if (String.isBlank(surveyName)) {
+                try {
+                        if (String.isBlank(surveyName)) {
 				result.message = 'Survey name is required';
 				return result;
 			}
 
-			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
-				Schema.Survey__c.fields.Name,
-				Schema.Survey__c.fields.Survey_Header__c,
-				Schema.Survey__c.fields.Thank_You_Text__c,
-				Schema.Survey__c.fields.Thank_You_Link__c,
-				Schema.Survey__c.fields.Hide_Survey_Name__c,
+                        List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+                                Schema.Survey__c.fields.Name,
+                                Schema.Survey__c.fields.Survey_Header__c,
+                                Schema.Survey__c.fields.Survey_Subheader__c,
+                                Schema.Survey__c.fields.Thank_You_Text__c,
+                                Schema.Survey__c.fields.Thank_You_Link__c,
+                                Schema.Survey__c.fields.Hide_Survey_Name__c,
 				Schema.Survey__c.fields.All_Responses_Anonymous__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey__c.getSobjectType(), fields);
 
-			Survey__c newSurvey = new Survey__c();
-			newSurvey.Name = surveyName;
-			newSurvey.Survey_Header__c = surveyHeader;
-			newSurvey.Thank_You_Text__c = thankYouText;
-			newSurvey.Thank_You_Link__c = thankYouLink;
-			newSurvey.Hide_Survey_Name__c = hideSurveyName != null ? hideSurveyName : false;
+                        Survey__c newSurvey = new Survey__c();
+                        newSurvey.Name = surveyName;
+                        newSurvey.Survey_Header__c = surveyHeader;
+                        newSurvey.Survey_Subheader__c = surveySubheader;
+                        newSurvey.Thank_You_Text__c = thankYouText;
+                        newSurvey.Thank_You_Link__c = thankYouLink;
+                        newSurvey.Hide_Survey_Name__c = hideSurveyName != null ? hideSurveyName : false;
 			newSurvey.All_Responses_Anonymous__c = allResponsesAnonymous != null ? allResponsesAnonymous : false;
 
 			insert newSurvey;
@@ -285,12 +288,13 @@ public with sharing class SurveyCreationController {
 				throw new AuraHandledException('Survey ID is required');
 			}
 
-			List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
-				Schema.Survey__c.fields.Name,
-				Schema.Survey__c.fields.Survey_Header__c,
-				Schema.Survey__c.fields.Hide_Survey_Name__c,
-				Schema.Survey__c.fields.Thank_You_Text__c,
-				Schema.Survey__c.fields.Thank_You_Link__c,
+                        List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
+                                Schema.Survey__c.fields.Name,
+                                Schema.Survey__c.fields.Survey_Header__c,
+                                Schema.Survey__c.fields.Survey_Subheader__c,
+                                Schema.Survey__c.fields.Hide_Survey_Name__c,
+                                Schema.Survey__c.fields.Thank_You_Text__c,
+                                Schema.Survey__c.fields.Thank_You_Link__c,
 				Schema.Survey__c.fields.All_Responses_Anonymous__c,
 				Schema.Survey__c.fields.Questions__c,
 				Schema.Survey__c.fields.Completed_Surveys__c
@@ -299,12 +303,13 @@ public with sharing class SurveyCreationController {
 
 			Survey__c survey = [
 				SELECT
-					Id,
-					Name,
-					Survey_Header__c,
-					Hide_Survey_Name__c,
-					Thank_You_Text__c,
-					Thank_You_Link__c,
+                                        Id,
+                                        Name,
+                                        Survey_Header__c,
+                                        Survey_Subheader__c,
+                                        Hide_Survey_Name__c,
+                                        Thank_You_Text__c,
+                                        Thank_You_Link__c,
 					All_Responses_Anonymous__c,
 					Questions__c,
 					Completed_Surveys__c,
@@ -392,12 +397,13 @@ public with sharing class SurveyCreationController {
 			}
 
 			// Get source survey
-			List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
-				Schema.Survey__c.fields.Name,
-				Schema.Survey__c.fields.Survey_Header__c,
-				Schema.Survey__c.fields.Hide_Survey_Name__c,
-				Schema.Survey__c.fields.Thank_You_Text__c,
-				Schema.Survey__c.fields.Thank_You_Link__c,
+                        List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
+                                Schema.Survey__c.fields.Name,
+                                Schema.Survey__c.fields.Survey_Header__c,
+                                Schema.Survey__c.fields.Survey_Subheader__c,
+                                Schema.Survey__c.fields.Hide_Survey_Name__c,
+                                Schema.Survey__c.fields.Thank_You_Text__c,
+                                Schema.Survey__c.fields.Thank_You_Link__c,
 				Schema.Survey__c.fields.All_Responses_Anonymous__c,
 				Schema.Survey__c.fields.Survey_Container_CSS__c
 			};

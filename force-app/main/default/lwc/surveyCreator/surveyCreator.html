@@ -78,8 +78,10 @@
 												<dl class="slds-list_horizontal slds-wrap">
 													<dt class="slds-item_label slds-text-color_weak">Survey Name:</dt>
 													<dd class="slds-item_detail">{surveyName}</dd>
-													<dt class="slds-item_label slds-text-color_weak">Header:</dt>
-													<dd class="slds-item_detail">{surveyHeader}</dd>
+                                                                                                        <dt class="slds-item_label slds-text-color_weak">Header:</dt>
+                                                                                                        <dd class="slds-item_detail">{surveyHeader}</dd>
+                                                                                                        <dt class="slds-item_label slds-text-color_weak">Subheader:</dt>
+                                                                                                        <dd class="slds-item_detail">{surveySubheader}</dd>
 													<dt class="slds-item_label slds-text-color_weak">Questions:</dt>
 													<dd class="slds-item_detail">{questionCount}</dd>
 													<dt class="slds-item_label slds-text-color_weak">Responses:</dt>
@@ -199,18 +201,27 @@
 													class="slds-m-bottom_small"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-												<lightning-input
-													label="Survey Header"
-													value={surveyHeader}
-													onchange={handleHeaderChange}
-													disabled={isCreating}
-													placeholder="Enter header text"
-													class="slds-m-bottom_small"></lightning-input>
-											</div>
-											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-												<lightning-textarea
-													label="Thank You Message"
-													value={thankYouText}
+                                                                                                <lightning-input
+                                                                                                        label="Survey Header"
+                                                                                                        value={surveyHeader}
+                                                                                                        onchange={handleHeaderChange}
+                                                                                                        disabled={isCreating}
+                                                                                                        placeholder="Enter header text"
+                                                                                                        class="slds-m-bottom_small"></lightning-input>
+                                                                                        </div>
+                                                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                                                                                <lightning-input
+                                                                                                        label="Survey Subheader"
+                                                                                                        value={surveySubheader}
+                                                                                                        onchange={handleSubheaderChange}
+                                                                                                        disabled={isCreating}
+                                                                                                        placeholder="Enter subheader text"
+                                                                                                        class="slds-m-bottom_small"></lightning-input>
+                                                                                        </div>
+                                                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                                                                                <lightning-textarea
+                                                                                                        label="Thank You Message"
+                                                                                                        value={thankYouText}
 													onchange={handleThankYouTextChange}
 													disabled={isCreating}
 													placeholder="Enter thank you message"
@@ -442,10 +453,12 @@
 									<dl class="slds-list_horizontal slds-wrap">
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Survey Name:</dt>
 										<dd class="slds-item_detail slds-truncate">{surveyName}</dd>
-										<dt class="slds-item_label slds-text-color_weak slds-truncate">Header:</dt>
-										<dd class="slds-item_detail slds-truncate">{surveyHeader}</dd>
-										<dt class="slds-item_label slds-text-color_weak slds-truncate">Status:</dt>
-										<dd class="slds-item_detail slds-truncate">{surveyStatusText}</dd>
+                                                                                <dt class="slds-item_label slds-text-color_weak slds-truncate">Header:</dt>
+                                                                                <dd class="slds-item_detail slds-truncate">{surveyHeader}</dd>
+                                                                                <dt class="slds-item_label slds-text-color_weak slds-truncate">Subheader:</dt>
+                                                                                <dd class="slds-item_detail slds-truncate">{surveySubheader}</dd>
+                                                                                <dt class="slds-item_label slds-text-color_weak slds-truncate">Status:</dt>
+                                                                                <dd class="slds-item_detail slds-truncate">{surveyStatusText}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Questions:</dt>
 										<dd class="slds-item_detail slds-truncate">{questionCount}</dd>
 										<dt class="slds-item_label slds-text-color_weak slds-truncate">Responses:</dt>
