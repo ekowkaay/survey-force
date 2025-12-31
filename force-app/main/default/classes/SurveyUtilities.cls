@@ -1,4 +1,3 @@
-
 /**
  * @description Utility class for creating and managing surveys from templates.
  * Provides methods to clone survey templates and generate unique survey links
@@ -33,6 +32,7 @@ public with sharing class SurveyUtilities {
 		public Id surveyId { get; set; }
 		public String surveyUrl { get; set; }
 		public Id sourceRecordId { get; set; }
+		public String trainingType { get; set; }
 
 		public SurveyCreationResult() {
 			this.success = false;
@@ -75,12 +75,12 @@ public with sharing class SurveyUtilities {
 		// Use bulkified method for consistency and to avoid LIMIT 1 queries
 		SurveyCreationRequest request = new SurveyCreationRequest(parentId, surveyType, lang, surveyName);
 		Map<String, SurveyCreationResult> results = createSurveysInBulk(new List<SurveyCreationRequest>{ request });
-		
+
 		String key = parentId + '_' + surveyType;
 		if (results.containsKey(key)) {
 			return results.get(key);
 		}
-		
+
 		// Fallback if key not found
 		SurveyCreationResult result = new SurveyCreationResult();
 		result.message = 'Survey creation failed';
@@ -95,7 +95,7 @@ public with sharing class SurveyUtilities {
 	 */
 	public static Map<String, SurveyCreationResult> createSurveysInBulk(List<SurveyCreationRequest> requests) {
 		Map<String, SurveyCreationResult> results = new Map<String, SurveyCreationResult>();
-		
+
 		if (requests == null || requests.isEmpty()) {
 			return results;
 		}
@@ -104,7 +104,7 @@ public with sharing class SurveyUtilities {
 			// Collect all template names and training request IDs
 			Set<String> templateNames = new Set<String>();
 			Set<Id> trainingRequestIds = new Set<Id>();
-			
+
 			for (SurveyCreationRequest req : requests) {
 				String templateName = getSurveyTemplateName(req.surveyType, req.language);
 				if (String.isNotBlank(templateName)) {
@@ -127,12 +127,14 @@ public with sharing class SurveyUtilities {
 			}
 
 			// Single SOQL query for all training requests
-			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>([
-				SELECT Id, Training_Type__c
-				FROM Training_Request__c
-				WHERE Id IN :trainingRequestIds
-				WITH USER_MODE
-			]);
+			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>(
+				[
+					SELECT Id, Training_Type__c
+					FROM Training_Request__c
+					WHERE Id IN :trainingRequestIds
+					WITH USER_MODE
+				]
+			);
 
 			// Collect all template IDs for questions query
 			Set<Id> templateIds = new Set<Id>();
@@ -158,7 +160,7 @@ public with sharing class SurveyUtilities {
 			// Process each request
 			List<Survey__c> surveysToInsert = new List<Survey__c>();
 			Map<Integer, SurveyCreationRequest> indexToRequestMap = new Map<Integer, SurveyCreationRequest>();
-			
+
 			for (Integer i = 0; i < requests.size(); i++) {
 				SurveyCreationRequest req = requests[i];
 				String key = req.trainingRequestId + '_' + req.surveyType;
@@ -201,7 +203,7 @@ public with sharing class SurveyUtilities {
 				Survey__c template = templateMap.get(templateName);
 				Survey__c newSurvey = template.clone(false, true, false, false);
 				newSurvey.Name = req.surveyName;
-				
+
 				surveysToInsert.add(newSurvey);
 				indexToRequestMap.put(i, req);
 				results.put(key, result);
@@ -213,7 +215,7 @@ public with sharing class SurveyUtilities {
 
 				// Clone questions for each survey
 				List<Survey_Question__c> allQuestionsToInsert = new List<Survey_Question__c>();
-				
+
 				for (Integer i = 0; i < surveysToInsert.size(); i++) {
 					Survey__c newSurvey = surveysToInsert[i];
 					SurveyCreationRequest req = indexToRequestMap.get(i);
@@ -235,7 +237,8 @@ public with sharing class SurveyUtilities {
 					// Build result
 					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
 					SurveyCreationResult result = results.get(key);
-					
+					result.trainingType = tReq.Training_Type__c;
+
 					if (String.isBlank(siteURL)) {
 						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
 					} else {
@@ -321,17 +324,26 @@ public with sharing class SurveyUtilities {
 	 * @return String Site URL or null if not found
 	 */
 	private static String getSiteURLForTrainingType(String trainingType) {
-		Map<String, SiteURL__c> csSite = SiteURL__c.getAll();
+		List<SiteURL__mdt> siteURLs = [
+			SELECT Label, URL__c
+			FROM SiteURL__mdt
+			WHERE Label IN (:SITE_URL_EAP_TRAINING, :SITE_URL_RESELLER_TRAINING)
+			WITH SECURITY_ENFORCED
+		];
 
-		if (csSite == null || csSite.isEmpty()) {
+		if (siteURLs == null || siteURLs.isEmpty()) {
 			return null;
 		}
 
 		String siteURL = null;
-		if (trainingType == TRAINING_TYPE_EAP && csSite.containsKey(SITE_URL_EAP_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_EAP_TRAINING).URL__c;
-		} else if (csSite.containsKey(SITE_URL_RESELLER_TRAINING)) {
-			siteURL = csSite.get(SITE_URL_RESELLER_TRAINING).URL__c;
+		for (SiteURL__mdt site : siteURLs) {
+			if (trainingType == TRAINING_TYPE_EAP && site.Label == SITE_URL_EAP_TRAINING) {
+				siteURL = site.URL__c;
+				break;
+			} else if (site.Label == SITE_URL_RESELLER_TRAINING) {
+				siteURL = site.URL__c;
+				break;
+			}
 		}
 
 		return siteURL;
@@ -352,12 +364,14 @@ public with sharing class SurveyUtilities {
 			}
 
 			// Query all participants at once
-			Map<Id, Participants__c> participantsMap = new Map<Id, Participants__c>([
-				SELECT Id, Participant_Name__c, Email__c, Training_Request__c
-				FROM Participants__c
-				WHERE Id IN :participantIds
-				WITH USER_MODE
-			]);
+			Map<Id, Participants__c> participantsMap = new Map<Id, Participants__c>(
+				[
+					SELECT Id, Participant_Name__c, Email__c, Training_Request__c
+					FROM Participants__c
+					WHERE Id IN :participantIds
+					WITH USER_MODE
+				]
+			);
 
 			// Bulk create invitations
 			List<SurveyInvitation__c> invitations = new List<SurveyInvitation__c>();
@@ -365,7 +379,7 @@ public with sharing class SurveyUtilities {
 
 			for (Participants__c participant : participantsMap.values()) {
 				String token = generateUniqueToken();
-				
+
 				SurveyInvitation__c invitation = new SurveyInvitation__c();
 				invitation.Survey__c = surveyId;
 				invitation.Token__c = token;
@@ -373,7 +387,7 @@ public with sharing class SurveyUtilities {
 				invitation.Email__c = participant.Email__c;
 				invitation.ParticipantName__c = participant.Participant_Name__c;
 				invitation.RelatedRecordId__c = participant.Training_Request__c;
-				
+
 				invitations.add(invitation);
 				tokenToParticipantMap.put(token, participant.Id);
 			}
@@ -420,11 +434,11 @@ public with sharing class SurveyUtilities {
 	public static String generateParticipantSurveyLink(Id participantId, Id surveyId) {
 		Set<Id> participantIds = new Set<Id>{ participantId };
 		Map<Id, ParticipantSurveyResult> results = generateParticipantSurveyLinks(participantIds, surveyId);
-		
+
 		if (results.containsKey(participantId) && results.get(participantId).success) {
 			return results.get(participantId).surveyUrl;
 		}
-		
+
 		return null;
 	}
 
@@ -489,18 +503,42 @@ public with sharing class SurveyUtilities {
 	}
 
 	/**
-	 * @description Build survey URL with token
+	 * @description Build survey URL with token for Experience Site/Community access
+	 * Uses SiteURL custom metadata when available to ensure correct Experience Site URL
+	 * @param token The invitation token
+	 * @param trainingType Optional training type to get specific site URL from metadata
+	 * @return String Complete survey URL
+	 */
+	private static String buildSurveyUrlWithToken(String token, String trainingType) {
+		String baseUrl = '';
+
+		// Try to get site URL from metadata if training type is provided
+		if (String.isNotBlank(trainingType)) {
+			baseUrl = getSiteURLForTrainingType(trainingType);
+		}
+
+		// If no metadata URL, try Site.getBaseUrl() for Experience Sites/Communities
+		if (String.isBlank(baseUrl) && Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
+			baseUrl = Site.getBaseUrl();
+		}
+
+		// Final fallback to org domain URL for internal org access
+		if (String.isBlank(baseUrl)) {
+			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
+		}
+
+		// Use /survey path for token-based access
+		// This should match the Experience Site page URL path
+		return baseUrl + '/survey?token=' + token;
+	}
+
+	/**
+	 * @description Build survey URL with token (overload without training type)
 	 * @param token The invitation token
 	 * @return String Complete survey URL
 	 */
 	private static String buildSurveyUrlWithToken(String token) {
-		String baseUrl = '';
-		if (Site.getBaseUrl() != null && String.isNotBlank(Site.getBaseUrl())) {
-			baseUrl = Site.getBaseUrl();
-		} else {
-			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
-		}
-		return baseUrl + '/survey?token=' + token;
+		return buildSurveyUrlWithToken(token, null);
 	}
 
 	/**
@@ -511,7 +549,7 @@ public with sharing class SurveyUtilities {
 	 */
 	public static Map<String, String> generateSurveyInvitationsInBulk(List<InvitationRequest> invitationRequests) {
 		Map<String, String> results = new Map<String, String>();
-		
+
 		try {
 			if (invitationRequests == null || invitationRequests.isEmpty()) {
 				return results;
@@ -519,23 +557,23 @@ public with sharing class SurveyUtilities {
 
 			List<SurveyInvitation__c> invitationsToInsert = new List<SurveyInvitation__c>();
 			Map<Integer, InvitationRequest> indexToRequestMap = new Map<Integer, InvitationRequest>();
-			
+
 			for (Integer i = 0; i < invitationRequests.size(); i++) {
 				InvitationRequest req = invitationRequests[i];
-				
+
 				if (req.surveyId == null) {
 					continue;
 				}
 
 				String token = generateUniqueToken();
-				
+
 				SurveyInvitation__c invitation = new SurveyInvitation__c();
 				invitation.Survey__c = req.surveyId;
 				invitation.Token__c = token;
 				invitation.Status__c = 'Pending';
 				invitation.ParticipantName__c = req.surveyType + ' Survey';
 				invitation.RelatedRecordId__c = req.relatedRecordId;
-				
+
 				invitationsToInsert.add(invitation);
 				indexToRequestMap.put(i, req);
 			}
@@ -549,7 +587,11 @@ public with sharing class SurveyUtilities {
 					SurveyInvitation__c invitation = invitationsToInsert[i];
 					InvitationRequest req = indexToRequestMap.get(i);
 					String key = req.relatedRecordId + '_' + req.surveyType;
-					results.put(key, buildSurveyUrlWithToken(invitation.Token__c));
+
+					// Build URL with training type if available for proper site URL
+					String surveyUrl = String.isNotBlank(req.trainingType) ? buildSurveyUrlWithToken(invitation.Token__c, req.trainingType) : buildSurveyUrlWithToken(invitation.Token__c);
+
+					results.put(key, surveyUrl);
 				}
 			}
 
@@ -567,11 +609,17 @@ public with sharing class SurveyUtilities {
 		public Id surveyId { get; set; }
 		public Id relatedRecordId { get; set; }
 		public String surveyType { get; set; }
+		public String trainingType { get; set; }
 
 		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType) {
+			this(surveyId, relatedRecordId, surveyType, null);
+		}
+
+		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType, String trainingType) {
 			this.surveyId = surveyId;
 			this.relatedRecordId = relatedRecordId;
 			this.surveyType = surveyType;
+			this.trainingType = trainingType;
 		}
 	}
 

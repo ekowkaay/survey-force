@@ -8,11 +8,7 @@ private class ParticipantsTriggerHandler_Test {
 	 */
 	@TestSetup
 	static void setupTestData() {
-		// Create custom settings for site URLs
-		SiteURL__c eapTraining = new SiteURL__c();
-		eapTraining.Name = 'EAP Training';
-		eapTraining.URL__c = 'https://example.force.com';
-		insert eapTraining;
+		// Custom Metadata Types (SiteURL__mdt) are deployed and automatically available in tests
 
 		// Create survey settings
 		SurveySettings__c settings = new SurveySettings__c();
@@ -39,13 +35,12 @@ private class ParticipantsTriggerHandler_Test {
 
 		// Create Training Request
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Test Training Request';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		// Create main survey for the training request
 		String surveyUrl = SurveyUtilities.createSurvey(tr.Id, 'Participant', 'English', 'Main Participant Survey');
-		
+
 		// Update training request with survey URL
 		tr.Participant_Survey__c = surveyUrl;
 		update tr;
@@ -78,10 +73,7 @@ private class ParticipantsTriggerHandler_Test {
 		];
 
 		System.assertNotEquals(null, insertedParticipant.Participant_Survey__c, 'Participant should have survey link');
-		System.assert(
-			insertedParticipant.Participant_Survey__c.contains('token='),
-			'Participant survey URL should contain token'
-		);
+		System.assert(insertedParticipant.Participant_Survey__c.contains('token='), 'Participant survey URL should contain token');
 
 		// Verify invitation was created
 		List<SurveyInvitation__c> invitations = [
@@ -127,7 +119,7 @@ private class ParticipantsTriggerHandler_Test {
 
 		Integer participantsWithLinks = 0;
 		Set<String> uniqueUrls = new Set<String>();
-		
+
 		for (Participants__c p : insertedParticipants) {
 			if (String.isNotBlank(p.Participant_Survey__c)) {
 				participantsWithLinks++;
@@ -154,7 +146,6 @@ private class ParticipantsTriggerHandler_Test {
 	static void testParticipantInsert_NoSurvey() {
 		// Create a training request without a survey
 		Training_Request__c trNoSurvey = new Training_Request__c();
-		trNoSurvey.Name = 'Training Without Survey';
 		trNoSurvey.Training_Type__c = 'EAP Training';
 		insert trNoSurvey;
 

@@ -8,16 +8,7 @@ private class TrainingRequestTriggerHandler_Test {
 	 */
 	@TestSetup
 	static void setupTestData() {
-		// Create custom settings for site URLs
-		SiteURL__c eapTraining = new SiteURL__c();
-		eapTraining.Name = 'EAP Training';
-		eapTraining.URL__c = 'https://example.force.com';
-		insert eapTraining;
-
-		SiteURL__c resellerTraining = new SiteURL__c();
-		resellerTraining.Name = 'Reseller Training';
-		resellerTraining.URL__c = 'https://reseller.force.com';
-		insert resellerTraining;
+		// Custom Metadata Types (SiteURL__mdt) are deployed and automatically available in tests
 
 		// Create survey settings
 		SurveySettings__c settings = new SurveySettings__c();
@@ -79,7 +70,6 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create a new training request
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Test Training Request';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
@@ -93,44 +83,20 @@ private class TrainingRequestTriggerHandler_Test {
 		];
 
 		// Verify all three surveys were created
-		System.assertNotEquals(
-			null,
-			insertedTr.Participant_Survey__c,
-			'Participant survey should be created automatically'
-		);
+		System.assertNotEquals(null, insertedTr.Participant_Survey__c, 'Participant survey should be created automatically');
 		System.assertNotEquals(null, insertedTr.Customer_Survey__c, 'Customer survey should be created automatically');
 		System.assertNotEquals(null, insertedTr.Trainer_Survey__c, 'Trainer survey should be created automatically');
 
-		// Verify survey URLs now use token-based format for all three
-		System.assert(
-			insertedTr.Participant_Survey__c.contains('/survey?token='),
-			'Participant survey URL should contain token'
-		);
-		System.assert(
-			insertedTr.Customer_Survey__c.contains('/survey?token='),
-			'Customer survey URL should contain token'
-		);
-		System.assert(
-			insertedTr.Trainer_Survey__c.contains('/survey?token='),
-			'Trainer survey URL should contain token'
-		);
+		// Verify survey URL formats:
+		// - All surveys: Survey ID URL (tokens generated when participants are created, or for Customer/Trainer in background)
+		System.assert(insertedTr.Participant_Survey__c.contains('/TakeSurvey?id='), 'Participant survey URL should contain survey ID');
+		System.assert(insertedTr.Customer_Survey__c.contains('/TakeSurvey?id='), 'Customer survey URL should contain survey ID');
+		System.assert(insertedTr.Trainer_Survey__c.contains('/TakeSurvey?id='), 'Trainer survey URL should contain survey ID');
 
 		// Verify surveys have different URLs (different tokens)
-		System.assertNotEquals(
-			insertedTr.Participant_Survey__c,
-			insertedTr.Customer_Survey__c,
-			'Participant and Customer surveys should be different'
-		);
-		System.assertNotEquals(
-			insertedTr.Participant_Survey__c,
-			insertedTr.Trainer_Survey__c,
-			'Participant and Trainer surveys should be different'
-		);
-		System.assertNotEquals(
-			insertedTr.Customer_Survey__c,
-			insertedTr.Trainer_Survey__c,
-			'Customer and Trainer surveys should be different'
-		);
+		System.assertNotEquals(insertedTr.Participant_Survey__c, insertedTr.Customer_Survey__c, 'Participant and Customer surveys should be different');
+		System.assertNotEquals(insertedTr.Participant_Survey__c, insertedTr.Trainer_Survey__c, 'Participant and Trainer surveys should be different');
+		System.assertNotEquals(insertedTr.Customer_Survey__c, insertedTr.Trainer_Survey__c, 'Customer and Trainer surveys should be different');
 
 		// Verify surveys were created with correct names
 		List<Survey__c> createdSurveys = [
@@ -151,13 +117,14 @@ private class TrainingRequestTriggerHandler_Test {
 			System.assertEquals(2, surveyQuestions.size(), 'Each survey should have 2 questions cloned');
 		}
 
-		// Verify SurveyInvitation records were created for Customer and Trainer
+		// Verify SurveyInvitation records were created for Customer and Trainer only
+		// Participant tokens are generated when participant records are created
 		List<SurveyInvitation__c> invitations = [
 			SELECT Id, Token__c, Survey__c, Status__c, ParticipantName__c
 			FROM SurveyInvitation__c
 			WHERE RelatedRecordId__c = :tr.Id
 		];
-		System.assertEquals(3, invitations.size(), 'Should create 3 survey invitations (Participant, Customer, Trainer)');
+		System.assertEquals(2, invitations.size(), 'Should create 2 survey invitations (Customer, Trainer only)');
 
 		// Verify all invitations are pending and have unique tokens
 		Set<String> tokens = new Set<String>();
@@ -166,7 +133,7 @@ private class TrainingRequestTriggerHandler_Test {
 			System.assertNotEquals(null, inv.Token__c, 'Token should not be null');
 			tokens.add(inv.Token__c);
 		}
-		System.assertEquals(3, tokens.size(), 'All tokens should be unique');
+		System.assertEquals(2, tokens.size(), 'All tokens should be unique');
 	}
 
 	/**
@@ -180,7 +147,6 @@ private class TrainingRequestTriggerHandler_Test {
 		List<Training_Request__c> trainingRequests = new List<Training_Request__c>();
 		for (Integer i = 0; i < 10; i++) {
 			Training_Request__c tr = new Training_Request__c();
-			tr.Name = 'Bulk Training Request ' + i;
 			tr.Training_Type__c = 'EAP Training';
 			trainingRequests.add(tr);
 		}
@@ -241,7 +207,6 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create training request with existing survey URL
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Training with Existing Survey';
 		tr.Training_Type__c = 'EAP Training';
 		tr.Participant_Survey__c = existingUrl; // Already has participant survey
 		insert tr;
@@ -280,15 +245,14 @@ private class TrainingRequestTriggerHandler_Test {
 
 		// Create training request
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Recursion Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		// Update the training request multiple times
-		tr.Name = 'Updated Name 1';
+		tr.Training_Type__c = 'Reseller Training';
 		update tr;
 
-		tr.Name = 'Updated Name 2';
+		tr.Training_Type__c = 'EAP Training';
 		update tr;
 
 		Test.stopTest();
@@ -310,7 +274,6 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Before Insert Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
@@ -332,14 +295,13 @@ private class TrainingRequestTriggerHandler_Test {
 	static void testAfterUpdate() {
 		// Create training request
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Update Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
 		Test.startTest();
 
 		// Update training request
-		tr.Name = 'Updated Training Request';
+		tr.Training_Type__c = 'Reseller Training';
 		update tr;
 
 		Test.stopTest();
@@ -359,7 +321,6 @@ private class TrainingRequestTriggerHandler_Test {
 	@IsTest
 	static void testAfterDelete() {
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Delete Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
@@ -384,7 +345,6 @@ private class TrainingRequestTriggerHandler_Test {
 	@IsTest
 	static void testAfterUndelete() {
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Undelete Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
@@ -413,7 +373,6 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Corporate Training 2024';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 
@@ -459,7 +418,6 @@ private class TrainingRequestTriggerHandler_Test {
 		Test.startTest();
 
 		Training_Request__c tr = new Training_Request__c();
-		tr.Name = 'Missing Template Test';
 		tr.Training_Type__c = 'EAP Training';
 		insert tr;
 

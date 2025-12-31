@@ -5,7 +5,6 @@
     <columns>CREATEDBY_USER</columns>
     <columns>CREATED_DATE</columns>
     <columns>Questions__c</columns>
-    <columns>Share_with_Guest_User__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
     <language>en_US</language>

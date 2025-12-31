@@ -14,13 +14,12 @@ public with sharing class SurveyTemplateController {
 				Schema.Survey__c.fields.Name,
 				Schema.Survey__c.fields.CreatedDate,
 				Schema.Survey__c.fields.Questions__c,
-				Schema.Survey__c.fields.Completed_Surveys__c,
-				Schema.Survey__c.fields.Share_with_Guest_User__c
+				Schema.Survey__c.fields.Completed_Surveys__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), fields);
 
 			return [
-				SELECT Id, Name, CreatedDate, Questions__c, Completed_Surveys__c, Share_with_Guest_User__c
+				SELECT Id, Name, CreatedDate, Questions__c, Completed_Surveys__c
 				FROM Survey__c
 				WITH USER_MODE
 				ORDER BY CreatedDate DESC

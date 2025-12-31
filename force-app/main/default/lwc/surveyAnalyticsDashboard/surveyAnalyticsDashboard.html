@@ -144,11 +144,11 @@
 							<div class="metric-card slds-box slds-theme_default">
 								<div class="slds-media slds-media_center">
 									<div class="slds-media__figure">
-										<lightning-icon icon-name="utility:world" size="small" alternative-text="Public Surveys"></lightning-icon>
+										<lightning-icon icon-name="utility:record_update" size="small" alternative-text="Active Surveys"></lightning-icon>
 									</div>
 									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Public Surveys</p>
-										<p class="slds-text-heading_large metric-value">{publicSurveys}</p>
+										<p class="slds-text-body_small slds-text-color_weak">Active Surveys</p>
+										<p class="slds-text-heading_large metric-value">{activeSurveys}</p>
 									</div>
 								</div>
 							</div>
@@ -230,9 +230,7 @@
 														</div>
 													</div>
 													<div class="slds-col slds-no-flex">
-														<template lwc:if={survey.Share_with_Guest_User__c}>
-															<span class="slds-badge slds-theme_inverse">Public</span>
-														</template>
+														<!-- All surveys now use token-based access -->
 													</div>
 												</div>
 											</div>
