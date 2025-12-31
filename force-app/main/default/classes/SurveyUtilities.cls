@@ -404,7 +404,7 @@ public with sharing class SurveyUtilities {
 
 					// Get training type from related Training Request
 					String trainingType = null;
-					if (participant.Training_Request__c != null && participant.Training_Request__r != null) {
+					if (participant.Training_Request__r != null) {
 						trainingType = participant.Training_Request__r.Training_Type__c;
 					}
 
