@@ -83,45 +83,20 @@ private class TrainingRequestTriggerHandler_Test {
 		];
 
 		// Verify all three surveys were created
-		System.assertNotEquals(
-			null,
-			insertedTr.Participant_Survey__c,
-			'Participant survey should be created automatically'
-		);
+		System.assertNotEquals(null, insertedTr.Participant_Survey__c, 'Participant survey should be created automatically');
 		System.assertNotEquals(null, insertedTr.Customer_Survey__c, 'Customer survey should be created automatically');
 		System.assertNotEquals(null, insertedTr.Trainer_Survey__c, 'Trainer survey should be created automatically');
 
 		// Verify survey URL formats:
 		// - All surveys: Survey ID URL (tokens generated when participants are created, or for Customer/Trainer in background)
-		System.assert(
-			insertedTr.Participant_Survey__c.contains('/TakeSurvey?id='),
-			'Participant survey URL should contain survey ID'
-		);
-		System.assert(
-			insertedTr.Customer_Survey__c.contains('/TakeSurvey?id='),
-			'Customer survey URL should contain survey ID'
-		);
-		System.assert(
-			insertedTr.Trainer_Survey__c.contains('/TakeSurvey?id='),
-			'Trainer survey URL should contain survey ID'
-		);
+		System.assert(insertedTr.Participant_Survey__c.contains('/TakeSurvey?id='), 'Participant survey URL should contain survey ID');
+		System.assert(insertedTr.Customer_Survey__c.contains('/TakeSurvey?id='), 'Customer survey URL should contain survey ID');
+		System.assert(insertedTr.Trainer_Survey__c.contains('/TakeSurvey?id='), 'Trainer survey URL should contain survey ID');
 
 		// Verify surveys have different URLs (different tokens)
-		System.assertNotEquals(
-			insertedTr.Participant_Survey__c,
-			insertedTr.Customer_Survey__c,
-			'Participant and Customer surveys should be different'
-		);
-		System.assertNotEquals(
-			insertedTr.Participant_Survey__c,
-			insertedTr.Trainer_Survey__c,
-			'Participant and Trainer surveys should be different'
-		);
-		System.assertNotEquals(
-			insertedTr.Customer_Survey__c,
-			insertedTr.Trainer_Survey__c,
-			'Customer and Trainer surveys should be different'
-		);
+		System.assertNotEquals(insertedTr.Participant_Survey__c, insertedTr.Customer_Survey__c, 'Participant and Customer surveys should be different');
+		System.assertNotEquals(insertedTr.Participant_Survey__c, insertedTr.Trainer_Survey__c, 'Participant and Trainer surveys should be different');
+		System.assertNotEquals(insertedTr.Customer_Survey__c, insertedTr.Trainer_Survey__c, 'Customer and Trainer surveys should be different');
 
 		// Verify surveys were created with correct names
 		List<Survey__c> createdSurveys = [

@@ -17,7 +17,6 @@ const COLUMNS = [
 	},
 	{ label: 'Questions', fieldName: 'Questions__c', type: 'number', sortable: true },
 	{ label: 'Responses', fieldName: 'Completed_Surveys__c', type: 'number', sortable: true },
-	{ label: 'Public', fieldName: 'Share_with_Guest_User__c', type: 'boolean' },
 	{ label: 'Created Date', fieldName: 'CreatedDate', type: 'date', sortable: true },
 	{
 		type: 'action',

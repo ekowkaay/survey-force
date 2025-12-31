@@ -89,12 +89,14 @@ public with sharing class ParticipantsTriggerHandler {
 			}
 
 			// Query Training Requests to get their participant surveys
-			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>([
-				SELECT Id, Participant_Survey__c
-				FROM Training_Request__c
-				WHERE Id IN :trainingRequestIds
-				WITH USER_MODE
-			]);
+			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>(
+				[
+					SELECT Id, Participant_Survey__c
+					FROM Training_Request__c
+					WHERE Id IN :trainingRequestIds
+					WITH USER_MODE
+				]
+			);
 
 			// Get survey IDs from URLs
 			Map<Id, Id> trainingRequestToSurveyMap = new Map<Id, Id>();
@@ -131,10 +133,7 @@ public with sharing class ParticipantsTriggerHandler {
 			List<Participants__c> participantsToUpdate = new List<Participants__c>();
 			for (Id surveyId : surveyToParticipantsMap.keySet()) {
 				Set<Id> participantIds = surveyToParticipantsMap.get(surveyId);
-				Map<Id, SurveyUtilities.ParticipantSurveyResult> results = SurveyUtilities.generateParticipantSurveyLinks(
-					participantIds,
-					surveyId
-				);
+				Map<Id, SurveyUtilities.ParticipantSurveyResult> results = SurveyUtilities.generateParticipantSurveyLinks(participantIds, surveyId);
 
 				// Update participants with their survey URLs
 				for (Id participantId : results.keySet()) {
@@ -176,7 +175,7 @@ public with sharing class ParticipantsTriggerHandler {
 				// Get everything up to the next & or end of string
 				Integer endIndex = idPortion.indexOf('&');
 				String idValue = endIndex != -1 ? idPortion.substring(0, endIndex) : idPortion;
-				
+
 				// Validate it's a valid Survey ID
 				if (idValue.length() >= 15) {
 					return (Id) idValue;

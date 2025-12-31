@@ -95,6 +95,7 @@ public with sharing class SurveyTakerController {
 			// Get survey record
 			Survey__c survey;
 			if (System.UserInfo.getUserType() == 'Guest') {
+				// All guest access is now token-based
 				survey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(surveyId);
 			} else {
 				List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{

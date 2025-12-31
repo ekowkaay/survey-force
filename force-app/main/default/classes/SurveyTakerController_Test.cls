@@ -215,4 +215,25 @@ private class SurveyTakerController_Test {
 			System.assertEquals(null, surveyTakers[0].User__c, 'User should be null for anonymous response');
 		}
 	}
+
+	@IsTest
+	private static void testGetSurveyDataByToken() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create invitation with token
+			SurveyInvitationController.InvitationResult invitation = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test User', null, null, null, null);
+
+			Test.startTest();
+			// Access survey via token
+			SurveyTakerController.SurveyData surveyData = SurveyTakerController.getSurveyDataByToken(invitation.token);
+			Test.stopTest();
+
+			System.assertNotEquals(null, surveyData, 'Survey data should not be null');
+			System.assertNotEquals(null, surveyData.survey, 'Survey should not be null');
+			System.assertEquals(tu.surveyId, surveyData.survey.Id, 'Survey ID should match');
+			System.assertEquals(SurveyTestingUtil.QUESTION_TYPES, surveyData.questions.size(), 'Should have correct number of questions');
+		}
+	}
 }

@@ -36,10 +36,6 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 		return this.filteredSurveys.filter((s) => (s.Completed_Surveys__c || 0) > 0).length;
 	}
 
-	get publicSurveys() {
-		return this.filteredSurveys.filter((s) => s.Share_with_Guest_User__c).length;
-	}
-
 	get filteredSurveys() {
 		if (!this.surveys) return [];
 

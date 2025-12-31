@@ -56,11 +56,7 @@ public with sharing class TrainingRequestTriggerHandler {
 	 * @param newMap Map of updated Training Request records
 	 * @param oldMap Map of old Training Request records
 	 */
-	public void afterUpdate(
-		List<Training_Request__c> newRecords,
-		Map<Id, Training_Request__c> newMap,
-		Map<Id, Training_Request__c> oldMap
-	) {
+	public void afterUpdate(List<Training_Request__c> newRecords, Map<Id, Training_Request__c> newMap, Map<Id, Training_Request__c> oldMap) {
 		// Placeholder for after update logic
 	}
 
@@ -101,34 +97,19 @@ public with sharing class TrainingRequestTriggerHandler {
 
 				// Create Participant Survey
 				if (String.isBlank(tr.Participant_Survey__c)) {
-					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
-						tr.Id,
-						SURVEY_TYPE_PARTICIPANT,
-						DEFAULT_LANGUAGE,
-						buildSurveyName(tr.Name, SURVEY_TYPE_PARTICIPANT)
-					));
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, SURVEY_TYPE_PARTICIPANT, DEFAULT_LANGUAGE, buildSurveyName(tr.Name, SURVEY_TYPE_PARTICIPANT)));
 					surveyTypes.add(SURVEY_TYPE_PARTICIPANT);
 				}
 
 				// Create Customer Survey
 				if (String.isBlank(tr.Customer_Survey__c)) {
-					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
-						tr.Id,
-						SURVEY_TYPE_CUSTOMER,
-						DEFAULT_LANGUAGE,
-						buildSurveyName(tr.Name, SURVEY_TYPE_CUSTOMER)
-					));
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, SURVEY_TYPE_CUSTOMER, DEFAULT_LANGUAGE, buildSurveyName(tr.Name, SURVEY_TYPE_CUSTOMER)));
 					surveyTypes.add(SURVEY_TYPE_CUSTOMER);
 				}
 
 				// Create Trainer Survey
 				if (String.isBlank(tr.Trainer_Survey__c)) {
-					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(
-						tr.Id,
-						SURVEY_TYPE_TRAINER,
-						DEFAULT_LANGUAGE,
-						buildSurveyName(tr.Name, SURVEY_TYPE_TRAINER)
-					));
+					surveyRequests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, SURVEY_TYPE_TRAINER, DEFAULT_LANGUAGE, buildSurveyName(tr.Name, SURVEY_TYPE_TRAINER)));
 					surveyTypes.add(SURVEY_TYPE_TRAINER);
 				}
 
@@ -146,16 +127,11 @@ public with sharing class TrainingRequestTriggerHandler {
 				for (String key : surveyResults.keySet()) {
 					SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
 					String surveyType = key.substringAfter('_');
-					
+
 					// Only generate tokens for Customer and Trainer surveys
 					// Participant tokens are generated when participant records are created
 					if (result.success && result.surveyId != null && surveyType != SURVEY_TYPE_PARTICIPANT) {
-						invitationRequests.add(new SurveyUtilities.InvitationRequest(
-							result.surveyId,
-							result.sourceRecordId,
-							surveyType,
-							result.trainingType
-						));
+						invitationRequests.add(new SurveyUtilities.InvitationRequest(result.surveyId, result.sourceRecordId, surveyType, result.trainingType));
 					}
 				}
 
@@ -202,12 +178,7 @@ public with sharing class TrainingRequestTriggerHandler {
 				}
 			}
 		} catch (Exception e) {
-			SurveyForceUtil.log(
-				'TrainingRequestTriggerHandler.createSurveysForTrainingRequests: ' +
-				e.getMessage() +
-				' - ' +
-				e.getStackTraceString()
-			);
+			SurveyForceUtil.log('TrainingRequestTriggerHandler.createSurveysForTrainingRequests: ' + e.getMessage() + ' - ' + e.getStackTraceString());
 		}
 	}
 
