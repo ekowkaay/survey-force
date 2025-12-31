@@ -336,7 +336,7 @@ public with sharing class SurveyUtilities {
 	private static String getSiteURLForTrainingType(String trainingType) {
 		Map<String, SiteURL__mdt> siteURLs = SiteURL__mdt.getAll();
 
-		if (siteURLs == null || siteURLs.isEmpty()) {
+		if (siteURLs.isEmpty()) {
 			return null;
 		}
 
