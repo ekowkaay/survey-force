@@ -167,6 +167,47 @@ h1 {
 	gap: 0.75rem;
 }
 
+/* Agreement Scale Styling */
+.agreement-header {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #475569;
+	text-align: center;
+	margin-bottom: 1.5rem;
+	font-style: italic;
+}
+
+.scale-container {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+.scale-label {
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: #334155;
+	white-space: nowrap;
+	min-width: 80px;
+}
+
+.scale-label-start {
+	text-align: right;
+}
+
+.scale-label-end {
+	text-align: left;
+}
+
+.radio-horizontal-scale {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+}
+
 .checkbox-container {
 	display: grid;
 	gap: 0.75rem;
@@ -191,6 +232,18 @@ lightning-radio-group {
 	--slds-c-radio-color-background: #f8fafc;
 	--slds-c-radio-color-border: #e2e8f0;
 	--slds-c-radio-mark-color-foreground: #f97316;
+}
+
+.radio-horizontal-scale lightning-radio-group {
+	width: 100%;
+}
+
+/* Ensure horizontal layout for scale radio buttons */
+.radio-horizontal-scale ::part(group) {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	justify-content: space-between;
 }
 
 /* Actions */
@@ -359,5 +412,28 @@ footer.footer {
 	.btn {
 		width: 100%;
 		justify-content: center;
+	}
+
+	.scale-container {
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.scale-label-start,
+	.scale-label-end {
+		text-align: center;
+		min-width: auto;
+	}
+
+	.scale-label-start {
+		order: -1;
+	}
+
+	.scale-label-end {
+		order: 1;
+	}
+
+	.radio-horizontal-scale {
+		order: 0;
 	}
 }
