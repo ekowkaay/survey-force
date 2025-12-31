@@ -1,0 +1,16 @@
+# Survey Header Configuration
+
+## Current behavior
+- **Template header field**: Each survey record includes the rich-text `Survey_Header__c` field. The Apex `SurveyTakerController.getSurveyData` seeds the invitation header from this field when no invitation metadata is provided, so populating it on the survey template sets the default header for all derived surveys.【F:force-app/main/default/classes/SurveyTakerController.cls†L115-L134】【F:force-app/main/default/objects/Survey__c/fields/Survey_Header__c.field-meta.xml†L3-L9】
+- **Invitation-driven context**: When respondents enter through an invitation token, `SurveyTakerController.getSurveyDataByToken` overrides the header copy with the invitation's `EventTopic__c` and `EventDate__c` to render topic/date-aware messaging.【F:force-app/main/default/classes/SurveyTakerController.cls†L567-L596】
+- **Template rendering**: The Survey Taker LWC renders a fixed intro heading and builds the subheading from the event topic/date if present, then falls back to the invitation header and template header respectively.【F:force-app/main/default/lwc/surveyTaker/surveyTaker.js†L140-L160】
+
+## How to set headers dynamically
+1. **Define the template header**: On the survey template record (Survey__c), fill `Survey_Header__c` with the desired default message. This rich-text field supports styling and will appear whenever an invitation does not inject topic/date context.【F:force-app/main/default/objects/Survey__c/fields/Survey_Header__c.field-meta.xml†L3-L9】【F:force-app/main/default/classes/SurveyTakerController.cls†L130-L134】
+2. **Pass event details with invitations**: When generating invitations (single or bulk), populate `EventTopic__c` and `EventDate__c` via the `eventTopic` and `eventDate` parameters on the Apex `createInvitation` / `createBulkInvitations` methods. These values are used to craft the topic/date-aware header shown to respondents.【F:force-app/main/default/classes/SurveyInvitationController.cls†L128-L210】【F:force-app/main/default/objects/SurveyInvitation__c/fields/EventTopic__c.field-meta.xml†L3-L11】【F:force-app/main/default/objects/SurveyInvitation__c/fields/EventDate__c.field-meta.xml†L3-L9】
+3. **Fallback logic**: If neither invitation nor template header is provided, the subheading gracefully falls back to "Please take a moment to complete the evaluation survey for {Survey Name}." ensuring a consistent prompt even without additional metadata.【F:force-app/main/default/lwc/surveyTaker/surveyTaker.js†L145-L160】
+
+## Recommendations
+- **Standardize template headers**: Add the canonical topic/date-agnostic message to `Survey_Header__c` on your Survey templates so cloned surveys inherit consistent branding and instructional text by default.
+- **Include event metadata when issuing invitations**: Supply `EventTopic__c` and `EventDate__c` on invitations to render "Topic on Date" automatically in the respondent view without modifying the template per event.
+- **Optional: token placeholders**: If you need the template header itself to render placeholders (e.g., `{Topic}`/`{Date}`) without relying on invitation overrides, consider extending the controller/LWC to replace tokens with invitation metadata before display.
