@@ -341,7 +341,7 @@ public with sharing class SurveyUtilities {
 		}
 
 		String siteURL = null;
-		if (trainingType == TRAINING_TYPE_EAP && siteURLs.containsKey(SITE_URL_EAP_TRAINING)) {
+		if (TRAINING_TYPE_EAP.equals(trainingType) && siteURLs.containsKey(SITE_URL_EAP_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_EAP_TRAINING).URL__c;
 		} else if (siteURLs.containsKey(SITE_URL_RESELLER_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_RESELLER_TRAINING).URL__c;
@@ -364,36 +364,15 @@ public with sharing class SurveyUtilities {
 				return results;
 			}
 
-			// Query all participants at once
+			// Query all participants at once with Training Request relationship
 			Map<Id, Participants__c> participantsMap = new Map<Id, Participants__c>(
 				[
-					SELECT Id, Participant_Name__c, Email__c, Training_Request__c
+					SELECT Id, Participant_Name__c, Email__c, Training_Request__c, Training_Request__r.Training_Type__c
 					FROM Participants__c
 					WHERE Id IN :participantIds
 					WITH USER_MODE
 				]
 			);
-
-			// Collect unique Training Request IDs to query training types
-			Set<Id> trainingRequestIds = new Set<Id>();
-			for (Participants__c participant : participantsMap.values()) {
-				if (participant.Training_Request__c != null) {
-					trainingRequestIds.add(participant.Training_Request__c);
-				}
-			}
-
-			// Query Training Requests to get Training_Type__c for site URL selection
-			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>();
-			if (!trainingRequestIds.isEmpty()) {
-				trainingRequestMap = new Map<Id, Training_Request__c>(
-					[
-						SELECT Id, Training_Type__c
-						FROM Training_Request__c
-						WHERE Id IN :trainingRequestIds
-						WITH USER_MODE
-					]
-				);
-			}
 
 			// Bulk create invitations
 			List<SurveyInvitation__c> invitations = new List<SurveyInvitation__c>();
@@ -425,8 +404,8 @@ public with sharing class SurveyUtilities {
 
 					// Get training type from related Training Request
 					String trainingType = null;
-					if (participant.Training_Request__c != null && trainingRequestMap.containsKey(participant.Training_Request__c)) {
-						trainingType = trainingRequestMap.get(participant.Training_Request__c).Training_Type__c;
+					if (participant.Training_Request__c != null && participant.Training_Request__r != null) {
+						trainingType = participant.Training_Request__r.Training_Type__c;
 					}
 
 					ParticipantSurveyResult result = new ParticipantSurveyResult();
