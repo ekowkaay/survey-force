@@ -399,14 +399,13 @@ public with sharing class SurveyCreationController {
 				Schema.Survey__c.fields.Thank_You_Text__c,
 				Schema.Survey__c.fields.Thank_You_Link__c,
 				Schema.Survey__c.fields.All_Responses_Anonymous__c,
-				Schema.Survey__c.fields.Share_with_Guest_User__c,
 				Schema.Survey__c.fields.Survey_Container_CSS__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey__c.getSobjectType(), surveyFields);
 
 			Survey__c sourceSurvey = [
-				SELECT Survey_Header__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Share_with_Guest_User__c, Survey_Container_CSS__c
+				SELECT Survey_Header__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c
 				FROM Survey__c
 				WHERE Id = :sourceSurveyId
 				WITH USER_MODE

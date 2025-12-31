@@ -86,18 +86,6 @@ public with sharing class SurveyTakerController {
 	 */
 	@AuraEnabled(cacheable=true)
 	public static SurveyData getSurveyData(Id surveyId, String caseId, String contactId) {
-		return getSurveyDataInternal(surveyId, caseId, contactId, false);
-	}
-
-	/**
-	 * Internal method to get survey data with option for token-based access
-	 * @param surveyId Survey record ID
-	 * @param caseId Optional Case ID
-	 * @param contactId Optional Contact ID
-	 * @param isTokenBased True if accessing via validated invitation token
-	 * @return SurveyData wrapper with all survey information
-	 */
-	private static SurveyData getSurveyDataInternal(Id surveyId, String caseId, String contactId, Boolean isTokenBased) {
 		try {
 			SurveyData result = new SurveyData();
 
@@ -107,12 +95,8 @@ public with sharing class SurveyTakerController {
 			// Get survey record
 			Survey__c survey;
 			if (System.UserInfo.getUserType() == 'Guest') {
-				// Use token-based access method if accessing via validated token
-				if (isTokenBased) {
-					survey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUserByToken(surveyId);
-				} else {
-					survey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(surveyId);
-				}
+				// All guest access is now token-based
+				survey = ViewSurveyControllerWithoutSharing.getSurveyForGuestUser(surveyId);
 			} else {
 				List<Schema.SobjectField> surveyFields = new List<Schema.SobjectField>{
 					Schema.Survey__c.fields.Name,
@@ -582,8 +566,8 @@ public with sharing class SurveyTakerController {
 				throw new AuraHandledException(validation.message);
 			}
 
-			// Get survey data using the validated survey ID with token-based access
-			SurveyData data = getSurveyDataInternal(validation.surveyId, null, null, true);
+			// Get survey data using the validated survey ID
+			SurveyData data = getSurveyData(validation.surveyId, null, null);
 
 			// Build dynamic invitation header if event information is available
 			if (validation.eventTopic != null || validation.eventDate != null) {

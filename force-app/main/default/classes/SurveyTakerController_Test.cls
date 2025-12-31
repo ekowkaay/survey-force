@@ -236,30 +236,4 @@ private class SurveyTakerController_Test {
 			System.assertEquals(SurveyTestingUtil.QUESTION_TYPES, surveyData.questions.size(), 'Should have correct number of questions');
 		}
 	}
-
-	@IsTest
-	private static void testGetSurveyDataByTokenWithoutShareFlag() {
-		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
-		System.runAs(u) {
-			SurveyTestingUtil tu = new SurveyTestingUtil();
-
-			// Ensure Share_with_Guest_User__c is false
-			Survey__c survey = [SELECT Id, Share_with_Guest_User__c FROM Survey__c WHERE Id = :tu.surveyId LIMIT 1];
-			survey.Share_with_Guest_User__c = false;
-			update survey;
-
-			// Create invitation with token
-			SurveyInvitationController.InvitationResult invitation = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test User', null, null, null, null);
-
-			Test.startTest();
-			// Access survey via token should succeed even though Share_with_Guest_User__c is false
-			SurveyTakerController.SurveyData surveyData = SurveyTakerController.getSurveyDataByToken(invitation.token);
-			Test.stopTest();
-
-			System.assertNotEquals(null, surveyData, 'Survey data should not be null');
-			System.assertNotEquals(null, surveyData.survey, 'Survey should not be null');
-			System.assertEquals(tu.surveyId, surveyData.survey.Id, 'Survey ID should match');
-			System.assertEquals(false, surveyData.survey.Share_with_Guest_User__c, 'Share flag should be false');
-		}
-	}
 }
