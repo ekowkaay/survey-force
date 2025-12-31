@@ -18,10 +18,6 @@
                 <field>Hide_Survey_Name__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Share_with_Guest_User__c</field>
-            </layoutItems>
-            <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>All_Responses_Anonymous__c</field>
             </layoutItems>

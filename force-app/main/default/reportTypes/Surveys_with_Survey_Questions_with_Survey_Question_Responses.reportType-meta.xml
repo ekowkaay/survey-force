@@ -56,11 +56,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Share_with_Guest_User__c</field>
-            <table>Survey__c</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>Survey_Container_CSS__c</field>
             <table>Survey__c</table>
         </columns>
