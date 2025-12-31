@@ -20,8 +20,8 @@ public with sharing class SurveyUtilities {
 
 	/** Training type constants */
 	private static final String TRAINING_TYPE_EAP = 'EAP Training';
-	private static final String SITE_URL_EAP_TRAINING = 'EAP Training';
-	private static final String SITE_URL_RESELLER_TRAINING = 'Reseller Training';
+	private static final String SITE_URL_EAP_TRAINING = 'EAP_Training';
+	private static final String SITE_URL_RESELLER_TRAINING = 'Reseller_Training';
 
 	/**
 	 * @description Wrapper class for survey creation results
@@ -334,26 +334,17 @@ public with sharing class SurveyUtilities {
 	 * @return String Site URL or null if not found
 	 */
 	private static String getSiteURLForTrainingType(String trainingType) {
-		List<SiteURL__mdt> siteURLs = [
-			SELECT Label, URL__c
-			FROM SiteURL__mdt
-			WHERE Label IN (:SITE_URL_EAP_TRAINING, :SITE_URL_RESELLER_TRAINING)
-			WITH SECURITY_ENFORCED
-		];
+		Map<String, SiteURL__mdt> siteURLs = SiteURL__mdt.getAll();
 
-		if (siteURLs == null || siteURLs.isEmpty()) {
+		if (siteURLs.isEmpty()) {
 			return null;
 		}
 
 		String siteURL = null;
-		for (SiteURL__mdt site : siteURLs) {
-			if (trainingType == TRAINING_TYPE_EAP && site.Label == SITE_URL_EAP_TRAINING) {
-				siteURL = site.URL__c;
-				break;
-			} else if (site.Label == SITE_URL_RESELLER_TRAINING) {
-				siteURL = site.URL__c;
-				break;
-			}
+		if (TRAINING_TYPE_EAP.equals(trainingType) && siteURLs.containsKey(SITE_URL_EAP_TRAINING)) {
+			siteURL = siteURLs.get(SITE_URL_EAP_TRAINING).URL__c;
+		} else if (siteURLs.containsKey(SITE_URL_RESELLER_TRAINING)) {
+			siteURL = siteURLs.get(SITE_URL_RESELLER_TRAINING).URL__c;
 		}
 
 		return siteURL;
@@ -373,10 +364,10 @@ public with sharing class SurveyUtilities {
 				return results;
 			}
 
-			// Query all participants at once
+			// Query all participants at once with Training Request relationship
 			Map<Id, Participants__c> participantsMap = new Map<Id, Participants__c>(
 				[
-					SELECT Id, Participant_Name__c, Email__c, Training_Request__c
+					SELECT Id, Participant_Name__c, Email__c, Training_Request__c, Training_Request__r.Training_Type__c
 					FROM Participants__c
 					WHERE Id IN :participantIds
 					WITH USER_MODE
@@ -409,10 +400,18 @@ public with sharing class SurveyUtilities {
 				// Build results with URLs
 				for (SurveyInvitation__c inv : invitations) {
 					Id participantId = tokenToParticipantMap.get(inv.Token__c);
+					Participants__c participant = participantsMap.get(participantId);
+
+					// Get training type from related Training Request
+					String trainingType = null;
+					if (participant.Training_Request__r != null) {
+						trainingType = participant.Training_Request__r.Training_Type__c;
+					}
+
 					ParticipantSurveyResult result = new ParticipantSurveyResult();
 					result.participantId = participantId;
 					result.success = true;
-					result.surveyUrl = buildSurveyUrlWithToken(inv.Token__c);
+					result.surveyUrl = buildSurveyUrlWithToken(inv.Token__c, trainingType);
 					result.message = 'Survey link generated successfully';
 					results.put(participantId, result);
 				}
@@ -647,6 +646,21 @@ public with sharing class SurveyUtilities {
 				return null;
 			}
 
+			// Query Training Request to get Training_Type__c for site URL selection
+			String trainingType = null;
+			if (trainingRequestId != null) {
+				List<Training_Request__c> trainingRequests = [
+					SELECT Id, Training_Type__c
+					FROM Training_Request__c
+					WHERE Id = :trainingRequestId
+					WITH USER_MODE
+					LIMIT 1
+				];
+				if (!trainingRequests.isEmpty()) {
+					trainingType = trainingRequests[0].Training_Type__c;
+				}
+			}
+
 			String token = generateUniqueToken();
 
 			SurveyInvitation__c invitation = new SurveyInvitation__c();
@@ -658,7 +672,7 @@ public with sharing class SurveyUtilities {
 
 			Database.insert(invitation, AccessLevel.USER_MODE);
 
-			return buildSurveyUrlWithToken(token);
+			return buildSurveyUrlWithToken(token, trainingType);
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyUtilities.generateSingleSurveyInvitation: ' + e.getMessage());
 			return null;
