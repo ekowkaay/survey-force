@@ -100,8 +100,8 @@
 											<div class="radio-button-group">
 												<template for:each={currentQuestionChoices} for:item="choice">
 													<div key={choice.value} class="radio-button-item">
-														<input type="radio" id={choice.value} name={currentQuestion.id} value={choice.value} checked={choice.checked} onchange={handleRadioChange} />
-														<label for={choice.value} class="radio-button-label">{choice.label}</label>
+														<input type="radio" id={choice.safeId} name={currentQuestion.id} value={choice.value} checked={choice.checked} onchange={handleRadioChange} />
+														<label for={choice.safeId} class="radio-button-label">{choice.label}</label>
 													</div>
 												</template>
 											</div>

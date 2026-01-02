@@ -128,7 +128,7 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	/**
-	 * Get current question's choices with updated checked state
+	 * Get current question's choices with updated checked state and safe HTML IDs
 	 */
 	get currentQuestionChoices() {
 		if (!this.currentQuestion || !this.currentQuestion.choices) {
@@ -136,9 +136,11 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		const currentResponse = this.currentResponse;
-		return this.currentQuestion.choices.map((choice) => ({
+		return this.currentQuestion.choices.map((choice, index) => ({
 			...choice,
-			checked: choice.value === currentResponse
+			checked: choice.value === currentResponse,
+			// Create a safe HTML ID by combining question ID with choice index
+			safeId: `radio-${this.currentQuestion.id}-${index}`
 		}));
 	}
 
@@ -415,12 +417,6 @@ export default class SurveyTaker extends LightningElement {
 				}
 			} else {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: null };
-				// Initialize radio button checked state for single select
-				if (q.choices && (q.questionType === QUESTION_TYPE.SINGLE_SELECT_VERTICAL || q.questionType === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL)) {
-					q.choices.forEach((choice) => {
-						choice.checked = false;
-					});
-				}
 			}
 		});
 		// Reset to first question
