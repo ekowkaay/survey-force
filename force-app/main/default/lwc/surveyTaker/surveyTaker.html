@@ -94,14 +94,19 @@
 
 									<!-- Single Select -->
 									<template if:true={isSingleSelect}>
-										<lightning-radio-group
-											name={currentQuestion.id}
-											options={currentQuestion.choices}
-											value={currentResponse}
-											type="radio"
-											onchange={handleCurrentResponseChange}
-											class={radioGroupClass}>
-										</lightning-radio-group>
+										<div class="agreement-header">Please indicate your level of agreement with the statement above</div>
+										<div class="scale-container">
+											<div class="scale-label scale-label-start">Disagree</div>
+											<lightning-radio-group
+												name={currentQuestion.id}
+												options={currentQuestion.choices}
+												value={currentResponse}
+												type="radio"
+												onchange={handleCurrentResponseChange}
+												class="radio-horizontal-scale">
+											</lightning-radio-group>
+											<div class="scale-label scale-label-end">Strongly Agree</div>
+										</div>
 									</template>
 
 									<!-- Multi-Select -->
