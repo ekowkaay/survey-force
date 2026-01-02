@@ -470,4 +470,19 @@ footer.footer {
 	.radio-horizontal-scale {
 		order: 0;
 	}
+
+	.radio-button-group {
+		order: 0;
+		flex-direction: row;
+		justify-content: center;
+	}
+
+	.radio-button-item {
+		min-width: 50px;
+	}
+
+	.radio-button-label {
+		padding: 0.5rem 0.25rem;
+		font-size: 0.875rem;
+	}
 }
