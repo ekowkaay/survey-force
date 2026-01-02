@@ -440,15 +440,14 @@ export default class SurveyTaker extends LightningElement {
 	handleRadioChange(event) {
 		if (!this.currentQuestion) return;
 
-		const value = event.target.value;
-		const questionId = this.currentQuestion.id;
+		// Convert native input event to Lightning event format for handleCurrentResponseChange
+		const syntheticEvent = {
+			detail: {
+				value: event.target.value
+			}
+		};
 
-		if (!this.responses[questionId]) {
-			this.responses[questionId] = { questionId, response: '', responses: null };
-		}
-
-		this.responses[questionId].response = value;
-		// Checked state is automatically handled by currentQuestionChoices getter
+		this.handleCurrentResponseChange(syntheticEvent);
 	}
 
 	handleScaleSelection(event) {
