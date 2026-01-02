@@ -116,7 +116,18 @@ export default class SurveyTaker extends LightningElement {
 
 	get currentQuestion() {
 		const visible = this.visibleQuestions;
-		return visible[this.currentQuestionIndex] || null;
+		const question = visible[this.currentQuestionIndex] || null;
+
+		// Update checked state for radio buttons based on current response
+		if (question && question.choices && this.isSingleSelect) {
+			const currentResponse = this.currentResponse;
+			question.choices = question.choices.map((choice) => ({
+				...choice,
+				checked: choice.value === currentResponse
+			}));
+		}
+
+		return question;
 	}
 
 	get currentQuestionNumber() {
@@ -392,6 +403,12 @@ export default class SurveyTaker extends LightningElement {
 				}
 			} else {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: null };
+				// Initialize radio button checked state for single select
+				if (q.choices && (q.questionType === 'Single Select--Vertical' || q.questionType === 'Single Select--Horizontal')) {
+					q.choices.forEach((choice) => {
+						choice.checked = false;
+					});
+				}
 			}
 		});
 		// Reset to first question
@@ -410,6 +427,26 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		this.responses[questionId].response = value;
+	}
+
+	handleRadioChange(event) {
+		if (!this.currentQuestion) return;
+
+		const value = event.target.value;
+		const questionId = this.currentQuestion.id;
+
+		if (!this.responses[questionId]) {
+			this.responses[questionId] = { questionId, response: '', responses: null };
+		}
+
+		this.responses[questionId].response = value;
+
+		// Update checked state for all choices
+		if (this.currentQuestion.choices) {
+			this.currentQuestion.choices.forEach((choice) => {
+				choice.checked = choice.value === value;
+			});
+		}
 	}
 
 	handleScaleSelection(event) {

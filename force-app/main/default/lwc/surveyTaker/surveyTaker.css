@@ -208,6 +208,52 @@ h1 {
 	justify-content: center;
 }
 
+/* Custom horizontal radio button styling */
+.radio-button-group {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: space-between;
+	width: 100%;
+	flex-wrap: wrap;
+}
+
+.radio-button-item {
+	flex: 1;
+	min-width: 60px;
+}
+
+.radio-button-item input[type='radio'] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.radio-button-label {
+	display: block;
+	text-align: center;
+	padding: 0.75rem 0.5rem;
+	background: #f8fafc;
+	border: 2px solid #e2e8f0;
+	border-radius: 0.5rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-weight: 600;
+	color: #334155;
+}
+
+.radio-button-item input[type='radio']:checked + .radio-button-label {
+	background: #f97316;
+	border-color: #f97316;
+	color: white;
+	box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.3);
+}
+
+.radio-button-label:hover {
+	border-color: #f97316;
+	box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
+}
+
 .checkbox-container {
 	display: grid;
 	gap: 0.75rem;
@@ -232,18 +278,6 @@ lightning-radio-group {
 	--slds-c-radio-color-background: #f8fafc;
 	--slds-c-radio-color-border: #e2e8f0;
 	--slds-c-radio-mark-color-foreground: #f97316;
-}
-
-.radio-horizontal-scale lightning-radio-group {
-	width: 100%;
-}
-
-/* Ensure horizontal layout for scale radio buttons */
-.radio-horizontal-scale ::part(group) {
-	display: flex;
-	flex-direction: row;
-	gap: 0.5rem;
-	justify-content: space-between;
 }
 
 /* Actions */
