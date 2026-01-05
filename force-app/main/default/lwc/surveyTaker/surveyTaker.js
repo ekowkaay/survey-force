@@ -6,6 +6,14 @@ import getSurveyDataByToken from '@salesforce/apex/SurveyTakerController.getSurv
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
 import submitSurveyWithToken from '@salesforce/apex/SurveyTakerController.submitSurveyWithToken';
 
+// Question type constants
+const QUESTION_TYPE = {
+	FREE_TEXT: 'Free Text',
+	SINGLE_SELECT_VERTICAL: 'Single Select--Vertical',
+	SINGLE_SELECT_HORIZONTAL: 'Single Select--Horizontal',
+	MULTI_SELECT_VERTICAL: 'Multi-Select--Vertical'
+};
+
 export default class SurveyTaker extends LightningElement {
 	@api recordId;
 	@api caseId = null;
@@ -117,6 +125,23 @@ export default class SurveyTaker extends LightningElement {
 	get currentQuestion() {
 		const visible = this.visibleQuestions;
 		return visible[this.currentQuestionIndex] || null;
+	}
+
+	/**
+	 * Get current question's choices with updated checked state and safe HTML IDs
+	 */
+	get currentQuestionChoices() {
+		if (!this.currentQuestion || !this.currentQuestion.choices) {
+			return [];
+		}
+
+		const currentResponse = this.currentResponse;
+		return this.currentQuestion.choices.map((choice, index) => ({
+			...choice,
+			checked: choice.value === currentResponse,
+			// Create a safe HTML ID by combining question ID with choice index
+			safeId: `radio-${this.currentQuestion.id}-${index}`
+		}));
 	}
 
 	get currentQuestionNumber() {
@@ -255,23 +280,23 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	get isFreeText() {
-		return this.currentQuestion && this.currentQuestion.questionType === 'Free Text';
+		return this.currentQuestion && this.currentQuestion.questionType === QUESTION_TYPE.FREE_TEXT;
 	}
 
 	get isSingleSelect() {
 		if (!this.currentQuestion) return false;
 		const type = this.currentQuestion.questionType;
-		return type === 'Single Select--Vertical' || type === 'Single Select--Horizontal';
+		return type === QUESTION_TYPE.SINGLE_SELECT_VERTICAL || type === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get isMultiSelect() {
 		if (!this.currentQuestion) return false;
-		return this.currentQuestion.questionType === 'Multi-Select--Vertical';
+		return this.currentQuestion.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL;
 	}
 
 	get isHorizontalLayout() {
 		if (!this.currentQuestion) return false;
-		return this.currentQuestion.questionType === 'Single Select--Horizontal';
+		return this.currentQuestion.questionType === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get scaleChoices() {
@@ -382,7 +407,7 @@ export default class SurveyTaker extends LightningElement {
 	initializeResponses() {
 		this.responses = {};
 		this.questions.forEach((q) => {
-			if (q.questionType === 'Multi-Select--Vertical') {
+			if (q.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: [] };
 				// Initialize checkbox checked state
 				if (q.choices) {
@@ -410,6 +435,19 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		this.responses[questionId].response = value;
+	}
+
+	handleRadioChange(event) {
+		if (!this.currentQuestion) return;
+
+		// Convert native input event to Lightning event format for handleCurrentResponseChange
+		const syntheticEvent = {
+			detail: {
+				value: event.target.value
+			}
+		};
+
+		this.handleCurrentResponseChange(syntheticEvent);
 	}
 
 	handleScaleSelection(event) {
@@ -495,7 +533,7 @@ export default class SurveyTaker extends LightningElement {
 			this.responses[questionId] = { questionId, response: '', responses: [] };
 		}
 
-		if (questionType === 'Multi-Select--Vertical') {
+		if (questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 			// Handle checkbox changes
 			if (!this.responses[questionId].responses) {
 				this.responses[questionId].responses = [];
@@ -575,7 +613,7 @@ export default class SurveyTaker extends LightningElement {
 					return `Please answer question ${question.orderNumber}: ${question.question}`;
 				}
 
-				if (question.questionType === 'Multi-Select--Vertical') {
+				if (question.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 					if (!response.responses || response.responses.length === 0) {
 						return `Please answer question ${question.orderNumber}: ${question.question}`;
 					}

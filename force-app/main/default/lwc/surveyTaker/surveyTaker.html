@@ -97,14 +97,14 @@
 										<div class="agreement-header">Please indicate your level of agreement with the statement above</div>
 										<div class="scale-container">
 											<div class="scale-label scale-label-start">Disagree</div>
-											<lightning-radio-group
-												name={currentQuestion.id}
-												options={currentQuestion.choices}
-												value={currentResponse}
-												type="radio"
-												onchange={handleCurrentResponseChange}
-												class="radio-horizontal-scale">
-											</lightning-radio-group>
+											<div class="radio-button-group">
+												<template for:each={currentQuestionChoices} for:item="choice">
+													<div key={choice.value} class="radio-button-item">
+														<input type="radio" id={choice.safeId} name={currentQuestion.id} value={choice.value} checked={choice.checked} onchange={handleRadioChange} />
+														<label for={choice.safeId} class="radio-button-label">{choice.label}</label>
+													</div>
+												</template>
+											</div>
 											<div class="scale-label scale-label-end">Strongly Agree</div>
 										</div>
 									</template>
