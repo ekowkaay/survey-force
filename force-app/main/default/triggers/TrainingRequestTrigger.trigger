@@ -1,25 +1,12 @@
 /**
  * @description Trigger for Training_Request__c object.
- * Follows the one trigger per object pattern.
+ * Follows the one trigger per object pattern and delegates logic to handler.
+ * Only includes context methods that have actual business logic implemented.
  */
-trigger TrainingRequestTrigger on Training_Request__c(before insert, before update, after insert, after update, after delete, after undelete) {
+trigger TrainingRequestTrigger on Training_Request__c(after insert) {
 	TrainingRequestTriggerHandler handler = new TrainingRequestTriggerHandler();
 
-	if (Trigger.isBefore) {
-		if (Trigger.isInsert) {
-			handler.beforeInsert(Trigger.new);
-		} else if (Trigger.isUpdate) {
-			handler.beforeUpdate(Trigger.new, Trigger.oldMap);
-		}
-	} else if (Trigger.isAfter) {
-		if (Trigger.isInsert) {
-			handler.afterInsert(Trigger.new, Trigger.newMap);
-		} else if (Trigger.isUpdate) {
-			handler.afterUpdate(Trigger.new, Trigger.newMap, Trigger.oldMap);
-		} else if (Trigger.isDelete) {
-			handler.afterDelete(Trigger.old, Trigger.oldMap);
-		} else if (Trigger.isUndelete) {
-			handler.afterUndelete(Trigger.new, Trigger.newMap);
-		}
+	if (Trigger.isAfter && Trigger.isInsert) {
+		handler.afterInsert(Trigger.new, Trigger.newMap);
 	}
 }

@@ -2,27 +2,11 @@
  * @description Handler for Participants__c trigger.
  * Implements trigger logic for participant record operations, including
  * automatic survey invitation generation when participants are created.
+ * Follows Single Responsibility Principle by focusing only on participant-related operations.
  */
 public with sharing class ParticipantsTriggerHandler {
 	/** Static flag to prevent recursive trigger execution */
 	private static Boolean isExecuting = false;
-
-	/**
-	 * @description Before insert handler
-	 * @param newRecords List of new Participant records
-	 */
-	public void beforeInsert(List<Participants__c> newRecords) {
-		// Placeholder for before insert logic
-	}
-
-	/**
-	 * @description Before update handler
-	 * @param newRecords List of updated Participant records
-	 * @param oldMap Map of old Participant records
-	 */
-	public void beforeUpdate(List<Participants__c> newRecords, Map<Id, Participants__c> oldMap) {
-		// Placeholder for before update logic
-	}
 
 	/**
 	 * @description After insert handler - generates survey invitations for new participants
@@ -40,34 +24,6 @@ public with sharing class ParticipantsTriggerHandler {
 		} finally {
 			isExecuting = false;
 		}
-	}
-
-	/**
-	 * @description After update handler
-	 * @param newRecords List of updated Participant records
-	 * @param newMap Map of updated Participant records
-	 * @param oldMap Map of old Participant records
-	 */
-	public void afterUpdate(List<Participants__c> newRecords, Map<Id, Participants__c> newMap, Map<Id, Participants__c> oldMap) {
-		// Placeholder for after update logic
-	}
-
-	/**
-	 * @description After delete handler
-	 * @param oldRecords List of deleted Participant records
-	 * @param oldMap Map of deleted Participant records
-	 */
-	public void afterDelete(List<Participants__c> oldRecords, Map<Id, Participants__c> oldMap) {
-		// Placeholder for after delete logic
-	}
-
-	/**
-	 * @description After undelete handler
-	 * @param newRecords List of undeleted Participant records
-	 * @param newMap Map of undeleted Participant records
-	 */
-	public void afterUndelete(List<Participants__c> newRecords, Map<Id, Participants__c> newMap) {
-		// Placeholder for after undelete logic
 	}
 
 	/**
