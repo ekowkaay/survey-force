@@ -47,7 +47,9 @@ public with sharing class SurveyQuestionTriggerHandler {
 	}
 
 	/**
-	 * @description Set Name field from Question__c field with proper truncation and escaping
+	 * @description Set Name field from Question__c field with proper truncation
+	 * Uses the raw question text (not escaped) to preserve original characters like apostrophes.
+	 * Length checking uses escaped string to ensure SOQL-safe length validation.
 	 * @param questions List of Survey Question records to process
 	 */
 	private void setQuestionNames(List<Survey_Question__c> questions) {
@@ -56,14 +58,15 @@ public with sharing class SurveyQuestionTriggerHandler {
 				continue;
 			}
 
-			// Escape single quotes for SOQL safety
+			// Check length of escaped version (for SOQL safety in length calculation)
+			// but assign the raw unescaped question text to preserve original characters
 			String escapedQuestion = String.escapeSingleQuotes(sq.Question__c);
 
-			// Truncate to max length if needed
+			// Truncate to max length if needed - use raw question text, not escaped
 			if (escapedQuestion.length() > MAX_NAME_LENGTH) {
-				sq.Name = escapedQuestion.substring(0, MAX_NAME_LENGTH - 1);
+				sq.Name = sq.Question__c.substring(0, MAX_NAME_LENGTH - 1);
 			} else {
-				sq.Name = escapedQuestion;
+				sq.Name = sq.Question__c;
 			}
 		}
 	}

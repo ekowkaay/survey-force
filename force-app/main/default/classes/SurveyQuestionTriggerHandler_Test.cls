@@ -61,10 +61,10 @@ private class SurveyQuestionTriggerHandler_Test {
 	}
 
 	/**
-	 * @description Test single quotes are escaped in name field
+	 * @description Test apostrophes are preserved in name field (not escaped)
 	 */
 	@IsTest
-	static void testBeforeInsertEscapesSingleQuotes() {
+	static void testBeforeInsertPreservesApostrophes() {
 		// Setup
 		Survey__c survey = [SELECT Id FROM Survey__c LIMIT 1];
 
@@ -72,14 +72,15 @@ private class SurveyQuestionTriggerHandler_Test {
 		Test.startTest();
 		Survey_Question__c question = new Survey_Question__c();
 		question.Survey__c = survey.Id;
-		question.Question__c = 'What\\'s your name?';
+		question.Question__c = 'What\'s your role?';
 		question.Type__c = 'Free Text';
 		insert question;
 		Test.stopTest();
 
-		// Assert
+		// Assert - Name should preserve the apostrophe without escaping
 		Survey_Question__c inserted = [SELECT Id, Name, Question__c FROM Survey_Question__c WHERE Id = :question.Id];
-		System.assert(inserted.Name.contains('What'), 'Name should contain question text');
+		System.assertEquals('What\'s your role?', inserted.Name, 'Name should preserve apostrophe without backslash escape');
+		System.assert(!inserted.Name.contains('\\'), 'Name should not contain escaped backslash');
 	}
 
 	/**
