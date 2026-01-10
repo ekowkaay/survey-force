@@ -311,7 +311,8 @@ export default class SurveyTaker extends LightningElement {
 			...choice,
 			buttonText: choice.label || choice.value,
 			showLabel: !!choice.label && (index === 0 || index === total - 1),
-			buttonClass: selected === choice.value ? 'scaleButton active' : 'scaleButton'
+			buttonClass: selected === choice.value ? 'scaleButton active' : 'scaleButton',
+			checked: selected === choice.value ? 'true' : 'false'
 		}));
 	}
 
