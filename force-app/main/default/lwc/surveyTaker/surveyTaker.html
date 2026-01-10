@@ -97,10 +97,19 @@
 										<template lwc:if={isHorizontalLayout}>
 											<!-- Horizontal Scale Layout -->
 											<div class="scale-container slds-m-top_medium">
-												<div class="scale-buttons-wrapper">
+												<div class="scale-buttons-wrapper" role="radiogroup" aria-label="Response scale">
 													<template for:each={scaleChoices} for:item="choice">
 														<div key={choice.value} class="scale-button-container">
-															<button type="button" class={choice.buttonClass} data-value={choice.value} onclick={handleScaleSelection}>{choice.buttonText}</button>
+															<button
+																type="button"
+																class={choice.buttonClass}
+																data-value={choice.value}
+																onclick={handleScaleSelection}
+																role="radio"
+																aria-checked={choice.checked}
+																aria-label={choice.label}>
+																{choice.buttonText}
+															</button>
 															<template lwc:if={choice.showLabel}>
 																<span class="scale-label">{choice.label}</span>
 															</template>
