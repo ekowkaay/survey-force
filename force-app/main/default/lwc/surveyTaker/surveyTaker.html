@@ -93,20 +93,38 @@
 									</template>
 
 									<!-- Single Select -->
-									<template if:true={isSingleSelect}>
-										<div class="agreement-header">Please indicate your level of agreement with the statement above</div>
-										<div class="scale-container">
-											<div class="scale-label scale-label-start">Disagree</div>
-											<div class="radio-button-group">
-												<template for:each={currentQuestionChoices} for:item="choice">
-													<div key={choice.value} class="radio-button-item">
-														<input type="radio" id={choice.safeId} name={currentQuestion.id} value={choice.value} checked={choice.checked} onchange={handleRadioChange} />
-														<label for={choice.safeId} class="radio-button-label">{choice.label}</label>
-													</div>
-												</template>
+									<template lwc:if={isSingleSelect}>
+										<template lwc:if={isHorizontalLayout}>
+											<!-- Horizontal Scale Layout -->
+											<div class="scale-container slds-m-top_medium">
+												<div class="scale-buttons-wrapper">
+													<template for:each={scaleChoices} for:item="choice">
+														<div key={choice.value} class="scale-button-container">
+															<button type="button" class={choice.buttonClass} data-value={choice.value} onclick={handleScaleSelection}>{choice.buttonText}</button>
+															<template lwc:if={choice.showLabel}>
+																<span class="scale-label">{choice.label}</span>
+															</template>
+														</div>
+													</template>
+												</div>
 											</div>
-											<div class="scale-label scale-label-end">Strongly Agree</div>
-										</div>
+										</template>
+										<template lwc:else>
+											<!-- Vertical Radio Layout -->
+											<div class="agreement-header">Please indicate your level of agreement with the statement above</div>
+											<div class="scale-container">
+												<div class="scale-label scale-label-start">Disagree</div>
+												<div class="radio-button-group">
+													<template for:each={currentQuestionChoices} for:item="choice">
+														<div key={choice.value} class="radio-button-item">
+															<input type="radio" id={choice.safeId} name={currentQuestion.id} value={choice.value} checked={choice.checked} onchange={handleRadioChange} />
+															<label for={choice.safeId} class="radio-button-label">{choice.label}</label>
+														</div>
+													</template>
+												</div>
+												<div class="scale-label scale-label-end">Strongly Agree</div>
+											</div>
+										</template>
 									</template>
 
 									<!-- Multi-Select -->
