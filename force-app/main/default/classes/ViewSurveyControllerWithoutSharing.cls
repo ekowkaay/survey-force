@@ -43,7 +43,7 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	public static void updateInvitationStatus(Id invitationId, String status, Id surveyTakerId) {
 		SurveyInvitation__c invitation = new SurveyInvitation__c(Id = invitationId);
 		invitation.Status__c = status;
-		if (status == 'Completed') {
+		if (status == SurveyForceConstants.STATUS_COMPLETED) {
 			invitation.CompletedDate__c = Datetime.now();
 			invitation.SurveyTaker__c = surveyTakerId;
 		}

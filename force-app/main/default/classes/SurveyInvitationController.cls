@@ -6,12 +6,10 @@
  * from related objects, calculating expiration as event date + configured days.
  */
 public with sharing class SurveyInvitationController {
-	/** Status value for pending invitations */
-	private static final String STATUS_PENDING = 'Pending';
-	/** Status value for completed invitations */
-	private static final String STATUS_COMPLETED = 'Completed';
-	/** Status value for expired invitations */
-	private static final String STATUS_EXPIRED = 'Expired';
+	/** Survey invitation status constants */
+	private static final String STATUS_PENDING = SurveyForceConstants.STATUS_PENDING;
+	private static final String STATUS_COMPLETED = SurveyForceConstants.STATUS_COMPLETED;
+	private static final String STATUS_EXPIRED = SurveyForceConstants.STATUS_EXPIRED;
 
 	/**
 	 * @description Wrapper class for invitation generation results
@@ -100,9 +98,7 @@ public with sharing class SurveyInvitationController {
 	 * @return String UUID-style token
 	 */
 	private static String generateToken() {
-		Blob b = Crypto.generateAesKey(128);
-		String h = EncodingUtil.convertToHex(b);
-		return h.substring(0, 8) + '-' + h.substring(8, 12) + '-' + h.substring(12, 16) + '-' + h.substring(16, 20) + '-' + h.substring(20);
+		return TokenGeneratorService.generateToken();
 	}
 
 	/**
@@ -112,7 +108,9 @@ public with sharing class SurveyInvitationController {
 	 */
 	private static DateTime getExpirationDate(DateTime eventDate) {
 		SurveySettings__c settings = SurveySettings__c.getInstance();
-		Decimal expirationDays = settings != null && settings.InvitationExpirationDays__c != null ? settings.InvitationExpirationDays__c : 30;
+		Decimal expirationDays = settings != null && settings.InvitationExpirationDays__c != null
+			? settings.InvitationExpirationDays__c
+			: SurveyForceConstants.DEFAULT_EXPIRATION_DAYS;
 
 		// If expiration days is 0, return null (no expiration)
 		if (expirationDays == 0) {
@@ -226,8 +224,8 @@ public with sharing class SurveyInvitationController {
 				return result;
 			}
 
-			if (count > 200) {
-				result.message = 'Cannot generate more than 200 invitations at once';
+			if (count > SurveyForceConstants.MAX_BULK_INVITATIONS) {
+				result.message = 'Cannot generate more than ' + SurveyForceConstants.MAX_BULK_INVITATIONS + ' invitations at once';
 				return result;
 			}
 
@@ -458,7 +456,7 @@ public with sharing class SurveyInvitationController {
 			baseUrl = System.URL.getOrgDomainUrl().toExternalForm();
 		}
 		// Survey page path - can be customized via custom label or custom metadata in future
-		String surveyPagePath = '/survey';
+		String surveyPagePath = SurveyForceConstants.SURVEY_PAGE_PATH;
 		return baseUrl + surveyPagePath + '?token=' + token;
 	}
 

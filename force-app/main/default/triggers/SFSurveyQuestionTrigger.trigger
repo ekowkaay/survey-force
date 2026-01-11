@@ -1,6 +1,15 @@
-trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before update) { //NOPMD
-	for (Survey_Question__c sq : Trigger.new) {
-		//Don't need single q
-		sq.Name = (String.escapeSingleQuotes(sq.Question__c).length() > 80) ? sq.Question__c.substring(0, 79) : sq.Question__c;
+/**
+ * @description Trigger for Survey_Question__c object.
+ * Follows the one trigger per object pattern and delegates logic to handler class.
+ */
+trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before update) {
+	SurveyQuestionTriggerHandler handler = new SurveyQuestionTriggerHandler();
+
+	if (Trigger.isBefore) {
+		if (Trigger.isInsert) {
+			handler.beforeInsert(Trigger.new);
+		} else if (Trigger.isUpdate) {
+			handler.beforeUpdate(Trigger.new, Trigger.oldMap);
+		}
 	}
 }

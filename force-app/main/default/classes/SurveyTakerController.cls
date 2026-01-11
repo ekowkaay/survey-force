@@ -135,7 +135,9 @@ public with sharing class SurveyTakerController {
 			result.eventDate = null;
 
 			// Set anonymous option
-			result.anonymousOption = (System.UserInfo.getUserType() == 'Guest' || survey.All_Responses_Anonymous__c) ? 'Anonymous' : 'User';
+			result.anonymousOption = (System.UserInfo.getUserType() == 'Guest' || survey.All_Responses_Anonymous__c)
+				? SurveyForceConstants.ANONYMOUS_OPTION_ANONYMOUS
+				: SurveyForceConstants.ANONYMOUS_OPTION_USER;
 
 			// Get questions
 			result.questions = getQuestions(surveyId);
@@ -279,7 +281,7 @@ public with sharing class SurveyTakerController {
 					continue;
 				}
 
-				if (question.questionType == 'Single Select--Vertical' || question.questionType == 'Single Select--Horizontal') {
+				if (SurveyForceConstants.isSingleSelectQuestionType(question.questionType)) {
 					if (String.isNotBlank(r.response)) {
 						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
 						sqr.Survey_Question__c = r.questionId;
@@ -287,7 +289,7 @@ public with sharing class SurveyTakerController {
 						sqr.Response__c = getChoiceLabel(question.choices, r.response);
 						responseRecords.add(sqr);
 					}
-				} else if (question.questionType == 'Multi-Select--Vertical') {
+				} else if (SurveyForceConstants.isMultiSelectQuestionType(question.questionType)) {
 					if (r.responses != null && !r.responses.isEmpty()) {
 						for (String selectedValue : r.responses) {
 							SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
@@ -297,7 +299,7 @@ public with sharing class SurveyTakerController {
 							responseRecords.add(sqr);
 						}
 					}
-				} else if (question.questionType == 'Free Text') {
+				} else if (question.questionType == SurveyForceConstants.QUESTION_TYPE_FREE_TEXT) {
 					if (String.isNotBlank(r.response)) {
 						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
 						sqr.Survey_Question__c = r.questionId;
@@ -497,7 +499,7 @@ public with sharing class SurveyTakerController {
 					continue;
 				}
 
-				if (question.questionType == 'Single Select--Vertical' || question.questionType == 'Single Select--Horizontal') {
+				if (SurveyForceConstants.isSingleSelectQuestionType(question.questionType)) {
 					if (String.isNotBlank(r.response)) {
 						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
 						sqr.Survey_Question__c = r.questionId;
@@ -505,7 +507,7 @@ public with sharing class SurveyTakerController {
 						sqr.Response__c = getChoiceLabel(question.choices, r.response);
 						responseRecords.add(sqr);
 					}
-				} else if (question.questionType == 'Multi-Select--Vertical') {
+				} else if (SurveyForceConstants.isMultiSelectQuestionType(question.questionType)) {
 					if (r.responses != null && !r.responses.isEmpty()) {
 						for (String selectedValue : r.responses) {
 							SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
@@ -515,7 +517,7 @@ public with sharing class SurveyTakerController {
 							responseRecords.add(sqr);
 						}
 					}
-				} else if (question.questionType == 'Free Text') {
+				} else if (question.questionType == SurveyForceConstants.QUESTION_TYPE_FREE_TEXT) {
 					if (String.isNotBlank(r.response)) {
 						SurveyQuestionResponse__c sqr = new SurveyQuestionResponse__c();
 						sqr.Survey_Question__c = r.questionId;

@@ -19,9 +19,9 @@ public with sharing class SurveyUtilities {
 	}
 
 	/** Training type constants */
-	private static final String TRAINING_TYPE_EAP = 'EAP Training';
-	private static final String SITE_URL_EAP_TRAINING = 'EAP_Training';
-	private static final String SITE_URL_RESELLER_TRAINING = 'Reseller_Training';
+	private static final String TRAINING_TYPE_EAP = SurveyForceConstants.TRAINING_TYPE_EAP;
+	private static final String SITE_URL_EAP_TRAINING = SurveyForceConstants.SITE_URL_EAP_TRAINING;
+	private static final String SITE_URL_RESELLER_TRAINING = SurveyForceConstants.SITE_URL_RESELLER_TRAINING;
 
 	/**
 	 * @description Wrapper class for survey creation results
@@ -313,16 +313,16 @@ public with sharing class SurveyUtilities {
 		String normalizedType = surveyType.trim();
 		String normalizedLang = lang.trim();
 
-		if (normalizedType.equalsIgnoreCase('Participant')) {
-			if (normalizedLang.equalsIgnoreCase('English')) {
-				return 'PartcipantSurveyTemplate';
-			} else if (normalizedLang.equalsIgnoreCase('Spanish')) {
-				return 'PartcipantSurveyTemplate Spanish';
+		if (normalizedType.equalsIgnoreCase(SurveyForceConstants.SURVEY_TYPE_PARTICIPANT)) {
+			if (normalizedLang.equalsIgnoreCase(SurveyForceConstants.LANGUAGE_ENGLISH)) {
+				return SurveyForceConstants.TEMPLATE_PARTICIPANT_ENGLISH;
+			} else if (normalizedLang.equalsIgnoreCase(SurveyForceConstants.LANGUAGE_SPANISH)) {
+				return SurveyForceConstants.TEMPLATE_PARTICIPANT_SPANISH;
 			}
-		} else if (normalizedType.equalsIgnoreCase('Customer')) {
-			return 'CustomerSurveyTemplate';
-		} else if (normalizedType.equalsIgnoreCase('Trainer')) {
-			return 'TrainerSurveyTemplate';
+		} else if (normalizedType.equalsIgnoreCase(SurveyForceConstants.SURVEY_TYPE_CUSTOMER)) {
+			return SurveyForceConstants.TEMPLATE_CUSTOMER;
+		} else if (normalizedType.equalsIgnoreCase(SurveyForceConstants.SURVEY_TYPE_TRAINER)) {
+			return SurveyForceConstants.TEMPLATE_TRAINER;
 		}
 
 		return null;
@@ -384,7 +384,7 @@ public with sharing class SurveyUtilities {
 				SurveyInvitation__c invitation = new SurveyInvitation__c();
 				invitation.Survey__c = surveyId;
 				invitation.Token__c = token;
-				invitation.Status__c = 'Pending';
+				invitation.Status__c = SurveyForceConstants.STATUS_PENDING;
 				invitation.Email__c = participant.Email__c;
 				invitation.ParticipantName__c = participant.Participant_Name__c;
 				invitation.RelatedRecordId__c = participant.Training_Request__c;
@@ -506,9 +506,7 @@ public with sharing class SurveyUtilities {
 	 * @return String UUID-style token
 	 */
 	private static String generateUniqueToken() {
-		Blob b = Crypto.generateAesKey(128);
-		String h = EncodingUtil.convertToHex(b);
-		return h.substring(0, 8) + '-' + h.substring(8, 12) + '-' + h.substring(12, 16) + '-' + h.substring(16, 20) + '-' + h.substring(20);
+		return TokenGeneratorService.generateToken();
 	}
 
 	/**
@@ -579,7 +577,7 @@ public with sharing class SurveyUtilities {
 				SurveyInvitation__c invitation = new SurveyInvitation__c();
 				invitation.Survey__c = req.surveyId;
 				invitation.Token__c = token;
-				invitation.Status__c = 'Pending';
+				invitation.Status__c = SurveyForceConstants.STATUS_PENDING;
 				invitation.ParticipantName__c = req.surveyType + ' Survey';
 				invitation.RelatedRecordId__c = req.relatedRecordId;
 
@@ -666,7 +664,7 @@ public with sharing class SurveyUtilities {
 			SurveyInvitation__c invitation = new SurveyInvitation__c();
 			invitation.Survey__c = surveyId;
 			invitation.Token__c = token;
-			invitation.Status__c = 'Pending';
+			invitation.Status__c = SurveyForceConstants.STATUS_PENDING;
 			invitation.ParticipantName__c = surveyType + ' Survey';
 			invitation.RelatedRecordId__c = trainingRequestId;
 

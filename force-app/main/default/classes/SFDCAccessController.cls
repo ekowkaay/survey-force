@@ -16,8 +16,9 @@
 
 /**
  * This class provides access control functionality to enforce CRUD/FLS and sharing in the force.com platform.
+ * Implements IAccessController interface to allow for dependency injection and improved testability.
  */
-public with sharing class SFDCAccessController {
+public with sharing class SFDCAccessController implements IAccessController {
 	/**
 	 * OperationMode - this enum defines the DB operations mode to be used.
 	 * <br>

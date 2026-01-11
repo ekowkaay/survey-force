@@ -1,15 +1,36 @@
+/**
+ * @description Utility class providing common functionality for Survey Force application.
+ * Implements dependency injection pattern for access controller to improve testability.
+ */
 public with sharing class SurveyForceUtil {
+	/** Access controller instance - can be injected for testing */
+	@TestVisible
+	private static IAccessController accessControllerInstance;
+
 	/**
-	 * @return the current ESAPI SFDCAccessController object being used to maintain the access control rules for this application.
+	 * @description Get the current access controller instance.
+	 * Uses dependency injection pattern to allow mock injection in tests.
+	 * @return IAccessController The access controller instance
 	 */
-	public static SFDCAccessController accessController {
+	public static IAccessController accessController {
 		get {
-			if (accessController == null) {
-				accessController = new SFDCAccessController();
+			if (accessControllerInstance == null) {
+				accessControllerInstance = new SFDCAccessController();
 			}
-			return accessController;
+			return accessControllerInstance;
 		}
-		private set;
+		private set {
+			accessControllerInstance = value;
+		}
+	}
+
+	/**
+	 * @description Set access controller instance for dependency injection (primarily for testing)
+	 * @param controller The access controller implementation to use
+	 */
+	@TestVisible
+	private static void setAccessController(IAccessController controller) {
+		accessControllerInstance = controller;
 	}
 
 	public static void log(String message) {
