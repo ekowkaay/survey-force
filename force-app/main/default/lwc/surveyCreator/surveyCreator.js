@@ -6,6 +6,7 @@ import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.c
 import createSurveyQuestions from '@salesforce/apex/SurveyCreationController.createSurveyQuestions';
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
 import getSurveyDetails from '@salesforce/apex/SurveyCreationController.getSurveyDetails';
+import { QUESTION_TYPE } from 'c/surveyConstants';
 
 export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	// Survey properties
@@ -188,11 +189,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	get showChoices() {
-		return (
-			this.currentQuestion.questionType === 'Single Select--Vertical' ||
-			this.currentQuestion.questionType === 'Single Select--Horizontal' ||
-			this.currentQuestion.questionType === 'Multi-Select--Vertical'
-		);
+		const type = this.currentQuestion.questionType?.trim();
+		return type === QUESTION_TYPE.SINGLE_SELECT_VERTICAL || type === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL || type === QUESTION_TYPE.MULTI_SELECT_VERTICAL;
 	}
 
 	// Event handlers

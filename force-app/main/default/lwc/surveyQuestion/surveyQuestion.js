@@ -1,4 +1,5 @@
 import { LightningElement, api } from 'lwc';
+import { QUESTION_TYPE } from 'c/surveyConstants';
 
 export default class SurveyQuestion extends LightningElement {
 	@api question;
@@ -12,16 +13,16 @@ export default class SurveyQuestion extends LightningElement {
 	}
 
 	get isFreeText() {
-		return this.question.questionType === 'Free Text';
+		return this.question.questionType?.trim() === QUESTION_TYPE.FREE_TEXT;
 	}
 
 	get isSingleSelect() {
-		const type = this.question.questionType;
-		return type === 'Single Select--Vertical' || type === 'Single Select--Horizontal';
+		const type = this.question.questionType?.trim();
+		return type === QUESTION_TYPE.SINGLE_SELECT_VERTICAL || type === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get isMultiSelect() {
-		return this.question.questionType === 'Multi-Select--Vertical';
+		return this.question.questionType?.trim() === QUESTION_TYPE.MULTI_SELECT_VERTICAL;
 	}
 
 	get hasChoices() {
