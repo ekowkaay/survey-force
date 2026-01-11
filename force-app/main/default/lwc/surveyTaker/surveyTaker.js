@@ -5,14 +5,7 @@ import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData'
 import getSurveyDataByToken from '@salesforce/apex/SurveyTakerController.getSurveyDataByToken';
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
 import submitSurveyWithToken from '@salesforce/apex/SurveyTakerController.submitSurveyWithToken';
-
-// Question type constants
-const QUESTION_TYPE = {
-	FREE_TEXT: 'Free Text',
-	SINGLE_SELECT_VERTICAL: 'Single Select--Vertical',
-	SINGLE_SELECT_HORIZONTAL: 'Single Select--Horizontal',
-	MULTI_SELECT_VERTICAL: 'Multi-Select--Vertical'
-};
+import { QUESTION_TYPE } from 'c/surveyConstants';
 
 export default class SurveyTaker extends LightningElement {
 	@api recordId;
