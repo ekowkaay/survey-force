@@ -582,7 +582,8 @@ public with sharing class SurveyUtilities {
 				invitation.RelatedRecordId__c = req.relatedRecordId;
 
 				invitationsToInsert.add(invitation);
-				indexToRequestMap.put(i, req);
+				// Map the actual position in invitationsToInsert to the request
+				indexToRequestMap.put(invitationsToInsert.size() - 1, req);
 			}
 
 			// Bulk insert all invitations

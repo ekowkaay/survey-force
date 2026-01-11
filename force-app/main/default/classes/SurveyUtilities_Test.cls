@@ -413,4 +413,106 @@ private class SurveyUtilities_Test {
 			System.assert(questions.size() > 0, 'Each valid survey should have questions cloned: ' + survey.Name);
 		}
 	}
+
+	/**
+	 * @description Test bulk invitation generation with mixed valid and invalid requests
+	 * This test ensures the index mapping works correctly when some requests have null surveyIds
+	 */
+	@IsTest
+	static void testGenerateSurveyInvitationsInBulk_MixedRequests() {
+		Training_Request__c tr = [SELECT Id FROM Training_Request__c LIMIT 1];
+
+		// Create surveys
+		List<Survey__c> surveys = new List<Survey__c>();
+		for (Integer i = 0; i < 3; i++) {
+			Survey__c survey = new Survey__c();
+			survey.Name = 'Test Survey ' + i;
+			survey.Thank_You_Text__c = 'Thank you!';
+			surveys.add(survey);
+		}
+		insert surveys;
+
+		Test.startTest();
+
+		// Create a mix of valid and invalid invitation requests
+		List<SurveyUtilities.InvitationRequest> requests = new List<SurveyUtilities.InvitationRequest>();
+
+		// Invalid request - null survey ID (should be skipped)
+		SurveyUtilities.InvitationRequest req1 = new SurveyUtilities.InvitationRequest();
+		req1.surveyId = null;
+		req1.relatedRecordId = tr.Id;
+		req1.surveyType = 'Participant';
+		req1.trainingType = 'EAP Training';
+		requests.add(req1);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req2 = new SurveyUtilities.InvitationRequest();
+		req2.surveyId = surveys[0].Id;
+		req2.relatedRecordId = tr.Id;
+		req2.surveyType = 'Customer';
+		req2.trainingType = 'EAP Training';
+		requests.add(req2);
+
+		// Invalid request - null survey ID (should be skipped)
+		SurveyUtilities.InvitationRequest req3 = new SurveyUtilities.InvitationRequest();
+		req3.surveyId = null;
+		req3.relatedRecordId = tr.Id;
+		req3.surveyType = 'InvalidType';
+		req3.trainingType = 'EAP Training';
+		requests.add(req3);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req4 = new SurveyUtilities.InvitationRequest();
+		req4.surveyId = surveys[1].Id;
+		req4.relatedRecordId = tr.Id;
+		req4.surveyType = 'Trainer';
+		req4.trainingType = 'EAP Training';
+		requests.add(req4);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req5 = new SurveyUtilities.InvitationRequest();
+		req5.surveyId = surveys[2].Id;
+		req5.relatedRecordId = tr.Id;
+		req5.surveyType = 'Participant';
+		req5.trainingType = 'Reseller Training';
+		requests.add(req5);
+
+		// Call bulk invitation generation
+		Map<String, String> results = SurveyUtilities.generateSurveyInvitationsInBulk(requests);
+
+		Test.stopTest();
+
+		// Verify results - only valid requests should have URLs
+		System.assertEquals(3, results.size(), 'Should have URLs for 3 valid requests');
+
+		// Verify valid requests have URLs with tokens
+		String key2 = tr.Id + '_Customer';
+		System.assert(results.containsKey(key2), 'Should have URL for Customer survey');
+		System.assert(results.get(key2).contains('token='), 'Customer URL should contain token');
+
+		String key4 = tr.Id + '_Trainer';
+		System.assert(results.containsKey(key4), 'Should have URL for Trainer survey');
+		System.assert(results.get(key4).contains('token='), 'Trainer URL should contain token');
+
+		String key5 = tr.Id + '_Participant';
+		System.assert(results.containsKey(key5), 'Should have URL for Participant survey');
+		System.assert(results.get(key5).contains('token='), 'Participant URL should contain token');
+
+		// Verify invitations were created for valid surveys only
+		List<SurveyInvitation__c> invitations = [
+			SELECT Id, Survey__c, Token__c, Status__c
+			FROM SurveyInvitation__c
+			WHERE Survey__c IN :surveys
+		];
+		System.assertEquals(3, invitations.size(), 'Should create 3 invitations for valid surveys');
+
+		// Verify all invitations have unique tokens
+		Set<String> tokens = new Set<String>();
+		for (SurveyInvitation__c inv : invitations) {
+			System.assertEquals('Pending', inv.Status__c, 'Invitation should be pending');
+			System.assertNotEquals(null, inv.Token__c, 'Token should not be null');
+			tokens.add(inv.Token__c);
+		}
+		System.assertEquals(3, tokens.size(), 'All tokens should be unique');
+	}
 }
