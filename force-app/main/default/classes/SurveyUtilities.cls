@@ -223,6 +223,9 @@ public with sharing class SurveyUtilities {
 			if (!surveysToInsert.isEmpty()) {
 				Database.insert(surveysToInsert, AccessLevel.USER_MODE);
 
+				// Get org domain URL once for use as fallback (performance optimization)
+				String orgDomainUrl = System.URL.getOrgDomainUrl().toExternalForm();
+
 				// Clone questions for each survey
 				List<Survey_Question__c> allQuestionsToInsert = new List<Survey_Question__c>();
 
@@ -252,13 +255,13 @@ public with sharing class SurveyUtilities {
 					result.surveyId = newSurvey.Id;
 
 					// Build survey URL - use configured site URL if available, otherwise use org domain
+					// Note: Survey ID is Salesforce-generated and safe to use in URL without encoding
 					if (String.isNotBlank(siteURL)) {
 						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
 						result.message = 'Survey created successfully';
 					} else {
 						// Fallback to org domain URL when site URL is not configured
-						String orgUrl = System.URL.getOrgDomainUrl().toExternalForm();
-						result.surveyUrl = orgUrl + '/TakeSurvey?id=' + newSurvey.Id;
+						result.surveyUrl = orgDomainUrl + '/TakeSurvey?id=' + newSurvey.Id;
 						result.message = 'Survey created successfully. Note: Site URL not configured for training type: ' + tReq.Training_Type__c;
 					}
 				}
