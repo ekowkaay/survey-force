@@ -248,14 +248,17 @@ public with sharing class SurveyUtilities {
 					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
 					SurveyCreationResult result = results.get(key);
 					result.trainingType = tReq.Training_Type__c;
+					result.success = true;
+					result.surveyId = newSurvey.Id;
 
-					if (String.isBlank(siteURL)) {
-						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
-					} else {
-						result.success = true;
-						result.message = 'Survey created successfully';
-						result.surveyId = newSurvey.Id;
+					// Build survey URL - use configured site URL if available, otherwise use generic path
+					if (String.isNotBlank(siteURL)) {
 						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+						result.message = 'Survey created successfully';
+					} else {
+						// Fallback URL when site URL is not configured
+						result.surveyUrl = '/TakeSurvey?id=' + newSurvey.Id;
+						result.message = 'Survey created successfully. Note: Site URL not configured for training type: ' + tReq.Training_Type__c;
 					}
 				}
 
