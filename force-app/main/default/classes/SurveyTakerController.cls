@@ -184,7 +184,7 @@ public with sharing class SurveyTakerController {
 			qd.question = q.Question__c;
 			qd.orderNumber = orderNumber++;
 			// Trim questionType to ensure clean comparison in LWC
-			qd.questionType = String.isNotBlank(q.Type__c) ? q.Type__c.trim() : q.Type__c;
+			qd.questionType = q.Type__c != null ? q.Type__c.trim() : null;
 			qd.required = q.Required__c != null ? q.Required__c : false;
 			qd.hideOnSurvey = q.Hide_on_Survey__c != null ? q.Hide_on_Survey__c : false;
 			qd.rowsForTextArea = 3; // Default value

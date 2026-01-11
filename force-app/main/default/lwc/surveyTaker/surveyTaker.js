@@ -289,9 +289,7 @@ export default class SurveyTaker extends LightningElement {
 
 	get isHorizontalLayout() {
 		if (!this.currentQuestion) return false;
-		// Trim and normalize the question type to handle any whitespace issues
-		const questionType = this.currentQuestion.questionType?.trim();
-		return questionType === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
+		return this.currentQuestion.questionType?.trim() === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get scaleChoices() {
