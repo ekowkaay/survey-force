@@ -127,7 +127,6 @@ public with sharing class SurveyUtilities {
 					Survey_Subheader__c,
 					Hide_Survey_Name__c,
 					All_Responses_Anonymous__c,
-					Share_with_Guest_User__c,
 					Survey_Container_CSS__c
 				FROM Survey__c
 				WHERE Name IN :templateNames
