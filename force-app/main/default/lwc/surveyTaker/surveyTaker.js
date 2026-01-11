@@ -280,23 +280,25 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	get isFreeText() {
-		return this.currentQuestion && this.currentQuestion.questionType === QUESTION_TYPE.FREE_TEXT;
+		return this.currentQuestion && this.currentQuestion.questionType?.trim() === QUESTION_TYPE.FREE_TEXT;
 	}
 
 	get isSingleSelect() {
 		if (!this.currentQuestion) return false;
-		const type = this.currentQuestion.questionType;
+		const type = this.currentQuestion.questionType?.trim();
 		return type === QUESTION_TYPE.SINGLE_SELECT_VERTICAL || type === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get isMultiSelect() {
 		if (!this.currentQuestion) return false;
-		return this.currentQuestion.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL;
+		return this.currentQuestion.questionType?.trim() === QUESTION_TYPE.MULTI_SELECT_VERTICAL;
 	}
 
 	get isHorizontalLayout() {
 		if (!this.currentQuestion) return false;
-		return this.currentQuestion.questionType === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
+		// Trim and normalize the question type to handle any whitespace issues
+		const questionType = this.currentQuestion.questionType?.trim();
+		return questionType === QUESTION_TYPE.SINGLE_SELECT_HORIZONTAL;
 	}
 
 	get scaleChoices() {
@@ -408,7 +410,7 @@ export default class SurveyTaker extends LightningElement {
 	initializeResponses() {
 		this.responses = {};
 		this.questions.forEach((q) => {
-			if (q.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
+			if (q.questionType?.trim() === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 				this.responses[q.id] = { questionId: q.id, response: '', responses: [] };
 				// Initialize checkbox checked state
 				if (q.choices) {
@@ -534,7 +536,7 @@ export default class SurveyTaker extends LightningElement {
 			this.responses[questionId] = { questionId, response: '', responses: [] };
 		}
 
-		if (questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
+		if (questionType?.trim() === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 			// Handle checkbox changes
 			if (!this.responses[questionId].responses) {
 				this.responses[questionId].responses = [];
@@ -614,7 +616,7 @@ export default class SurveyTaker extends LightningElement {
 					return `Please answer question ${question.orderNumber}: ${question.question}`;
 				}
 
-				if (question.questionType === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
+				if (question.questionType?.trim() === QUESTION_TYPE.MULTI_SELECT_VERTICAL) {
 					if (!response.responses || response.responses.length === 0) {
 						return `Please answer question ${question.orderNumber}: ${question.question}`;
 					}
