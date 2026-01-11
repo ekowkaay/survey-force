@@ -343,15 +343,24 @@ public with sharing class SurveyUtilities {
 	private static String getSiteURLForTrainingType(String trainingType) {
 		Map<String, SiteURL__mdt> siteURLs = SiteURL__mdt.getAll();
 
+		// Log for debugging
+		SurveyForceUtil.log('getSiteURLForTrainingType - Training Type: ' + trainingType);
+		SurveyForceUtil.log('getSiteURLForTrainingType - Available Site URLs: ' + siteURLs.keySet());
+
 		if (siteURLs.isEmpty()) {
+			SurveyForceUtil.log('getSiteURLForTrainingType - No site URLs configured');
 			return null;
 		}
 
 		String siteURL = null;
 		if (TRAINING_TYPE_EAP.equals(trainingType) && siteURLs.containsKey(SITE_URL_EAP_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_EAP_TRAINING).URL__c;
+			SurveyForceUtil.log('getSiteURLForTrainingType - Found EAP Training URL: ' + siteURL);
 		} else if (siteURLs.containsKey(SITE_URL_RESELLER_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_RESELLER_TRAINING).URL__c;
+			SurveyForceUtil.log('getSiteURLForTrainingType - Found Reseller Training URL: ' + siteURL);
+		} else {
+			SurveyForceUtil.log('getSiteURLForTrainingType - No matching URL found for training type: ' + trainingType);
 		}
 
 		return siteURL;
