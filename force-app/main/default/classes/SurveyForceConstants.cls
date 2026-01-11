@@ -158,7 +158,7 @@ public class SurveyForceConstants {
 	public static String getTemplateName(SurveyType surveyType, Language language) {
 		switch on surveyType {
 			when PARTICIPANT {
-				return language == Language.SPANISH ? TEMPLATE_PARTICIPANT_SPANISH : TEMPLATE_PARTICIPANT_ENGLISH;
+				return language == SurveyForceConstants.Language.SPANISH ? TEMPLATE_PARTICIPANT_SPANISH : TEMPLATE_PARTICIPANT_ENGLISH;
 			}
 			when CUSTOMER {
 				return TEMPLATE_CUSTOMER;
