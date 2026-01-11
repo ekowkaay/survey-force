@@ -12,16 +12,16 @@ export default class SurveyQuestion extends LightningElement {
 	}
 
 	get isFreeText() {
-		return this.question.questionType === 'Free Text';
+		return this.question.questionType?.trim() === 'Free Text';
 	}
 
 	get isSingleSelect() {
-		const type = this.question.questionType;
+		const type = this.question.questionType?.trim();
 		return type === 'Single Select--Vertical' || type === 'Single Select--Horizontal';
 	}
 
 	get isMultiSelect() {
-		return this.question.questionType === 'Multi-Select--Vertical';
+		return this.question.questionType?.trim() === 'Multi-Select--Vertical';
 	}
 
 	get hasChoices() {

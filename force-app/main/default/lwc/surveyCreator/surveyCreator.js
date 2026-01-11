@@ -188,11 +188,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	get showChoices() {
-		return (
-			this.currentQuestion.questionType === 'Single Select--Vertical' ||
-			this.currentQuestion.questionType === 'Single Select--Horizontal' ||
-			this.currentQuestion.questionType === 'Multi-Select--Vertical'
-		);
+		const type = this.currentQuestion.questionType?.trim();
+		return type === 'Single Select--Vertical' || type === 'Single Select--Horizontal' || type === 'Multi-Select--Vertical';
 	}
 
 	// Event handlers
