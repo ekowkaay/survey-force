@@ -82,8 +82,8 @@ public class TokenGeneratorService {
 			return false;
 		}
 
-		// Check hyphen positions
-		if (token.charAt(8) != '-' || token.charAt(13) != '-' || token.charAt(18) != '-' || token.charAt(23) != '-') {
+		// Check hyphen positions (charAt returns Integer character code, 45 is '-')
+		if (token.charAt(8) != 45 || token.charAt(13) != 45 || token.charAt(18) != 45 || token.charAt(23) != 45) {
 			return false;
 		}
 
