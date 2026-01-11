@@ -251,13 +251,14 @@ public with sharing class SurveyUtilities {
 					result.success = true;
 					result.surveyId = newSurvey.Id;
 
-					// Build survey URL - use configured site URL if available, otherwise use generic path
+					// Build survey URL - use configured site URL if available, otherwise use org domain
 					if (String.isNotBlank(siteURL)) {
 						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
 						result.message = 'Survey created successfully';
 					} else {
-						// Fallback URL when site URL is not configured
-						result.surveyUrl = '/TakeSurvey?id=' + newSurvey.Id;
+						// Fallback to org domain URL when site URL is not configured
+						String orgUrl = System.URL.getOrgDomainUrl().toExternalForm();
+						result.surveyUrl = orgUrl + '/TakeSurvey?id=' + newSurvey.Id;
 						result.message = 'Survey created successfully. Note: Site URL not configured for training type: ' + tReq.Training_Type__c;
 					}
 				}
