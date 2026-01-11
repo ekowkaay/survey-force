@@ -214,7 +214,8 @@ public with sharing class SurveyUtilities {
 				newSurvey.Name = req.surveyName;
 
 				surveysToInsert.add(newSurvey);
-				indexToRequestMap.put(i, req);
+				// Map the actual position in surveysToInsert to the request
+				indexToRequestMap.put(surveysToInsert.size() - 1, req);
 				results.put(key, result);
 			}
 
