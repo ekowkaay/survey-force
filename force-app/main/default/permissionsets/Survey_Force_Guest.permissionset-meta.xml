@@ -103,6 +103,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Survey__c.Survey_Subheader__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Survey__c.Thank_You_Link__c</field>
         <readable>true</readable>
     </fieldPermissions>
