@@ -62,8 +62,8 @@ private class SurveyForceConstants_Test {
 		String trainer = SurveyForceConstants.getTemplateName(SurveyForceConstants.SurveyType.TRAINER, SurveyForceConstants.Language.ENGLISH);
 
 		// Assert
-		System.assertEquals('PartcipantSurveyTemplate', participantEnglish, 'Participant English template should match');
-		System.assertEquals('PartcipantSurveyTemplate Spanish', participantSpanish, 'Participant Spanish template should match');
+		System.assertEquals('ParticipantSurveyTemplate', participantEnglish, 'Participant English template should match');
+		System.assertEquals('ParticipantSurveyTemplate Spanish', participantSpanish, 'Participant Spanish template should match');
 		System.assertEquals('CustomerSurveyTemplate', customer, 'Customer template should match');
 		System.assertEquals('TrainerSurveyTemplate', trainer, 'Trainer template should match');
 	}

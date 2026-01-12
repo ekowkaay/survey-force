@@ -18,7 +18,7 @@ private class ParticipantsTriggerHandler_Test {
 
 		// Create survey template
 		Survey__c template = new Survey__c();
-		template.Name = 'PartcipantSurveyTemplate';
+		template.Name = 'ParticipantSurveyTemplate';
 		template.Thank_You_Text__c = 'Thank you for your participation!';
 		insert template;
 

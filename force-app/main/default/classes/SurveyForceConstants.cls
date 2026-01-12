@@ -67,9 +67,9 @@ public class SurveyForceConstants {
 	public static final String SITE_URL_EAP_TRAINING = 'EAP_Training';
 	public static final String SITE_URL_RESELLER_TRAINING = 'Reseller_Training';
 
-	/** Survey template names (keeping intentional typo for backward compatibility) */
-	public static final String TEMPLATE_PARTICIPANT_ENGLISH = 'PartcipantSurveyTemplate';
-	public static final String TEMPLATE_PARTICIPANT_SPANISH = 'PartcipantSurveyTemplate Spanish';
+	/** Survey template names */
+	public static final String TEMPLATE_PARTICIPANT_ENGLISH = 'ParticipantSurveyTemplate';
+	public static final String TEMPLATE_PARTICIPANT_SPANISH = 'ParticipantSurveyTemplate Spanish';
 	public static final String TEMPLATE_CUSTOMER = 'CustomerSurveyTemplate';
 	public static final String TEMPLATE_TRAINER = 'TrainerSurveyTemplate';
 

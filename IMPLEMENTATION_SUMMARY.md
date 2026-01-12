@@ -38,7 +38,7 @@ The original implementation required manual survey creation and distribution. Th
 **Functionality**:
 When a Training Request is created, automatically creates 3 surveys:
 
-1. **Participant Survey** - From template "PartcipantSurveyTemplate"
+1. **Participant Survey** - From template "ParticipantSurveyTemplate"
 2. **Customer Survey** - From template "CustomerSurveyTemplate"
 3. **Trainer Survey** - From template "TrainerSurveyTemplate"
 
@@ -164,8 +164,8 @@ Three comprehensive test classes with >90% coverage:
 ### Prerequisites
 
 - [ ] Survey templates exist:
-  - [ ] PartcipantSurveyTemplate
-  - [ ] PartcipantSurveyTemplate Spanish
+  - [ ] ParticipantSurveyTemplate
+  - [ ] ParticipantSurveyTemplate Spanish
   - [ ] CustomerSurveyTemplate
   - [ ] TrainerSurveyTemplate
 - [ ] SiteURL\_\_c custom setting configured
@@ -217,9 +217,9 @@ Three comprehensive test classes with >90% coverage:
 
 ## Known Items
 
-### Template Name Typo
+### Template Name
 
-The template name "PartcipantSurveyTemplate" has a typo (missing 'i'). This is **intentional** and matches the existing Survey\_\_c records in the database. Do not fix this typo as it would break template lookup.
+The template names have been corrected from the previous typo "PartcipantSurveyTemplate" to the proper spelling "ParticipantSurveyTemplate".
 
 ### Language Support
 
