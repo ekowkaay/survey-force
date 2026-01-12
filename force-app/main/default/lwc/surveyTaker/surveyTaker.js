@@ -436,6 +436,9 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		this.responses[questionId].response = value;
+		
+		// Force LWC reactivity by reassigning the responses object
+		this.responses = { ...this.responses };
 	}
 
 	handleRadioChange(event) {
@@ -462,6 +465,9 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		this.responses[questionId].response = value;
+		
+		// Force LWC reactivity by reassigning the responses object
+		this.responses = { ...this.responses };
 	}
 
 	handleCheckboxChange(event) {
@@ -492,6 +498,9 @@ export default class SurveyTaker extends LightningElement {
 		if (choice) {
 			choice.checked = checked;
 		}
+		
+		// Force LWC reactivity by reassigning the responses object
+		this.responses = { ...this.responses };
 	}
 
 	handleNext() {
@@ -551,6 +560,9 @@ export default class SurveyTaker extends LightningElement {
 			// Handle single value changes (free text, single select)
 			this.responses[questionId].response = value;
 		}
+		
+		// Force LWC reactivity by reassigning the responses object
+		this.responses = { ...this.responses };
 	}
 
 	handleAnonymousChange(event) {
