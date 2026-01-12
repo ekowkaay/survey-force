@@ -54,13 +54,39 @@ public with sharing class ParticipantsTriggerHandler {
 				]
 			);
 
-			// Get survey IDs from URLs
+			// Collect all unique tokens from URLs to bulk query
+			Set<String> tokens = new Set<String>();
+			for (Training_Request__c tr : trainingRequestMap.values()) {
+				if (String.isNotBlank(tr.Participant_Survey__c)) {
+					String token = extractTokenFromUrl(tr.Participant_Survey__c);
+					if (token != null) {
+						tokens.add(token);
+					}
+				}
+			}
+
+			// Bulk query SurveyInvitation records for all tokens at once
+			Map<String, Id> tokenToSurveyMap = new Map<String, Id>();
+			if (!tokens.isEmpty()) {
+				for (SurveyInvitation__c inv : [
+					SELECT Token__c, Survey__c
+					FROM SurveyInvitation__c
+					WHERE Token__c IN :tokens
+					WITH USER_MODE
+				]) {
+					if (inv.Survey__c != null) {
+						tokenToSurveyMap.put(inv.Token__c, inv.Survey__c);
+					}
+				}
+			}
+
+			// Get survey IDs from URLs (using bulk-queried token map)
 			Map<Id, Id> trainingRequestToSurveyMap = new Map<Id, Id>();
 			for (Id trId : trainingRequestMap.keySet()) {
 				Training_Request__c tr = trainingRequestMap.get(trId);
 				if (String.isNotBlank(tr.Participant_Survey__c)) {
-					// Extract survey ID from URL (e.g., /TakeSurvey?id=a0X...)
-					Id surveyId = extractSurveyIdFromUrl(tr.Participant_Survey__c);
+					// Extract survey ID from URL (handles both token and Survey ID formats)
+					Id surveyId = extractSurveyIdFromUrl(tr.Participant_Survey__c, tokenToSurveyMap);
 					if (surveyId != null) {
 						trainingRequestToSurveyMap.put(trId, surveyId);
 					}
@@ -113,12 +139,38 @@ public with sharing class ParticipantsTriggerHandler {
 	}
 
 	/**
+	 * @description Extract token from a token-based survey URL
+	 * @param surveyUrl The survey URL potentially containing a token parameter
+	 * @return String The extracted token or null if not found
+	 */
+	private String extractTokenFromUrl(String surveyUrl) {
+		if (String.isBlank(surveyUrl)) {
+			return null;
+		}
+
+		try {
+			Integer tokenParamIndex = surveyUrl.indexOf('token=');
+			if (tokenParamIndex != -1) {
+				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
+				// Get everything up to the next & or end of string
+				Integer endIndex = tokenPortion.indexOf('&');
+				return endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
+			}
+		} catch (Exception e) {
+			SurveyForceUtil.log('ParticipantsTriggerHandler.extractTokenFromUrl: ' + e.getMessage());
+		}
+
+		return null;
+	}
+
+	/**
 	 * @description Extract Survey ID from a survey URL
 	 * Handles both Survey ID-based URLs and token-based URLs
 	 * @param surveyUrl The survey URL containing either an ID parameter or a token parameter
+	 * @param tokenToSurveyMap Pre-populated map of tokens to Survey IDs (for bulk processing)
 	 * @return Id The extracted Survey ID or null if not found
 	 */
-	private Id extractSurveyIdFromUrl(String surveyUrl) {
+	private Id extractSurveyIdFromUrl(String surveyUrl, Map<String, Id> tokenToSurveyMap) {
 		if (String.isBlank(surveyUrl)) {
 			return null;
 		}
@@ -138,26 +190,10 @@ public with sharing class ParticipantsTriggerHandler {
 				}
 			}
 
-			// If no direct ID found, try to extract from token-based URL (format: /survey?token=TOKEN)
-			Integer tokenParamIndex = surveyUrl.indexOf('token=');
-			if (idParamIndex == -1 && tokenParamIndex != -1) {
-				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
-				// Get everything up to the next & or end of string
-				Integer endIndex = tokenPortion.indexOf('&');
-				String tokenValue = endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
-
-				// Query SurveyInvitation to get Survey ID from token
-				List<SurveyInvitation__c> invitations = [
-					SELECT Survey__c
-					FROM SurveyInvitation__c
-					WHERE Token__c = :tokenValue
-					WITH USER_MODE
-					LIMIT 1
-				];
-
-				if (!invitations.isEmpty() && invitations[0].Survey__c != null) {
-					return invitations[0].Survey__c;
-				}
+			// If no direct ID found, try to extract from token-based URL using the bulk-queried map
+			String token = extractTokenFromUrl(surveyUrl);
+			if (token != null && tokenToSurveyMap != null && tokenToSurveyMap.containsKey(token)) {
+				return tokenToSurveyMap.get(token);
 			}
 		} catch (Exception e) {
 			SurveyForceUtil.log('ParticipantsTriggerHandler.extractSurveyIdFromUrl: ' + e.getMessage());
