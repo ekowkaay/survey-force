@@ -462,6 +462,9 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		this.responses[questionId].response = value;
+		
+		// Force LWC reactivity by reassigning the responses object
+		this.responses = { ...this.responses };
 	}
 
 	handleCheckboxChange(event) {
