@@ -29,9 +29,8 @@ public with sharing class TrainingRequestTriggerHandler {
 	/**
 	 * @description Create surveys for training requests
 	 * Creates participant, customer, and trainer surveys automatically
-	 * - All Survey Types: Stores token-based URL for immediate use
-	 * - Participant Survey: Additional unique tokens generated when participant records are created
-	 * - Customer/Trainer Surveys: Token URL can be used directly or additional tokens can be generated
+	 * - Participant Survey: Stores Survey ID URL (tokens generated when participants are created)
+	 * - Customer/Trainer Surveys: Stores Survey ID URL + creates one token invitation
 	 * Uses bulkified survey creation to avoid SOQL in loops
 	 * @param trainingRequests List of Training Request records
 	 */
@@ -92,26 +91,26 @@ public with sharing class TrainingRequestTriggerHandler {
 			if (!surveyRequests.isEmpty()) {
 				Map<String, SurveyUtilities.SurveyCreationResult> surveyResults = SurveyUtilities.createSurveysInBulk(surveyRequests);
 
-				// Collect surveys for token generation (all three survey types)
+				// Collect surveys for token generation (Customer and Trainer only, NOT Participant)
 				List<SurveyUtilities.InvitationRequest> invitationRequests = new List<SurveyUtilities.InvitationRequest>();
 				for (String key : surveyResults.keySet()) {
 					SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
 					String surveyType = key.substringAfter('_');
 
-					// Generate tokens for all survey types (Participant, Customer, and Trainer)
-					// Note: Participants also get additional unique tokens when participant records are created
-					if (result.success && result.surveyId != null) {
+					// Only generate tokens for Customer and Trainer surveys
+					// Participant tokens are generated when participant records are created
+					if (result.success && result.surveyId != null && surveyType != SurveyForceConstants.SURVEY_TYPE_PARTICIPANT) {
 						invitationRequests.add(new SurveyUtilities.InvitationRequest(result.surveyId, result.sourceRecordId, surveyType, result.trainingType));
 					}
 				}
 
-				// Generate token-based invitations in bulk (for all survey types)
+				// Generate token-based invitations in bulk (for Customer and Trainer only)
 				Map<String, String> surveyTokenUrls = new Map<String, String>();
 				if (!invitationRequests.isEmpty()) {
 					surveyTokenUrls = SurveyUtilities.generateSurveyInvitationsInBulk(invitationRequests);
 				}
 
-				// Update training requests with token-based URLs for all survey types
+				// Update training requests with Survey ID URLs for all survey types
 				List<Training_Request__c> requestsToUpdate = new List<Training_Request__c>();
 				for (Id trId : trainingRequestToSurveyTypes.keySet()) {
 					Training_Request__c trToUpdate = new Training_Request__c();
@@ -120,26 +119,18 @@ public with sharing class TrainingRequestTriggerHandler {
 
 					for (String surveyType : trainingRequestToSurveyTypes.get(trId)) {
 						String key = trId + '_' + surveyType;
+						SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
 
-						// Use token-based URL if available, otherwise fall back to Survey ID URL
-						String surveyUrl = surveyTokenUrls.containsKey(key) ? surveyTokenUrls.get(key) : null;
-						if (surveyUrl == null) {
-							SurveyUtilities.SurveyCreationResult result = surveyResults.get(key);
-							if (result != null && result.success) {
-								surveyUrl = result.surveyUrl;
-							}
-						}
-
-						if (surveyUrl != null) {
-							// All survey types: Store token-based URL (or Survey ID URL as fallback)
+						if (result != null && result.success && result.surveyUrl != null) {
+							// All survey types: Store Survey ID URL
 							if (surveyType == SurveyForceConstants.SURVEY_TYPE_PARTICIPANT) {
-								trToUpdate.Participant_Survey__c = surveyUrl;
+								trToUpdate.Participant_Survey__c = result.surveyUrl;
 								hasUpdates = true;
 							} else if (surveyType == SurveyForceConstants.SURVEY_TYPE_CUSTOMER) {
-								trToUpdate.Customer_Survey__c = surveyUrl;
+								trToUpdate.Customer_Survey__c = result.surveyUrl;
 								hasUpdates = true;
 							} else if (surveyType == SurveyForceConstants.SURVEY_TYPE_TRAINER) {
-								trToUpdate.Trainer_Survey__c = surveyUrl;
+								trToUpdate.Trainer_Survey__c = result.surveyUrl;
 								hasUpdates = true;
 							}
 						}
