@@ -137,7 +137,7 @@ public with sharing class ParticipantsTriggerHandler {
 					return (Id) idValue;
 				}
 			}
-			
+
 			// If no direct ID found, try to extract from token-based URL (format: /survey?token=TOKEN)
 			Integer tokenParamIndex = surveyUrl.indexOf('token=');
 			if (idParamIndex == -1 && tokenParamIndex != -1) {
@@ -145,7 +145,7 @@ public with sharing class ParticipantsTriggerHandler {
 				// Get everything up to the next & or end of string
 				Integer endIndex = tokenPortion.indexOf('&');
 				String tokenValue = endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
-				
+
 				// Query SurveyInvitation to get Survey ID from token
 				List<SurveyInvitation__c> invitations = [
 					SELECT Survey__c
@@ -154,7 +154,7 @@ public with sharing class ParticipantsTriggerHandler {
 					WITH USER_MODE
 					LIMIT 1
 				];
-				
+
 				if (!invitations.isEmpty() && invitations[0].Survey__c != null) {
 					return invitations[0].Survey__c;
 				}

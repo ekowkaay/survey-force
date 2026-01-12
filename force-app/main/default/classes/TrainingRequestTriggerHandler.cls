@@ -120,7 +120,7 @@ public with sharing class TrainingRequestTriggerHandler {
 
 					for (String surveyType : trainingRequestToSurveyTypes.get(trId)) {
 						String key = trId + '_' + surveyType;
-						
+
 						// Use token-based URL if available, otherwise fall back to Survey ID URL
 						String surveyUrl = surveyTokenUrls.containsKey(key) ? surveyTokenUrls.get(key) : null;
 						if (surveyUrl == null) {
