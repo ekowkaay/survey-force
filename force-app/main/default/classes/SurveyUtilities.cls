@@ -214,13 +214,17 @@ public with sharing class SurveyUtilities {
 				newSurvey.Name = req.surveyName;
 
 				surveysToInsert.add(newSurvey);
-				indexToRequestMap.put(i, req);
+				// Map the actual position in surveysToInsert to the request
+				indexToRequestMap.put(surveysToInsert.size() - 1, req);
 				results.put(key, result);
 			}
 
 			// Bulk insert surveys
 			if (!surveysToInsert.isEmpty()) {
 				Database.insert(surveysToInsert, AccessLevel.USER_MODE);
+
+				// Get org domain URL once for use as fallback (performance optimization)
+				String orgDomainUrl = System.URL.getOrgDomainUrl().toExternalForm();
 
 				// Clone questions for each survey
 				List<Survey_Question__c> allQuestionsToInsert = new List<Survey_Question__c>();
@@ -247,14 +251,18 @@ public with sharing class SurveyUtilities {
 					String siteURL = getSiteURLForTrainingType(tReq.Training_Type__c);
 					SurveyCreationResult result = results.get(key);
 					result.trainingType = tReq.Training_Type__c;
+					result.success = true;
+					result.surveyId = newSurvey.Id;
 
-					if (String.isBlank(siteURL)) {
-						result.message = 'Site URL not configured for training type: ' + tReq.Training_Type__c;
-					} else {
-						result.success = true;
-						result.message = 'Survey created successfully';
-						result.surveyId = newSurvey.Id;
+					// Build survey URL - use configured site URL if available, otherwise use org domain
+					// Note: Survey ID is Salesforce-generated and safe to use in URL without encoding
+					if (String.isNotBlank(siteURL)) {
 						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+						result.message = 'Survey created successfully';
+					} else {
+						// Fallback to org domain URL when site URL is not configured
+						result.surveyUrl = orgDomainUrl + '/TakeSurvey?id=' + newSurvey.Id;
+						result.message = 'Survey created successfully. Note: Site URL not configured for training type: ' + tReq.Training_Type__c;
 					}
 				}
 
@@ -335,15 +343,24 @@ public with sharing class SurveyUtilities {
 	private static String getSiteURLForTrainingType(String trainingType) {
 		Map<String, SiteURL__mdt> siteURLs = SiteURL__mdt.getAll();
 
+		// Log for debugging
+		SurveyForceUtil.log('getSiteURLForTrainingType - Training Type: ' + trainingType);
+		SurveyForceUtil.log('getSiteURLForTrainingType - Available Site URLs: ' + siteURLs.keySet());
+
 		if (siteURLs.isEmpty()) {
+			SurveyForceUtil.log('getSiteURLForTrainingType - No site URLs configured');
 			return null;
 		}
 
 		String siteURL = null;
 		if (TRAINING_TYPE_EAP.equals(trainingType) && siteURLs.containsKey(SITE_URL_EAP_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_EAP_TRAINING).URL__c;
+			SurveyForceUtil.log('getSiteURLForTrainingType - Found EAP Training URL: ' + siteURL);
 		} else if (siteURLs.containsKey(SITE_URL_RESELLER_TRAINING)) {
 			siteURL = siteURLs.get(SITE_URL_RESELLER_TRAINING).URL__c;
+			SurveyForceUtil.log('getSiteURLForTrainingType - Found Reseller Training URL: ' + siteURL);
+		} else {
+			SurveyForceUtil.log('getSiteURLForTrainingType - No matching URL found for training type: ' + trainingType);
 		}
 
 		return siteURL;
@@ -581,7 +598,8 @@ public with sharing class SurveyUtilities {
 				invitation.RelatedRecordId__c = req.relatedRecordId;
 
 				invitationsToInsert.add(invitation);
-				indexToRequestMap.put(i, req);
+				// Map the actual position in invitationsToInsert to the request
+				indexToRequestMap.put(invitationsToInsert.size() - 1, req);
 			}
 
 			// Bulk insert all invitations

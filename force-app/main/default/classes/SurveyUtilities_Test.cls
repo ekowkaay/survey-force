@@ -325,4 +325,194 @@ private class SurveyUtilities_Test {
 
 		Test.stopTest();
 	}
+
+	/**
+	 * @description Test bulk survey creation with mixed valid and invalid requests
+	 * This test ensures the index mapping works correctly when some requests fail validation
+	 */
+	@IsTest
+	static void testCreateSurveysInBulk_MixedRequests() {
+		Training_Request__c tr = [SELECT Id FROM Training_Request__c LIMIT 1];
+
+		Test.startTest();
+
+		// Create a mix of valid and invalid requests
+		List<SurveyUtilities.SurveyCreationRequest> requests = new List<SurveyUtilities.SurveyCreationRequest>();
+
+		// Invalid request - null training request ID (should fail)
+		requests.add(new SurveyUtilities.SurveyCreationRequest(null, 'Participant', 'English', 'Invalid Survey 1'));
+
+		// Valid request
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Participant', 'English', 'Valid Survey 1'));
+
+		// Invalid request - blank survey name (should fail)
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Customer', 'English', ''));
+
+		// Valid request
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Customer', 'English', 'Valid Survey 2'));
+
+		// Invalid request - invalid survey type (should fail)
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'InvalidType', 'English', 'Invalid Survey 2'));
+
+		// Valid request
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Trainer', 'English', 'Valid Survey 3'));
+
+		// Call bulk creation
+		Map<String, SurveyUtilities.SurveyCreationResult> results = SurveyUtilities.createSurveysInBulk(requests);
+
+		Test.stopTest();
+
+		// Verify results for all requests
+		System.assertEquals(6, results.size(), 'Should have results for all 6 requests');
+
+		// Verify invalid requests failed with appropriate messages
+		String key1 = 'null_Participant';
+		System.assert(results.containsKey(key1), 'Should have result for request 1');
+		System.assertEquals(false, results.get(key1).success, 'Request 1 should fail');
+		System.assert(results.get(key1).message.contains('required'), 'Request 1 should have error about required ID');
+
+		// Verify valid request succeeded
+		String key2 = tr.Id + '_Participant';
+		System.assert(results.containsKey(key2), 'Should have result for request 2');
+		System.assertEquals(true, results.get(key2).success, 'Request 2 should succeed');
+		System.assertNotEquals(null, results.get(key2).surveyId, 'Request 2 should have survey ID');
+
+		// Verify invalid request (blank name) failed
+		String key3 = tr.Id + '_Customer';
+		System.assert(results.containsKey(key3), 'Should have result for request 3/4');
+		// Note: Request 4 with same key will overwrite request 3 result
+		System.assertEquals(true, results.get(key3).success, 'Request 4 (valid Customer) should succeed');
+
+		// Verify invalid request (invalid type) failed
+		String key5 = tr.Id + '_InvalidType';
+		System.assert(results.containsKey(key5), 'Should have result for request 5');
+		System.assertEquals(false, results.get(key5).success, 'Request 5 should fail');
+		System.assert(results.get(key5).message.contains('Invalid'), 'Request 5 should have error about invalid type');
+
+		// Verify valid request succeeded
+		String key6 = tr.Id + '_Trainer';
+		System.assert(results.containsKey(key6), 'Should have result for request 6');
+		System.assertEquals(true, results.get(key6).success, 'Request 6 should succeed');
+		System.assertNotEquals(null, results.get(key6).surveyId, 'Request 6 should have survey ID');
+
+		// Verify only valid surveys were created
+		List<Survey__c> createdSurveys = [
+			SELECT Id, Name
+			FROM Survey__c
+			WHERE Name IN ('Valid Survey 1', 'Valid Survey 2', 'Valid Survey 3')
+		];
+		System.assertEquals(3, createdSurveys.size(), 'Should create 3 valid surveys');
+
+		// Verify questions were cloned for all valid surveys
+		for (Survey__c survey : createdSurveys) {
+			List<Survey_Question__c> questions = [
+				SELECT Id
+				FROM Survey_Question__c
+				WHERE Survey__c = :survey.Id
+			];
+			System.assert(questions.size() > 0, 'Each valid survey should have questions cloned: ' + survey.Name);
+		}
+	}
+
+	/**
+	 * @description Test bulk invitation generation with mixed valid and invalid requests
+	 * This test ensures the index mapping works correctly when some requests have null surveyIds
+	 */
+	@IsTest
+	static void testGenerateSurveyInvitationsInBulk_MixedRequests() {
+		Training_Request__c tr = [SELECT Id FROM Training_Request__c LIMIT 1];
+
+		// Create surveys
+		List<Survey__c> surveys = new List<Survey__c>();
+		for (Integer i = 0; i < 3; i++) {
+			Survey__c survey = new Survey__c();
+			survey.Name = 'Test Survey ' + i;
+			survey.Thank_You_Text__c = 'Thank you!';
+			surveys.add(survey);
+		}
+		insert surveys;
+
+		Test.startTest();
+
+		// Create a mix of valid and invalid invitation requests
+		List<SurveyUtilities.InvitationRequest> requests = new List<SurveyUtilities.InvitationRequest>();
+
+		// Invalid request - null survey ID (should be skipped)
+		SurveyUtilities.InvitationRequest req1 = new SurveyUtilities.InvitationRequest();
+		req1.surveyId = null;
+		req1.relatedRecordId = tr.Id;
+		req1.surveyType = 'Participant';
+		req1.trainingType = 'EAP Training';
+		requests.add(req1);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req2 = new SurveyUtilities.InvitationRequest();
+		req2.surveyId = surveys[0].Id;
+		req2.relatedRecordId = tr.Id;
+		req2.surveyType = 'Customer';
+		req2.trainingType = 'EAP Training';
+		requests.add(req2);
+
+		// Invalid request - null survey ID (should be skipped)
+		SurveyUtilities.InvitationRequest req3 = new SurveyUtilities.InvitationRequest();
+		req3.surveyId = null;
+		req3.relatedRecordId = tr.Id;
+		req3.surveyType = 'InvalidType';
+		req3.trainingType = 'EAP Training';
+		requests.add(req3);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req4 = new SurveyUtilities.InvitationRequest();
+		req4.surveyId = surveys[1].Id;
+		req4.relatedRecordId = tr.Id;
+		req4.surveyType = 'Trainer';
+		req4.trainingType = 'EAP Training';
+		requests.add(req4);
+
+		// Valid request
+		SurveyUtilities.InvitationRequest req5 = new SurveyUtilities.InvitationRequest();
+		req5.surveyId = surveys[2].Id;
+		req5.relatedRecordId = tr.Id;
+		req5.surveyType = 'Participant';
+		req5.trainingType = 'Reseller Training';
+		requests.add(req5);
+
+		// Call bulk invitation generation
+		Map<String, String> results = SurveyUtilities.generateSurveyInvitationsInBulk(requests);
+
+		Test.stopTest();
+
+		// Verify results - only valid requests should have URLs
+		System.assertEquals(3, results.size(), 'Should have URLs for 3 valid requests');
+
+		// Verify valid requests have URLs with tokens
+		String key2 = tr.Id + '_Customer';
+		System.assert(results.containsKey(key2), 'Should have URL for Customer survey');
+		System.assert(results.get(key2).contains('token='), 'Customer URL should contain token');
+
+		String key4 = tr.Id + '_Trainer';
+		System.assert(results.containsKey(key4), 'Should have URL for Trainer survey');
+		System.assert(results.get(key4).contains('token='), 'Trainer URL should contain token');
+
+		String key5 = tr.Id + '_Participant';
+		System.assert(results.containsKey(key5), 'Should have URL for Participant survey');
+		System.assert(results.get(key5).contains('token='), 'Participant URL should contain token');
+
+		// Verify invitations were created for valid surveys only
+		List<SurveyInvitation__c> invitations = [
+			SELECT Id, Survey__c, Token__c, Status__c
+			FROM SurveyInvitation__c
+			WHERE Survey__c IN :surveys
+		];
+		System.assertEquals(3, invitations.size(), 'Should create 3 invitations for valid surveys');
+
+		// Verify all invitations have unique tokens
+		Set<String> tokens = new Set<String>();
+		for (SurveyInvitation__c inv : invitations) {
+			System.assertEquals('Pending', inv.Status__c, 'Invitation should be pending');
+			System.assertNotEquals(null, inv.Token__c, 'Token should not be null');
+			tokens.add(inv.Token__c);
+		}
+		System.assertEquals(3, tokens.size(), 'All tokens should be unique');
+	}
 }
