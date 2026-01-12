@@ -8,6 +8,11 @@ public with sharing class ParticipantsTriggerHandler {
 	/** Static flag to prevent recursive trigger execution */
 	private static Boolean isExecuting = false;
 
+	/** Constants for URL parsing */
+	private static final Integer TOKEN_PARAM_LENGTH = 6; // Length of 'token='
+	private static final Integer ID_PARAM_LENGTH = 3; // Length of 'id='
+	private static final Integer SALESFORCE_ID_MIN_LENGTH = 15; // Minimum length for Salesforce IDs
+
 	/**
 	 * @description After insert handler - generates survey invitations for new participants
 	 * @param newRecords List of new Participant records
@@ -151,7 +156,7 @@ public with sharing class ParticipantsTriggerHandler {
 		try {
 			Integer tokenParamIndex = surveyUrl.indexOf('token=');
 			if (tokenParamIndex != -1) {
-				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
+				String tokenPortion = surveyUrl.substring(tokenParamIndex + TOKEN_PARAM_LENGTH);
 				// Get everything up to the next & or end of string
 				Integer endIndex = tokenPortion.indexOf('&');
 				return endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
@@ -179,13 +184,13 @@ public with sharing class ParticipantsTriggerHandler {
 			// First, try to extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
 			Integer idParamIndex = surveyUrl.indexOf('id=');
 			if (idParamIndex != -1) {
-				String idPortion = surveyUrl.substring(idParamIndex + 3);
+				String idPortion = surveyUrl.substring(idParamIndex + ID_PARAM_LENGTH);
 				// Get everything up to the next & or end of string
 				Integer endIndex = idPortion.indexOf('&');
 				String idValue = endIndex != -1 ? idPortion.substring(0, endIndex) : idPortion;
 
 				// Validate it's a valid Survey ID
-				if (idValue.length() >= 15) {
+				if (idValue.length() >= SALESFORCE_ID_MIN_LENGTH) {
 					return (Id) idValue;
 				}
 			}
@@ -195,6 +200,10 @@ public with sharing class ParticipantsTriggerHandler {
 			if (token != null && tokenToSurveyMap != null && tokenToSurveyMap.containsKey(token)) {
 				return tokenToSurveyMap.get(token);
 			}
+
+			// Note: If token exists but not in the map, it means the token wasn't in the bulk query
+			// In this case, we return null to maintain consistent behavior with the bulk approach
+			// Individual SOQL queries are avoided to prevent governor limit issues
 		} catch (Exception e) {
 			SurveyForceUtil.log('ParticipantsTriggerHandler.extractSurveyIdFromUrl: ' + e.getMessage());
 		}
