@@ -118,16 +118,7 @@ public with sharing class SurveyUtilities {
 			// Single SOQL query for all templates
 			Map<String, Survey__c> templateMap = new Map<String, Survey__c>();
 			for (Survey__c template : [
-				SELECT
-					Id,
-					Name,
-					Thank_You_Text__c,
-					Thank_You_Link__c,
-					Survey_Header__c,
-					Survey_Subheader__c,
-					Hide_Survey_Name__c,
-					All_Responses_Anonymous__c,
-					Survey_Container_CSS__c
+				SELECT Id, Name, Thank_You_Text__c, Thank_You_Link__c, Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, All_Responses_Anonymous__c, Survey_Container_CSS__c
 				FROM Survey__c
 				WHERE Name IN :templateNames
 				WITH USER_MODE

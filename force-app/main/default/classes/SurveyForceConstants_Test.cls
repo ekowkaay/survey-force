@@ -75,10 +75,7 @@ private class SurveyForceConstants_Test {
 	static void testQuestionTypeHelpers() {
 		// Test single select
 		System.assert(SurveyForceConstants.isSelectQuestionType(SurveyForceConstants.QUESTION_TYPE_SINGLE_SELECT_VERTICAL), 'Single select vertical should be a select type');
-		System.assert(
-			SurveyForceConstants.isSelectQuestionType(SurveyForceConstants.QUESTION_TYPE_SINGLE_SELECT_HORIZONTAL),
-			'Single select horizontal should be a select type'
-		);
+		System.assert(SurveyForceConstants.isSelectQuestionType(SurveyForceConstants.QUESTION_TYPE_SINGLE_SELECT_HORIZONTAL), 'Single select horizontal should be a select type');
 		System.assert(SurveyForceConstants.isSingleSelectQuestionType(SurveyForceConstants.QUESTION_TYPE_SINGLE_SELECT_VERTICAL), 'Should be single select');
 
 		// Test multi select

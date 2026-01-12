@@ -178,9 +178,7 @@ public class SurveyForceConstants {
 	 * @return Boolean true if it's a select type
 	 */
 	public static Boolean isSelectQuestionType(String questionType) {
-		return questionType == QUESTION_TYPE_SINGLE_SELECT_VERTICAL ||
-			questionType == QUESTION_TYPE_SINGLE_SELECT_HORIZONTAL ||
-			questionType == QUESTION_TYPE_MULTI_SELECT_VERTICAL;
+		return questionType == QUESTION_TYPE_SINGLE_SELECT_VERTICAL || questionType == QUESTION_TYPE_SINGLE_SELECT_HORIZONTAL || questionType == QUESTION_TYPE_MULTI_SELECT_VERTICAL;
 	}
 
 	/**
