@@ -108,9 +108,7 @@ public with sharing class SurveyInvitationController {
 	 */
 	private static DateTime getExpirationDate(DateTime eventDate) {
 		SurveySettings__c settings = SurveySettings__c.getInstance();
-		Decimal expirationDays = settings != null && settings.InvitationExpirationDays__c != null
-			? settings.InvitationExpirationDays__c
-			: SurveyForceConstants.DEFAULT_EXPIRATION_DAYS;
+		Decimal expirationDays = settings != null && settings.InvitationExpirationDays__c != null ? settings.InvitationExpirationDays__c : SurveyForceConstants.DEFAULT_EXPIRATION_DAYS;
 
 		// If expiration days is 0, return null (no expiration)
 		if (expirationDays == 0) {

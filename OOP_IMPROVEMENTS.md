@@ -9,12 +9,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 ### 1. Violation of Single Responsibility Principle (SRP)
 
 **Problem:**
+
 - `SurveyUtilities` class had mixed responsibilities (survey creation, link generation, token management)
 - `ViewSurveyControllerWithoutSharing` contained unrelated DML methods
 - Trigger classes had business logic directly embedded
 - Token generation logic duplicated across multiple classes
 
 **Solution:**
+
 - Created `TokenGeneratorService` dedicated to token generation
 - Created `SurveyQuestionTriggerHandler` to separate trigger logic from trigger
 - Each class now has a focused, single responsibility
@@ -22,11 +24,13 @@ This document outlines the comprehensive object-oriented software engineering (O
 ### 2. Violation of Dependency Inversion Principle (DIP)
 
 **Problem:**
+
 - Direct instantiation of `SFDCAccessController` in `SurveyForceUtil` (tight coupling)
 - No abstraction layer for access control
 - Difficult to test with mocks
 
 **Solution:**
+
 - Created `IAccessController` interface defining access control contract
 - Updated `SFDCAccessController` to implement the interface
 - Modified `SurveyForceUtil` to use dependency injection pattern
@@ -35,12 +39,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 ### 3. Violation of DRY Principle (Don't Repeat Yourself)
 
 **Problem:**
+
 - Magic strings scattered throughout codebase ('Pending', 'Completed', 'Expired', etc.)
 - Duplicate token generation logic in multiple classes
 - Repeated validation and type-checking patterns
 - Increased risk of typos and inconsistencies
 
 **Solution:**
+
 - Created `SurveyForceConstants` class centralizing all constants
 - Added type-safe enums for survey types, statuses, and question types
 - Provided helper methods for type checking and conversions
@@ -49,11 +55,13 @@ This document outlines the comprehensive object-oriented software engineering (O
 ### 4. Poor Encapsulation
 
 **Problem:**
+
 - Business logic directly in trigger (`SFSurveyQuestionTrigger`)
 - Static recursion flags exposed as public
 - Mixed concerns in single classes
 
 **Solution:**
+
 - Moved business logic to dedicated handler class
 - Made recursion flags private
 - Clear separation between trigger and business logic
@@ -61,12 +69,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 ### 5. Interface Segregation Principle Violations
 
 **Problem:**
+
 - Trigger handlers had 5-6 empty placeholder methods
 - Increased maintenance burden
 - Unclear which methods are actually used
 - Violations of "implement only what you need" principle
 
 **Solution:**
+
 - Removed all empty placeholder methods from trigger handlers
 - Simplified triggers to only include active contexts
 - Cleaner, more focused interfaces
@@ -78,12 +88,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 #### 1. Constants Management (`SurveyForceConstants`)
 
 **Benefits:**
+
 - **Type Safety**: Enums prevent typos and invalid values
 - **Maintainability**: Single point of change for all constants
 - **Discoverability**: Developers can easily find all valid values
 - **Consistency**: Guaranteed consistent values across codebase
 
 **Features:**
+
 - Enums for InvitationStatus, SurveyType, Language, QuestionType
 - String constants for backward compatibility
 - Helper methods for type conversion and validation
@@ -92,12 +104,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 #### 2. Access Control Interface (`IAccessController`)
 
 **Benefits:**
+
 - **Loose Coupling**: Classes depend on interface, not implementation
 - **Testability**: Easy to inject mocks for testing
 - **Flexibility**: Can swap implementations without changing consumers
 - **Clear Contract**: Interface documents required functionality
 
 **Methods:**
+
 - `assertAuthorizedToView/Create/Update/Delete`
 - `isAuthorizedToView/Create/Update/Delete`
 - `getViewableFields/CreatableFields/UpdateableFields`
@@ -105,12 +119,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 #### 3. Token Generation Service (`TokenGeneratorService`)
 
 **Benefits:**
+
 - **Single Responsibility**: Focused only on token generation
 - **Reusability**: Used by all classes needing tokens
 - **Security**: Centralized cryptographic implementation
 - **Validation**: Built-in token format validation
 
 **Features:**
+
 - Generate single token with UUID format
 - Generate bulk tokens with uniqueness guarantee
 - Validate token format
@@ -119,12 +135,14 @@ This document outlines the comprehensive object-oriented software engineering (O
 #### 4. Trigger Handler Pattern
 
 **Benefits:**
+
 - **Separation of Concerns**: Triggers only route to handlers
 - **Testability**: Handlers can be unit tested independently
 - **Maintainability**: Business logic separated from trigger mechanics
 - **Bulkification**: Handlers can properly process collections
 
 **Implementation:**
+
 - `SurveyQuestionTriggerHandler` for Survey Question operations
 - Removed empty methods from `ParticipantsTriggerHandler`
 - Removed empty methods from `TrainingRequestTriggerHandler`
@@ -145,8 +163,8 @@ return h.substring(0, 8) + '-' + h.substring(8, 12) + '-'...
 // Business logic in trigger
 trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before update) {
     for (Survey_Question__c sq : Trigger.new) {
-        sq.Name = (String.escapeSingleQuotes(sq.Question__c).length() > 80) 
-            ? sq.Question__c.substring(0, 79) 
+        sq.Name = (String.escapeSingleQuotes(sq.Question__c).length() > 80)
+            ? sq.Question__c.substring(0, 79)
             : sq.Question__c;
     }
 }
@@ -186,11 +204,13 @@ trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before upda
 #### 1. Testing
 
 **New Test Classes:**
+
 - `SurveyForceConstants_Test` - 100% coverage of constants class
 - `TokenGeneratorService_Test` - 100% coverage with security validation
 - `SurveyQuestionTriggerHandler_Test` - 100% coverage including bulk operations
 
 **Test Coverage:**
+
 - All new classes have comprehensive unit tests
 - Bulk operations tested
 - Edge cases covered
@@ -199,12 +219,14 @@ trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before upda
 #### 2. Documentation
 
 **ApexDocs:**
+
 - Every public method documented with purpose, parameters, and return values
 - Usage examples where appropriate
 - Security considerations noted
 - Performance implications documented
 
 **README Files:**
+
 - This comprehensive architecture document
 - Clear explanation of improvements
 - Migration guidance
@@ -213,6 +235,7 @@ trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before upda
 #### 3. Error Handling
 
 **Improvements:**
+
 - Custom exceptions for specific error conditions
 - Proper exception propagation
 - Informative error messages
@@ -261,31 +284,34 @@ trigger SFSurveyQuestionTrigger on Survey_Question__c(before insert, before upda
 ### For Developers
 
 1. **Use Constants Instead of Strings:**
+
    ```apex
    // Old
    invitation.Status__c = 'Pending';
-   
+
    // New
    invitation.Status__c = SurveyForceConstants.STATUS_PENDING;
    ```
 
 2. **Use TokenGeneratorService:**
+
    ```apex
    // Old
    Blob b = Crypto.generateAesKey(128);
    String h = EncodingUtil.convertToHex(b);
    String token = h.substring(0, 8) + '-' + h.substring(8, 12) + '-'...
-   
+
    // New
    String token = TokenGeneratorService.generateToken();
    ```
 
 3. **Use Type-Safe Helper Methods:**
+
    ```apex
    // Old
-   if (question.questionType == 'Single Select--Vertical' || 
+   if (question.questionType == 'Single Select--Vertical' ||
        question.questionType == 'Single Select--Horizontal') {
-   
+
    // New
    if (SurveyForceConstants.isSingleSelectQuestionType(question.questionType)) {
    ```
@@ -317,28 +343,36 @@ No configuration changes required. All improvements are backward compatible.
 ## SOLID Principles Compliance
 
 ### Single Responsibility ✅
+
 Each class now has one reason to change:
+
 - `SurveyForceConstants` - Changes to constants
 - `TokenGeneratorService` - Changes to token generation
 - `SurveyQuestionTriggerHandler` - Changes to question business logic
 
 ### Open/Closed ✅
+
 Classes open for extension, closed for modification:
+
 - New survey types can be added to enum
 - New access control implementations can be created
 - Token format can be changed without affecting consumers
 
 ### Liskov Substitution ✅
+
 Interface implementations are substitutable:
+
 - Any `IAccessController` implementation works
 - Mock implementations for testing
 
 ### Interface Segregation ✅
+
 - No empty placeholder methods
 - Interfaces focused on specific needs
 - Classes only implement what they use
 
 ### Dependency Inversion ✅
+
 - Depend on abstractions (`IAccessController`)
 - Not on concretions (`SFDCAccessController`)
 - Dependency injection enabled
@@ -381,6 +415,7 @@ The refactoring maintains 100% backward compatibility while positioning the code
 ## Contact & Support
 
 For questions or issues related to these improvements:
+
 - Review this documentation
 - Examine test classes for usage examples
 - Consult ApexDocs in class files

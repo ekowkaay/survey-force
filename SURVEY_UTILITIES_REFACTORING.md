@@ -95,7 +95,7 @@ The original implementation had several issues:
 
 - **Feature**: Automatic creation of three surveys on training request insert
 - **Surveys Created**:
-  1. **Participant Survey** - Created from 'PartcipantSurveyTemplate'
+  1. **Participant Survey** - Created from 'ParticipantSurveyTemplate'
   2. **Customer Survey** - Created from 'CustomerSurveyTemplate'
   3. **Trainer Survey** - Created from 'TrainerSurveyTemplate'
 - **Process**:
@@ -409,8 +409,8 @@ If issues arise:
 4. Ensure Participants**c has Participant_Survey**c field (URL type)
 5. Ensure Training_Request**c has Participant_Survey**c, Customer_Survey**c, and Trainer_Survey**c fields (URL type)
 6. **Required Survey Templates** (must exist before deployment):
-   - `PartcipantSurveyTemplate` (for English participant surveys)
-   - `PartcipantSurveyTemplate Spanish` (for Spanish participant surveys)
+   - `ParticipantSurveyTemplate` (for English participant surveys)
+   - `ParticipantSurveyTemplate Spanish` (for Spanish participant surveys)
    - `CustomerSurveyTemplate` (for customer surveys)
    - `TrainerSurveyTemplate` (for trainer surveys)
 

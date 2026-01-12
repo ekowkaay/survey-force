@@ -20,7 +20,7 @@ private class TrainingRequestTriggerHandler_Test {
 		List<Survey__c> templates = new List<Survey__c>();
 
 		Survey__c participantTemplate = new Survey__c();
-		participantTemplate.Name = 'PartcipantSurveyTemplate';
+		participantTemplate.Name = 'ParticipantSurveyTemplate';
 		participantTemplate.Thank_You_Text__c = 'Thank you for your participation!';
 		templates.add(participantTemplate);
 

@@ -20,12 +20,12 @@ private class SurveyUtilities_Test {
 		List<Survey__c> templates = new List<Survey__c>();
 
 		Survey__c participantTemplate = new Survey__c();
-		participantTemplate.Name = 'PartcipantSurveyTemplate';
+		participantTemplate.Name = 'ParticipantSurveyTemplate';
 		participantTemplate.Thank_You_Text__c = 'Thank you for your participation!';
 		templates.add(participantTemplate);
 
 		Survey__c spanishTemplate = new Survey__c();
-		spanishTemplate.Name = 'PartcipantSurveyTemplate Spanish';
+		spanishTemplate.Name = 'ParticipantSurveyTemplate Spanish';
 		spanishTemplate.Thank_You_Text__c = 'Gracias por su participación!';
 		templates.add(spanishTemplate);
 
@@ -77,11 +77,11 @@ private class SurveyUtilities_Test {
 
 		// Test Participant English
 		String result1 = SurveyUtilities.getSurveyTemplateName('Participant', 'English');
-		System.assertEquals('PartcipantSurveyTemplate', result1, 'Should return English participant template');
+		System.assertEquals('ParticipantSurveyTemplate', result1, 'Should return English participant template');
 
 		// Test Participant Spanish
 		String result2 = SurveyUtilities.getSurveyTemplateName('Participant', 'Spanish');
-		System.assertEquals('PartcipantSurveyTemplate Spanish', result2, 'Should return Spanish participant template');
+		System.assertEquals('ParticipantSurveyTemplate Spanish', result2, 'Should return Spanish participant template');
 
 		// Test Customer
 		String result3 = SurveyUtilities.getSurveyTemplateName('Customer', 'English');
