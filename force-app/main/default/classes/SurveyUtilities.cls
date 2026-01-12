@@ -635,6 +635,10 @@ public with sharing class SurveyUtilities {
 		public String surveyType { get; set; }
 		public String trainingType { get; set; }
 
+		public InvitationRequest() {
+			// Default no-argument constructor for flexible initialization
+		}
+
 		public InvitationRequest(Id surveyId, Id relatedRecordId, String surveyType) {
 			this(surveyId, relatedRecordId, surveyType, null);
 		}
