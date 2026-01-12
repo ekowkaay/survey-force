@@ -114,8 +114,8 @@ public with sharing class ParticipantsTriggerHandler {
 
 	/**
 	 * @description Extract Survey ID from a survey URL
-	 * Handles Survey ID-based URLs (primary format for all survey types)
-	 * @param surveyUrl The survey URL containing the ID parameter
+	 * Handles both Survey ID-based URLs and token-based URLs
+	 * @param surveyUrl The survey URL containing either an ID parameter or a token parameter
 	 * @return Id The extracted Survey ID or null if not found
 	 */
 	private Id extractSurveyIdFromUrl(String surveyUrl) {
@@ -124,7 +124,7 @@ public with sharing class ParticipantsTriggerHandler {
 		}
 
 		try {
-			// Extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
+			// First, try to extract survey ID directly (format: /TakeSurvey?id=SURVEY_ID)
 			Integer idParamIndex = surveyUrl.indexOf('id=');
 			if (idParamIndex != -1) {
 				String idPortion = surveyUrl.substring(idParamIndex + 3);
@@ -135,6 +135,28 @@ public with sharing class ParticipantsTriggerHandler {
 				// Validate it's a valid Survey ID
 				if (idValue.length() >= 15) {
 					return (Id) idValue;
+				}
+			}
+			
+			// If no direct ID found, try to extract from token-based URL (format: /survey?token=TOKEN)
+			Integer tokenParamIndex = surveyUrl.indexOf('token=');
+			if (idParamIndex == -1 && tokenParamIndex != -1) {
+				String tokenPortion = surveyUrl.substring(tokenParamIndex + 6);
+				// Get everything up to the next & or end of string
+				Integer endIndex = tokenPortion.indexOf('&');
+				String tokenValue = endIndex != -1 ? tokenPortion.substring(0, endIndex) : tokenPortion;
+				
+				// Query SurveyInvitation to get Survey ID from token
+				List<SurveyInvitation__c> invitations = [
+					SELECT Survey__c
+					FROM SurveyInvitation__c
+					WHERE Token__c = :tokenValue
+					WITH USER_MODE
+					LIMIT 1
+				];
+				
+				if (!invitations.isEmpty() && invitations[0].Survey__c != null) {
+					return invitations[0].Survey__c;
 				}
 			}
 		} catch (Exception e) {
