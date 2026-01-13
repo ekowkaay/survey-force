@@ -88,7 +88,7 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 		this[NavigationMixin.Navigate]({
 			type: 'standard__navItemPage',
 			attributes: {
-				apiName: 'Survey_Creator_Page'
+				apiName: 'Create_Survey'
 			}
 		});
 	}
