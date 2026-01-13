@@ -156,7 +156,8 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 				apiName: 'Survey_Creator_Page'
 			},
 			state: {
-				c__surveyId: surveyId
+				c__surveyId: surveyId,
+				c__editMode: 'true'
 			}
 		});
 	}

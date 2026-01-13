@@ -63,7 +63,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			this.currentPageReference = currentPageReference;
 			// Check if surveyId is passed in URL state
 			if (currentPageReference.state?.c__surveyId) {
-				this.loadSurveyDetails(currentPageReference.state.c__surveyId);
+				const editMode = currentPageReference.state?.c__editMode === 'true';
+				this.loadSurveyDetails(currentPageReference.state.c__surveyId, editMode);
 			}
 		}
 	}
@@ -87,9 +88,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	/**
-	 * Load survey details for view mode
+	 * Load survey details for view or edit mode
+	 * @param {String} surveyIdToLoad - The survey ID to load
+	 * @param {Boolean} editMode - If true, loads in build/edit mode; if false or undefined, loads in view mode
 	 */
-	loadSurveyDetails(surveyIdToLoad) {
+	loadSurveyDetails(surveyIdToLoad, editMode = false) {
 		this.isLoading = true;
 		getSurveyDetails({ surveyId: surveyIdToLoad })
 			.then((result) => {
@@ -119,8 +122,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 					hideOnSurvey: q.hideOnSurvey
 				}));
 
-				this.isViewMode = true;
-				this.activeTab = 'view';
+				// Set mode based on editMode parameter
+				if (editMode) {
+					this.isViewMode = false;
+					this.activeTab = 'build';
+				} else {
+					this.isViewMode = true;
+					this.activeTab = 'view';
+				}
 				this.isLoading = false;
 			})
 			.catch((error) => {
