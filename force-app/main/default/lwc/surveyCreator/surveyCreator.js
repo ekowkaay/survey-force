@@ -1,5 +1,6 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import checkSiteAvailability from '@salesforce/apex/SurveyCreationController.checkSiteAvailability';
 import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.createSurveyWithDetails';
@@ -52,6 +53,20 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	@track totalResponses = 0;
 	@track completionRate = '0%';
 	@track averageTime = 'N/A';
+
+	// Page reference for URL parameters
+	currentPageReference;
+
+	@wire(CurrentPageReference)
+	getStateParameters(currentPageReference) {
+		if (currentPageReference) {
+			this.currentPageReference = currentPageReference;
+			// Check if surveyId is passed in URL state
+			if (currentPageReference.state?.c__surveyId) {
+				this.loadSurveyDetails(currentPageReference.state.c__surveyId);
+			}
+		}
+	}
 
 	connectedCallback() {
 		this.loadInitialData();
