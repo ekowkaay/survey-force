@@ -37,11 +37,7 @@ public with sharing class SurveyTemplateController {
 	@AuraEnabled(cacheable=true)
 	public static List<Survey__c> getTemplateSurveys() {
 		try {
-			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
-				Schema.Survey__c.fields.Name,
-				Schema.Survey__c.fields.CreatedDate,
-				Schema.Survey__c.fields.Questions__c
-			};
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{ Schema.Survey__c.fields.Name, Schema.Survey__c.fields.CreatedDate, Schema.Survey__c.fields.Questions__c };
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), fields);
 
 			return [

@@ -7,6 +7,9 @@ private class SurveyTemplateController_Test {
 		for (Integer i = 0; i < 3; i++) {
 			surveys.add(new Survey__c(Name = 'Test Survey ' + i, Thank_You_Text__c = 'Thank you for completing this survey'));
 		}
+		// Add template surveys
+		surveys.add(new Survey__c(Name = 'Customer Survey Template', Thank_You_Text__c = 'Thank you'));
+		surveys.add(new Survey__c(Name = 'Employee Feedback Template', Thank_You_Text__c = 'Thank you'));
 		insert surveys;
 	}
 
@@ -16,7 +19,19 @@ private class SurveyTemplateController_Test {
 		List<Survey__c> result = SurveyTemplateController.getAllSurveys();
 		Test.stopTest();
 
-		System.assertEquals(3, result.size(), 'Should return all 3 test surveys');
+		System.assertEquals(5, result.size(), 'Should return all 5 test surveys');
+	}
+
+	@isTest
+	static void testGetTemplateSurveys() {
+		Test.startTest();
+		List<Survey__c> result = SurveyTemplateController.getTemplateSurveys();
+		Test.stopTest();
+
+		System.assertEquals(2, result.size(), 'Should return only 2 template surveys');
+		for (Survey__c survey : result) {
+			System.assert(survey.Name.containsIgnoreCase('template'), 'Survey name should contain "template"');
+		}
 	}
 
 	@isTest
@@ -28,7 +43,7 @@ private class SurveyTemplateController_Test {
 		Test.stopTest();
 
 		List<Survey__c> remaining = [SELECT Id FROM Survey__c];
-		System.assertEquals(2, remaining.size(), 'Should have 2 surveys remaining after delete');
+		System.assertEquals(4, remaining.size(), 'Should have 4 surveys remaining after delete');
 	}
 
 	@isTest
