@@ -19,6 +19,15 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			action: 'handleCreateSurvey'
 		},
 		{
+			id: 'templates',
+			title: 'Manage Survey Templates',
+			description: 'View, create, edit, and clone survey templates',
+			icon: 'utility:layers',
+			iconBg: 'slds-icon-standard-survey',
+			steps: ['View templates', 'Create or clone', 'Edit and customize'],
+			action: 'handleManageTemplates'
+		},
+		{
 			id: 'generate',
 			title: 'Generate Survey Links',
 			description: 'Create unique invitation links to share with participants',
@@ -89,6 +98,15 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			type: 'standard__navItemPage',
 			attributes: {
 				apiName: 'Create_Survey'
+			}
+		});
+	}
+
+	handleManageTemplates() {
+		this[NavigationMixin.Navigate]({
+			type: 'standard__navItemPage',
+			attributes: {
+				apiName: 'Survey_Templates'
 			}
 		});
 	}
