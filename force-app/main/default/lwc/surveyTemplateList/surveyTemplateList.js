@@ -4,7 +4,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
 import createSurvey from '@salesforce/apex/SurveyCreationController.createSurvey';
 import cloneSurvey from '@salesforce/apex/SurveyCreationController.cloneSurvey';
-import getAllSurveys from '@salesforce/apex/SurveyTemplateController.getAllSurveys';
+import getTemplateSurveys from '@salesforce/apex/SurveyTemplateController.getTemplateSurveys';
 import deleteSurvey from '@salesforce/apex/SurveyTemplateController.deleteSurvey';
 
 const COLUMNS = [
@@ -16,7 +16,6 @@ const COLUMNS = [
 		sortable: true
 	},
 	{ label: 'Questions', fieldName: 'Questions__c', type: 'number', sortable: true },
-	{ label: 'Responses', fieldName: 'Completed_Surveys__c', type: 'number', sortable: true },
 	{ label: 'Created Date', fieldName: 'CreatedDate', type: 'date', sortable: true },
 	{
 		type: 'action',
@@ -62,7 +61,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 
 	get totalResponses() {
 		if (!this.surveys) return 0;
-		return this.surveys.reduce((sum, survey) => sum + (survey.Completed_Surveys__c || 0), 0);
+		return 0; // Templates don't track responses
 	}
 
 	connectedCallback() {
@@ -73,7 +72,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 		this.isLoading = true;
 		this.error = null;
 
-		getAllSurveys()
+		getTemplateSurveys()
 			.then((result) => {
 				this.surveys = result.map((survey) => ({
 					...survey,
@@ -152,11 +151,13 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 
 	navigateToBuilder(surveyId) {
 		this[NavigationMixin.Navigate]({
-			type: 'standard__recordPage',
+			type: 'standard__navItemPage',
 			attributes: {
-				recordId: surveyId,
-				objectApiName: 'Survey__c',
-				actionName: 'view'
+				apiName: 'Survey_Creator_Page'
+			},
+			state: {
+				c__surveyId: surveyId,
+				c__editMode: 'true'
 			}
 		});
 	}

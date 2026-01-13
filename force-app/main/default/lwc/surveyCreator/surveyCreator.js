@@ -1,5 +1,6 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import checkSiteAvailability from '@salesforce/apex/SurveyCreationController.checkSiteAvailability';
 import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.createSurveyWithDetails';
@@ -53,6 +54,21 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	@track completionRate = '0%';
 	@track averageTime = 'N/A';
 
+	// Page reference for URL parameters
+	currentPageReference;
+
+	@wire(CurrentPageReference)
+	getStateParameters(currentPageReference) {
+		if (currentPageReference) {
+			this.currentPageReference = currentPageReference;
+			// Check if surveyId is passed in URL state
+			if (currentPageReference.state?.c__surveyId) {
+				const editMode = currentPageReference.state?.c__editMode === 'true';
+				this.loadSurveyDetails(currentPageReference.state.c__surveyId, editMode);
+			}
+		}
+	}
+
 	connectedCallback() {
 		this.loadInitialData();
 	}
@@ -72,9 +88,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	/**
-	 * Load survey details for view mode
+	 * Load survey details for view or edit mode
+	 * @param {String} surveyIdToLoad - The survey ID to load
+	 * @param {Boolean} editMode - If true, loads in build/edit mode; if false or undefined, loads in view mode
 	 */
-	loadSurveyDetails(surveyIdToLoad) {
+	loadSurveyDetails(surveyIdToLoad, editMode = false) {
 		this.isLoading = true;
 		getSurveyDetails({ surveyId: surveyIdToLoad })
 			.then((result) => {
@@ -104,8 +122,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 					hideOnSurvey: q.hideOnSurvey
 				}));
 
-				this.isViewMode = true;
-				this.activeTab = 'view';
+				// Set mode based on editMode parameter
+				if (editMode) {
+					this.isViewMode = false;
+					this.activeTab = 'build';
+				} else {
+					this.isViewMode = true;
+					this.activeTab = 'view';
+				}
 				this.isLoading = false;
 			})
 			.catch((error) => {

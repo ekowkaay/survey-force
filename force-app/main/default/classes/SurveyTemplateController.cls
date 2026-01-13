@@ -31,6 +31,29 @@ public with sharing class SurveyTemplateController {
 	}
 
 	/**
+	 * Get survey templates (surveys with "template" in their name)
+	 * @return List of template surveys
+	 */
+	@AuraEnabled(cacheable=true)
+	public static List<Survey__c> getTemplateSurveys() {
+		try {
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{ Schema.Survey__c.fields.Name, Schema.Survey__c.fields.CreatedDate, Schema.Survey__c.fields.Questions__c };
+			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), fields);
+
+			return [
+				SELECT Id, Name, CreatedDate, Questions__c
+				FROM Survey__c
+				WHERE Name LIKE '%template%'
+				WITH USER_MODE
+				ORDER BY CreatedDate DESC
+			];
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyTemplateController:getTemplateSurveys():' + e.getMessage());
+			throw new AuraHandledException('Error loading template surveys: ' + e.getMessage());
+		}
+	}
+
+	/**
 	 * Delete a survey and all related records
 	 * @param surveyId The survey ID to delete
 	 */

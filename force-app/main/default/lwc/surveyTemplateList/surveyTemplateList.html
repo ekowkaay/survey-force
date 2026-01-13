@@ -28,16 +28,10 @@
 				<div class="slds-m-around_medium">
 					<!-- Stats Cards -->
 					<div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+						<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
 							<div class="slds-box slds-theme_shade slds-text-align_center">
 								<p class="slds-text-heading_large">{totalSurveys}</p>
-								<p class="slds-text-body_small slds-text-color_weak">Total Surveys</p>
-							</div>
-						</div>
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
-							<div class="slds-box slds-theme_shade slds-text-align_center">
-								<p class="slds-text-heading_large">{totalResponses}</p>
-								<p class="slds-text-body_small slds-text-color_weak">Total Responses</p>
+								<p class="slds-text-body_small slds-text-color_weak">Total Templates</p>
 							</div>
 						</div>
 					</div>
@@ -59,9 +53,9 @@
 					<template if:false={hasSurveys}>
 						<div class="slds-box slds-theme_default slds-text-align_center slds-p-vertical_large">
 							<lightning-icon icon-name="utility:survey" size="large" class="slds-m-bottom_medium"></lightning-icon>
-							<h3 class="slds-text-heading_medium slds-m-bottom_small">No Surveys Yet</h3>
-							<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">Create your first survey to get started.</p>
-							<lightning-button variant="brand" label="Create Your First Survey" icon-name="utility:add" onclick={handleOpenCreateModal}></lightning-button>
+							<h3 class="slds-text-heading_medium slds-m-bottom_small">No Survey Templates Yet</h3>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">Create a survey template to get started.</p>
+							<lightning-button variant="brand" label="Create Your First Template" icon-name="utility:add" onclick={handleOpenCreateModal}></lightning-button>
 						</div>
 					</template>
 				</div>
@@ -80,14 +74,14 @@
 						onclick={handleCloseCreateModal}
 						class="slds-modal__close"
 						variant="bare-inverse"></lightning-button-icon>
-					<h2 class="slds-text-heading_medium">Create New Survey</h2>
+					<h2 class="slds-text-heading_medium">Create New Survey Template</h2>
 				</header>
 				<div class="slds-modal__content slds-p-around_medium">
-					<lightning-input label="Survey Name" value={newSurveyName} onchange={handleNewSurveyNameChange} required placeholder="Enter survey name"></lightning-input>
+					<lightning-input label="Template Name" value={newSurveyName} onchange={handleNewSurveyNameChange} required placeholder="Enter template name"></lightning-input>
 				</div>
 				<footer class="slds-modal__footer">
 					<lightning-button label="Cancel" onclick={handleCloseCreateModal}></lightning-button>
-					<lightning-button variant="brand" label="Create Survey" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
+					<lightning-button variant="brand" label="Create Template" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
 				</footer>
 			</div>
 		</section>
