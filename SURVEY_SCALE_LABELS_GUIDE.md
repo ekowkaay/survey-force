@@ -119,9 +119,12 @@ If you have existing survey questions that use numeric labels like "1" and "5", 
 
 ### Option 2: Bulk Update via Data Loader
 
-1. Export Survey Questions where `Choices__c` contains "1\n2\n3\n4\n5"
-2. Update the `Choices__c` field with the new format
-3. Import the updated records back into Salesforce
+1. Export all Survey Questions where `Type__c = 'Single Select--Horizontal'`
+2. Filter records in Excel/CSV where `Choices__c` equals exactly "1\n2\n3\n4\n5" (you may need to use Find/Replace)
+3. Update the `Choices__c` field with the new format: "Very Difficult\n2\n3\n4\nVery Easy"
+4. Import the updated records back into Salesforce
+
+**Note**: The "\n" represents actual newline characters in the field. In Excel, this will appear as line breaks within the cell.
 
 ### Option 3: Apex Script (Execute Anonymous)
 

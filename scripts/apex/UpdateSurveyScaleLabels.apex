@@ -110,8 +110,12 @@ try {
     
 } catch (DmlException e) {
     System.debug('ERROR during update: ' + e.getMessage());
-    if (e.getNumDml() > 0) {
-        System.debug('Failed records: ' + e.getDmlMessage(0));
+    try {
+        if (e.getNumDml() != null && e.getNumDml() > 0) {
+            System.debug('Failed records: ' + e.getDmlMessage(0));
+        }
+    } catch (Exception dmlEx) {
+        System.debug('Could not retrieve DML error details');
     }
 } catch (Exception e) {
     System.debug('ERROR: ' + e.getMessage());
