@@ -231,50 +231,6 @@ export default class SurveyTaker extends LightningElement {
 		return 'Please share your perspective with the options below.';
 	}
 
-	get hasQuestions() {
-		return this.totalQuestions > 0;
-	}
-
-	get headerTitle() {
-		if (this.showSurveyName && this.surveyName) {
-			return this.surveyName;
-		}
-		return 'SurveyApp';
-	}
-
-	get introHeading() {
-		if (this.showSurveyName && this.surveyName) {
-			return this.surveyName;
-		}
-		return 'We value your feedback!';
-	}
-
-	get introSubheading() {
-		if (this.invitationHeader) {
-			return this.invitationHeader;
-		}
-
-		if (this.surveyHeader) {
-			return this.surveyHeader;
-		}
-
-		return 'Please take a moment to complete this evaluation.';
-	}
-
-	get questionHelpText() {
-		if (this.currentQuestion) {
-			if (this.currentQuestion.helpText) {
-				return this.currentQuestion.helpText;
-			}
-
-			if (this.currentQuestion.description) {
-				return this.currentQuestion.description;
-			}
-		}
-
-		return 'Please share your perspective with the options below.';
-	}
-
 	get progressPercentage() {
 		if (this.totalQuestions === 0) return 0;
 		return Math.round((this.currentQuestionNumber / this.totalQuestions) * 100);
