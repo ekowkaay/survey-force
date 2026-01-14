@@ -37,6 +37,12 @@
 							<div class="brandIcon">📊</div>
 							<span>{headerTitle}</span>
 						</div>
+						<template if:true={isPreviewMode}>
+							<div class="slds-badge slds-badge_inverse slds-m-left_small">
+								<lightning-icon icon-name="utility:preview" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+								Preview Mode
+							</div>
+						</template>
 						<template if:true={hasQuestions}>
 							<div class="pill">Question {currentQuestionNumber} of {totalQuestions}</div>
 						</template>

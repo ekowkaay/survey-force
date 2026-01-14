@@ -4,7 +4,9 @@ import { CurrentPageReference } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import checkSiteAvailability from '@salesforce/apex/SurveyCreationController.checkSiteAvailability';
 import createSurveyWithDetails from '@salesforce/apex/SurveyCreationController.createSurveyWithDetails';
+import updateSurveyWithDetails from '@salesforce/apex/SurveyCreationController.updateSurveyWithDetails';
 import createSurveyQuestions from '@salesforce/apex/SurveyCreationController.createSurveyQuestions';
+import updateSurveyQuestions from '@salesforce/apex/SurveyCreationController.updateSurveyQuestions';
 import getRecentSurveys from '@salesforce/apex/SurveyCreationController.getRecentSurveys';
 import getSurveyDetails from '@salesforce/apex/SurveyCreationController.getSurveyDetails';
 
@@ -56,6 +58,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 	// Page reference for URL parameters
 	currentPageReference;
+	_loadedSurveyId = null;
+	_loadedEditMode = false;
 
 	@wire(CurrentPageReference)
 	getStateParameters(currentPageReference) {
@@ -64,7 +68,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			// Check if surveyId is passed in URL state
 			if (currentPageReference.state?.c__surveyId) {
 				const editMode = currentPageReference.state?.c__editMode === 'true';
-				this.loadSurveyDetails(currentPageReference.state.c__surveyId, editMode);
+				const surveyId = currentPageReference.state.c__surveyId;
+				
+				// Only load if it's a different survey or different mode
+				if (surveyId !== this._loadedSurveyId || editMode !== this._loadedEditMode) {
+					this._loadedSurveyId = surveyId;
+					this._loadedEditMode = editMode;
+					this.loadSurveyDetails(surveyId, editMode);
+				}
 			}
 		}
 	}
@@ -396,7 +407,22 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			allResponsesAnonymous: this.allResponsesAnonymous
 		};
 
-		createSurveyWithDetails(surveyData)
+		// Determine if we're creating or updating
+		const isUpdate = this.surveyId !== null;
+		const surveyMethod = isUpdate
+			? updateSurveyWithDetails({
+					surveyId: this.surveyId,
+					surveyName: surveyData.surveyName,
+					surveyHeader: surveyData.surveyHeader,
+					surveySubheader: surveyData.surveySubheader,
+					thankYouText: surveyData.thankYouText,
+					thankYouLink: surveyData.thankYouLink,
+					hideSurveyName: surveyData.hideSurveyName,
+					allResponsesAnonymous: surveyData.allResponsesAnonymous
+			  })
+			: createSurveyWithDetails(surveyData);
+
+		surveyMethod
 			.then((result) => {
 				if (result.success) {
 					this.surveyId = result.surveyId;
@@ -410,21 +436,26 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							orderNumber: index + 1
 						}));
 
-						return createSurveyQuestions({
-							surveyId: result.surveyId,
-							questions: questionData
-						})
+						// Use update for existing surveys, create for new ones
+						const questionMethod = isUpdate
+							? updateSurveyQuestions({ surveyId: result.surveyId, questions: questionData })
+							: createSurveyQuestions({ surveyId: result.surveyId, questions: questionData });
+
+						return questionMethod
 							.then(() => {
-								this.showToast('Success', 'Survey created successfully', 'success');
+								const successMessage = isUpdate ? 'Survey updated successfully' : 'Survey created successfully';
+								this.showToast('Success', successMessage, 'success');
 								this.isCreating = false;
 								this.loadSurveyDetails(result.surveyId);
 							})
 							.catch((error) => {
-								this.showToast('Error', 'Error creating questions: ' + (error.body?.message || error.message), 'error');
+								const errorMessage = isUpdate ? 'Error updating questions' : 'Error creating questions';
+								this.showToast('Error', errorMessage + ': ' + (error.body?.message || error.message), 'error');
 								this.isCreating = false;
 							});
 					} else {
-						this.showToast('Success', 'Survey created successfully', 'success');
+						const successMessage = isUpdate ? 'Survey updated successfully' : 'Survey created successfully';
+						this.showToast('Success', successMessage, 'success');
 						this.isCreating = false;
 						this.loadSurveyDetails(result.surveyId);
 					}
@@ -434,7 +465,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				}
 			})
 			.catch((error) => {
-				this.showToast('Error', 'Error creating survey: ' + (error.body?.message || error.message), 'error');
+				const errorMessage = isUpdate ? 'Error updating survey' : 'Error creating survey';
+				this.showToast('Error', errorMessage + ': ' + (error.body?.message || error.message), 'error');
 				this.isCreating = false;
 			});
 	}
@@ -467,6 +499,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.createdDate = '';
 		this.lastModifiedDate = '';
 		this.createdByName = '';
+		this._loadedSurveyId = null;
+		this._loadedEditMode = false;
 	}
 
 	/**
