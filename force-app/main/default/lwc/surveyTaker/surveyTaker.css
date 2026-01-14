@@ -186,6 +186,26 @@ h1 {
 	margin: 0 auto;
 }
 
+/* End labels for scale (e.g., "Disagree" and "Strongly Agree") */
+.scale-end-label {
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: #334155;
+	white-space: nowrap;
+	min-width: 100px;
+	flex-shrink: 0;
+}
+
+.scale-label-start {
+	text-align: right;
+	padding-right: 0.5rem;
+}
+
+.scale-label-end {
+	text-align: left;
+	padding-left: 0.5rem;
+}
+
 .scale-label {
 	font-size: 0.875rem;
 	font-weight: 700;
@@ -194,18 +214,55 @@ h1 {
 	min-width: 80px;
 }
 
-.scale-label-start {
-	text-align: right;
-}
-
-.scale-label-end {
-	text-align: left;
-}
-
 .radio-horizontal-scale {
 	flex: 1;
 	display: flex;
 	justify-content: center;
+}
+
+/* Horizontal scale radio button styling */
+.scale-radio-wrapper {
+	flex: 1;
+	display: flex;
+	gap: 0.5rem;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.scale-radio-item {
+	flex: 1;
+	min-width: 50px;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.scale-radio-input {
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	margin: 0;
+	accent-color: #f97316;
+}
+
+.scale-radio-label {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #334155;
+	cursor: pointer;
+	user-select: none;
+	transition: color 0.2s ease;
+}
+
+.scale-radio-input:checked + .scale-radio-label {
+	color: #f97316;
+	font-weight: 700;
+}
+
+.scale-radio-item:hover .scale-radio-label {
+	color: #f97316;
 }
 
 /* Vertical radio button styling */
@@ -495,6 +552,11 @@ footer.footer {
 		gap: 0.75rem;
 	}
 
+	.scale-end-label {
+		min-width: auto;
+		padding: 0;
+	}
+
 	.scale-label-start,
 	.scale-label-end {
 		text-align: center;
@@ -507,6 +569,26 @@ footer.footer {
 
 	.scale-label-end {
 		order: 1;
+	}
+
+	.scale-radio-wrapper {
+		order: 0;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+	}
+
+	.scale-radio-item {
+		min-width: 45px;
+		flex-shrink: 0;
+	}
+
+	.scale-radio-input {
+		width: 20px;
+		height: 20px;
+	}
+
+	.scale-radio-label {
+		font-size: 0.75rem;
 	}
 
 	.radio-horizontal-scale {
