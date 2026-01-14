@@ -365,11 +365,12 @@ public with sharing class SurveyCreationController {
 
 	/**
 	 * Update individual survey questions without replacing all questions
-	 * Supports selective update - only updates/creates/deletes specific questions
+	 * Supports selective update - only updates or creates specific questions
 	 * @param surveyId The survey to update questions for
 	 * @param questions List of question data maps with optional 'id' field
-	 * Questions with 'id' will be updated, questions without 'id' will be created
+	 * Questions with valid 'id' will be updated, questions without 'id' will be created
 	 * Questions not in the list but existing in DB will remain unchanged
+	 * Note: This method does NOT delete questions. To delete questions, remove them first or use updateSurveyQuestions
 	 */
 	@AuraEnabled
 	public static void updateIndividualQuestions(Id surveyId, List<Map<String, Object>> questions) {
@@ -398,7 +399,7 @@ public with sharing class SurveyCreationController {
 
 			for (Map<String, Object> q : questions) {
 				// Check if this is an update (has id) or create (no id)
-				String questionId = (String) q.get('id');
+				String questionIdStr = (String) q.get('id');
 				
 				Survey_Question__c sq = new Survey_Question__c();
 				sq.Survey__c = surveyId;
@@ -418,11 +419,22 @@ public with sharing class SurveyCreationController {
 					sq.Choices__c = String.join(choicesStrings, '\n');
 				}
 
-				// Determine if update or create based on presence of 'id'
-				if (String.isNotBlank(questionId) && questionId.startsWith('a0')) {
-					// Update existing question
-					sq.Id = (Id) questionId;
-					questionsToUpdate.add(sq);
+				// Determine if update or create based on presence of valid ID
+				if (String.isNotBlank(questionIdStr)) {
+					try {
+						// Try to convert to ID - if successful and it's a Survey_Question__c ID, update
+						Id questionId = Id.valueOf(questionIdStr);
+						if (questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType) {
+							sq.Id = questionId;
+							questionsToUpdate.add(sq);
+						} else {
+							// Invalid object type - treat as create
+							questionsToCreate.add(sq);
+						}
+					} catch (Exception e) {
+						// Invalid ID format - treat as create
+						questionsToCreate.add(sq);
+					}
 				} else {
 					// Create new question
 					questionsToCreate.add(sq);
