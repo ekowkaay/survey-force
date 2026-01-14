@@ -277,8 +277,42 @@ export default class SurveyTaker extends LightningElement {
 			buttonText: choice.label || choice.value,
 			showLabel: !!choice.label && (index === 0 || index === total - 1),
 			buttonClass: selected === choice.value ? 'scaleButton active' : 'scaleButton',
-			checked: selected === choice.value ? 'true' : 'false'
+			checked: selected === choice.value,
+			radioId: `radio-${this.currentQuestion.id}-scale-${index}`
 		}));
+	}
+
+	/**
+	 * Check if scale has end labels (for horizontal layout)
+	 */
+	get hasScaleEndLabels() {
+		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length < 2) {
+			return false;
+		}
+		const firstChoice = this.currentQuestion.choices[0];
+		const lastChoice = this.currentQuestion.choices[this.currentQuestion.choices.length - 1];
+		return !!firstChoice.label && !!lastChoice.label;
+	}
+
+	/**
+	 * Get the start label for the scale (e.g., "Disagree")
+	 */
+	get scaleStartLabel() {
+		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
+			return '';
+		}
+		return this.currentQuestion.choices[0].label || '';
+	}
+
+	/**
+	 * Get the end label for the scale (e.g., "Strongly Agree")
+	 */
+	get scaleEndLabel() {
+		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
+			return '';
+		}
+		const lastChoice = this.currentQuestion.choices[this.currentQuestion.choices.length - 1];
+		return lastChoice.label || '';
 	}
 
 	get radioGroupClass() {
@@ -417,22 +451,6 @@ export default class SurveyTaker extends LightningElement {
 		};
 
 		this.handleCurrentResponseChange(syntheticEvent);
-	}
-
-	handleScaleSelection(event) {
-		if (!this.currentQuestion) return;
-
-		const value = event.currentTarget.dataset.value;
-		const questionId = this.currentQuestion.id;
-
-		if (!this.responses[questionId]) {
-			this.responses[questionId] = { questionId, response: '', responses: null };
-		}
-
-		this.responses[questionId].response = value;
-
-		// Force LWC reactivity by reassigning the responses object
-		this.responses = { ...this.responses };
 	}
 
 	handleCheckboxChange(event) {
