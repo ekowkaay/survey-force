@@ -58,6 +58,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 	// Page reference for URL parameters
 	currentPageReference;
+	_loadedSurveyId = null;
+	_loadedEditMode = false;
 
 	@wire(CurrentPageReference)
 	getStateParameters(currentPageReference) {
@@ -66,7 +68,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			// Check if surveyId is passed in URL state
 			if (currentPageReference.state?.c__surveyId) {
 				const editMode = currentPageReference.state?.c__editMode === 'true';
-				this.loadSurveyDetails(currentPageReference.state.c__surveyId, editMode);
+				const surveyId = currentPageReference.state.c__surveyId;
+				
+				// Only load if it's a different survey or different mode
+				if (surveyId !== this._loadedSurveyId || editMode !== this._loadedEditMode) {
+					this._loadedSurveyId = surveyId;
+					this._loadedEditMode = editMode;
+					this.loadSurveyDetails(surveyId, editMode);
+				}
 			}
 		}
 	}
@@ -487,6 +496,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.createdDate = '';
 		this.lastModifiedDate = '';
 		this.createdByName = '';
+		this._loadedSurveyId = null;
+		this._loadedEditMode = false;
 	}
 
 	/**

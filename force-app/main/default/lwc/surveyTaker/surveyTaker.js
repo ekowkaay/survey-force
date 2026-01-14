@@ -24,6 +24,7 @@ export default class SurveyTaker extends LightningElement {
 	_urlCaseId = null;
 	_urlContactId = null;
 	_urlToken = null;
+	_urlPreview = false;
 
 	/**
 	 * Wire adapter to get current page reference and extract URL state parameters
@@ -40,6 +41,7 @@ export default class SurveyTaker extends LightningElement {
 		this._urlCaseId = state.c__caseId || null;
 		this._urlContactId = state.c__contactId || null;
 		this._urlToken = state.c__token || state.token || null;
+		this._urlPreview = state.c__preview === 'true' || false;
 
 		// Load survey data if we have a new recordId or token that differs from what was already loaded
 		// and not currently loading to prevent race conditions
@@ -88,6 +90,13 @@ export default class SurveyTaker extends LightningElement {
 	 */
 	get effectiveToken() {
 		return this._urlToken;
+	}
+
+	/**
+	 * Check if component is in preview mode
+	 */
+	get isPreviewMode() {
+		return this._urlPreview === true;
 	}
 
 	// Track the recordId and token that was successfully loaded to prevent double-loading
@@ -570,6 +579,14 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	handleSubmit() {
+		// If in preview mode, don't submit - just show a message
+		if (this.isPreviewMode) {
+			this.showToast('Preview Mode', 'This is a preview. Survey responses will not be saved.', 'info');
+			// Show the thank you page without actually submitting
+			this.isSubmitted = true;
+			return;
+		}
+
 		// Validate required fields
 		const validationError = this.validateResponses();
 		if (validationError) {
