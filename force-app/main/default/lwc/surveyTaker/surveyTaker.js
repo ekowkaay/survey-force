@@ -295,7 +295,7 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	/**
-	 * Get the start label for the scale (e.g., "Disagree")
+	 * Get the start label for the scale (e.g., "Very Difficult")
 	 */
 	get scaleStartLabel() {
 		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
@@ -305,7 +305,7 @@ export default class SurveyTaker extends LightningElement {
 	}
 
 	/**
-	 * Get the end label for the scale (e.g., "Strongly Agree")
+	 * Get the end label for the scale (e.g., "Very Easy")
 	 */
 	get scaleEndLabel() {
 		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
