@@ -410,7 +410,16 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		// Determine if we're creating or updating
 		const isUpdate = this.surveyId != null;
 		const surveyMethod = isUpdate
-			? updateSurveyWithDetails({ surveyId: this.surveyId, ...surveyData })
+			? updateSurveyWithDetails({
+					surveyId: this.surveyId,
+					surveyName: surveyData.surveyName,
+					surveyHeader: surveyData.surveyHeader,
+					surveySubheader: surveyData.surveySubheader,
+					thankYouText: surveyData.thankYouText,
+					thankYouLink: surveyData.thankYouLink,
+					hideSurveyName: surveyData.hideSurveyName,
+					allResponsesAnonymous: surveyData.allResponsesAnonymous
+			  })
 			: createSurveyWithDetails(surveyData);
 
 		surveyMethod
@@ -429,14 +438,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 						// Use update for existing surveys, create for new ones
 						const questionMethod = isUpdate
-							? updateSurveyQuestions({
-									surveyId: result.surveyId,
-									questions: questionData
-							  })
-							: createSurveyQuestions({
-									surveyId: result.surveyId,
-									questions: questionData
-							  });
+							? updateSurveyQuestions({ surveyId: result.surveyId, questions: questionData })
+							: createSurveyQuestions({ surveyId: result.surveyId, questions: questionData });
 
 						return questionMethod
 							.then(() => {

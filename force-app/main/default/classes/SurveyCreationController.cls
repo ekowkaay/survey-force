@@ -309,7 +309,8 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Choices__c,
 				Schema.Survey_Question__c.fields.OrderNumber__c
 			};
-			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.Survey_Question__c.getSobjectType(), fields);
+			// Check delete permission at object level
+			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.Survey_Question__c.getSobjectType(), new List<Schema.SobjectField>());
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
 
 			// Delete existing questions
