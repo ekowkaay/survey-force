@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Scale_Start_Label__c</fullName>
+    <description>Label displayed at the start (left side) of a horizontal scale question. For example: &quot;Very Difficult&quot;, &quot;Strongly Disagree&quot;, or &quot;Very Dissatisfied&quot;. This helps users understand what the lowest value on the scale represents.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Enter the label for the start of the scale (e.g., &quot;Very Difficult&quot;). This will be displayed on the left side of horizontal scale questions to guide respondents.</inlineHelpText>
+    <label>Scale Start Label</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -2,104 +2,42 @@
 
 ## Overview
 
-This guide explains how to properly configure survey question choices for horizontal scale layouts (e.g., 1-5 rating scales) to display meaningful end labels like "Very Difficult" and "Very Easy".
+This guide explains how to configure static scale labels for horizontal scale survey questions to display meaningful guidance like "Very Difficult" and "Very Easy" at the ends of the scale.
 
-## Problem Description
+## New Static Label Fields
 
-When creating survey questions with horizontal scale layouts, if you enter choices as simple numbers (e.g., `1\n2\n3\n4\n5`), the scale will display numeric values at both ends instead of meaningful labels.
+Survey questions now have dedicated fields for scale endpoint labels:
+- **Scale Start Label** (`Scale_Start_Label__c`) - Displayed on the left side of horizontal scales
+- **Scale End Label** (`Scale_End_Label__c`) - Displayed on the right side of horizontal scales
 
-### Incorrect Format
+These labels help respondents understand what each end of the scale represents.
+
+## How It Works
+
+### Before (Without Static Labels)
+When scale labels were not set, the scale appeared without context:
 ```
-1
-2
-3
-4
-5
-```
-
-**Result:** Displays "1" at the start and "5" at the end of the scale, which doesn't provide context for respondents.
-
-### Correct Format
-```
-Very Difficult
-2
-3
-4
-Very Easy
+Question: "How would you rate the difficulty of this training?"
+[1] [2] [3] [4] [5]
 ```
 
-**Result:** Displays "Very Difficult" at the start and "Very Easy" at the end of the scale, providing clear context for the rating.
-
-## How Survey Choices Work
-
-When you create a survey question in Survey Force:
-
-1. The `Choices__c` field stores choices as newline-separated text
-2. Each line becomes a choice option with:
-   - **Label**: The text displayed to the user (e.g., "Very Difficult", "2", "3")
-   - **Value**: A numeric index starting from 0 (e.g., "0", "1", "2")
-
-3. For horizontal scale layouts:
-   - The **first choice's label** is displayed as the start label (left side)
-   - The **last choice's label** is displayed as the end label (right side)
-   - The button text for each choice shows its label
-
-## Recommended Scale Formats
-
-### Difficulty Scale (1-5)
+### After (With Static Labels)
+With static scale labels configured:
 ```
-Very Difficult
-2
-3
-4
-Very Easy
+Question: "How would you rate the difficulty of this training?"
+Very Difficult ◄─────────────────► Very Easy
+[1] [2] [3] [4] [5]
 ```
 
-### Agreement Scale (1-5)
-```
-Strongly Disagree
-2
-3
-4
-Strongly Agree
-```
+The static labels provide clear context without being part of the selectable choices.
 
-### Satisfaction Scale (1-5)
-```
-Very Dissatisfied
-2
-3
-4
-Very Satisfied
-```
+## Configuring Scale Labels
 
-### Likelihood Scale (1-5)
-```
-Very Unlikely
-2
-3
-4
-Very Likely
-```
+### Creating a New Scale Question
 
-### Quality Scale (1-5)
-```
-Very Poor
-2
-3
-4
-Excellent
-```
-
-## Updating Existing Survey Questions
-
-If you have existing survey questions that use numeric labels like "1" and "5", you can update them:
-
-### Option 1: Manual Update via Salesforce UI
-
-1. Navigate to the Survey Question record
-2. Edit the `Choices__c` field
-3. Replace:
+1. Create or edit a Survey Question record
+2. Set **Type** to "Single Select--Horizontal"
+3. Enter the numeric choices in **Choices** field:
    ```
    1
    2
@@ -107,106 +45,136 @@ If you have existing survey questions that use numeric labels like "1" and "5", 
    4
    5
    ```
-   With:
-   ```
-   Very Difficult
-   2
-   3
-   4
-   Very Easy
-   ```
-4. Save the record
+4. Set **Scale Start Label** to describe the lowest value (e.g., "Very Difficult")
+5. Set **Scale End Label** to describe the highest value (e.g., "Very Easy")
+6. Save the record
 
-### Option 2: Bulk Update via Data Loader
+### Result
+Survey respondents will see:
+- Clear labels at both ends of the scale showing what each extreme means
+- Numeric buttons (1, 2, 3, 4, 5) to make their selection
+- Easy understanding of the scale direction and meaning
 
-1. Export all Survey Questions where `Type__c = 'Single Select--Horizontal'`
-2. Filter records in Excel/CSV where `Choices__c` equals exactly "1\n2\n3\n4\n5" (you may need to use Find/Replace)
-3. Update the `Choices__c` field with the new format: "Very Difficult\n2\n3\n4\nVery Easy"
-4. Import the updated records back into Salesforce
+## Recommended Scale Labels
 
-**Note**: The "\n" represents actual newline characters in the field. In Excel, this will appear as line breaks within the cell.
+### Difficulty Scale
+- **Start**: Very Difficult
+- **End**: Very Easy
 
-### Option 3: Apex Script (Execute Anonymous)
+### Agreement Scale
+- **Start**: Strongly Disagree
+- **End**: Strongly Agree
 
-```apex
-// Update all survey questions with numeric scale choices to use "Very Difficult" / "Very Easy" labels
-List<Survey_Question__c> questionsToUpdate = new List<Survey_Question__c>();
+### Satisfaction Scale
+- **Start**: Very Dissatisfied
+- **End**: Very Satisfied
 
-for (Survey_Question__c sq : [
-    SELECT Id, Choices__c, Type__c
-    FROM Survey_Question__c
-    WHERE Type__c = 'Single Select--Horizontal'
-    AND Choices__c != null
-    WITH USER_MODE
-]) {
-    // Check if choices match exact numeric scale format
-    String trimmedChoices = sq.Choices__c.trim();
-    if (trimmedChoices.equals('1\n2\n3\n4\n5')) {
-        sq.Choices__c = 'Very Difficult\n2\n3\n4\nVery Easy';
-        questionsToUpdate.add(sq);
-    }
-}
+### Likelihood Scale
+- **Start**: Very Unlikely
+- **End**: Very Likely
 
-if (!questionsToUpdate.isEmpty()) {
-    update questionsToUpdate;
-    System.debug('Updated ' + questionsToUpdate.size() + ' survey questions');
-} else {
-    System.debug('No survey questions found to update');
-}
-```
-
-## Best Practices
-
-1. **Use Descriptive Labels**: Always use meaningful text for the first and last choices in a scale
-2. **Keep Numbers for Middle Options**: Use simple numbers (2, 3, 4) for middle options to keep the scale clear
-3. **Be Consistent**: Use the same scale format across similar questions in your survey
-4. **Test Your Surveys**: Preview your survey after creating questions to ensure labels display correctly
-5. **Document Your Scales**: Document which scales you use for different question types for consistency
+### Quality Scale
+- **Start**: Very Poor
+- **End**: Excellent
 
 ## Technical Details
 
-### Choice Parsing
+### Architecture
 
-Choices are parsed in the `SurveyTakerController.parseChoices()` method:
-- Splits `Choices__c` field by newline (`\n`)
-- Creates an `OptionData` object for each non-blank line
-- Sets `label` to the trimmed choice text
-- Sets `value` to the numeric index (0, 1, 2, 3, 4)
+**Survey_Question__c Fields:**
+- `Scale_Start_Label__c` (Text, 255) - Static label for scale start
+- `Scale_End_Label__c` (Text, 255) - Static label for scale end
+- `Choices__c` (Long Text Area) - Numeric choices (1, 2, 3, 4, 5)
+
+**Data Flow:**
+1. Question record stores static labels separate from choices
+2. `SurveyTakerController` fetches both labels and choices
+3. `surveyTaker` LWC displays labels at scale endpoints
+4. Choices remain numeric for clarity (1, 2, 3, 4, 5)
+5. Response stores the selected numeric value
 
 ### Display Logic
 
 For horizontal scale layouts in the `surveyTaker` LWC component:
-- `scaleStartLabel`: Returns `choices[0].label`
-- `scaleEndLabel`: Returns `choices[last].label`
-- Button text: Shows `choice.label`
-- Button value: Uses `choice.value` (numeric index)
+- `scaleStartLabel`: Returns `currentQuestion.scaleStartLabel`
+- `scaleEndLabel`: Returns `currentQuestion.scaleEndLabel`
+- `hasScaleEndLabels`: Returns true if either label is set
+- Button labels: Show numeric values from `Choices__c`
+
+### Benefits of Static Labels
+
+1. **Separation of Concerns**: Labels provide context, choices provide values
+2. **Clarity**: Numeric choices (1-5) are easier to understand than mixed values
+3. **Consistency**: All scale questions can use standard 1-5 format
+4. **Flexibility**: Labels can be changed without affecting choice structure
+5. **User Guidance**: Clear indication of what each end of the scale means
+
+## Best Practices
+
+1. **Always Set Both Labels**: For horizontal scales, set both start and end labels
+2. **Be Descriptive**: Use clear, meaningful labels that describe the extremes
+3. **Keep Choices Numeric**: Use simple numbers (1, 2, 3, 4, 5) for the choices
+4. **Be Consistent**: Use the same scale type for similar questions
+5. **Match Question Context**: Ensure labels align with what the question asks
+
+## Examples
+
+### Example 1: Training Difficulty
+
+**Question**: "How would you rate the difficulty of this training?"
+- **Scale Start Label**: Very Difficult
+- **Scale End Label**: Very Easy
+- **Choices**: 1\n2\n3\n4\n5
+
+### Example 2: Content Quality
+
+**Question**: "How would you rate the quality of the training materials?"
+- **Scale Start Label**: Very Poor
+- **Scale End Label**: Excellent
+- **Choices**: 1\n2\n3\n4\n5
+
+### Example 3: Recommendation Likelihood
+
+**Question**: "How likely are you to recommend this training?"
+- **Scale Start Label**: Very Unlikely
+- **Scale End Label**: Very Likely
+- **Choices**: 1\n2\n3\n4\n5
 
 ## Troubleshooting
 
-**Q: Why do I see numbers instead of labels at the ends of my scale?**  
-A: Your choices are set to simple numbers (1, 2, 3, 4, 5). Update the first and last choices to descriptive labels.
+**Q: I don't see the Scale Start/End Label fields**  
+A: Deploy the metadata to add these fields to your org. They are new custom fields on Survey_Question__c.
 
-**Q: Can I use different labels for different questions?**  
-A: Yes! Each question can have its own choice labels. Use labels that best fit your question.
+**Q: Do I need to update existing questions?**  
+A: Yes, edit existing horizontal scale questions to add the appropriate scale labels.
 
-**Q: Do I need to update existing survey responses?**  
-A: No. Existing responses store the numeric value (0-4), which remains valid even after changing labels.
+**Q: What if I don't set the labels?**  
+A: The scale will display without endpoint labels, showing only the numeric choices.
 
-**Q: What if I want more or fewer than 5 options?**  
-A: You can use any number of options. Just ensure the first and last have descriptive labels:
+**Q: Can I use different scales for different questions?**  
+A: Yes! Each question has its own Scale Start/End Label fields, so you can customize per question.
+
+**Q: Do the labels affect existing responses?**  
+A: No. Responses store the numeric value selected (e.g., "0", "1", "2", "3", "4"), which remains valid.
+
+## Migration from Old Approach
+
+If you previously had labels embedded in the Choices field:
+
+### Old Format (No Longer Recommended)
 ```
-Very Difficult
-2
-Very Easy
+Choices__c: Very Difficult\n2\n3\n4\nVery Easy
 ```
-or
+
+### New Format (Recommended)
 ```
-Very Difficult
-2
-3
-4
-5
-6
-7
-Very Easy
+Scale Start Label: Very Difficult
+Scale End Label: Very Easy  
+Choices__c: 1\n2\n3\n4\n5
 ```
+
+**Benefits:**
+- Cleaner separation between labels and values
+- Easier to maintain and update
+- More consistent user experience
+- Better data quality

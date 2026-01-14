@@ -80,7 +80,8 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	public static List<Survey_Question__c> getSurveyQuestionsForGuestUser(Id surveyId) {
 		try {
 			return [
-				SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c
+				SELECT Type__c, Id, Survey__c, Required__c, Question__c, OrderNumber__c, Name, Choices__c, Hide_on_Survey__c,
+					   Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c = :surveyId
 				ORDER BY OrderNumber__c ASC NULLS LAST

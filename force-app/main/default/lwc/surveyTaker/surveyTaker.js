@@ -286,33 +286,33 @@ export default class SurveyTaker extends LightningElement {
 	 * Check if scale has end labels (for horizontal layout)
 	 */
 	get hasScaleEndLabels() {
-		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length < 2) {
+		if (!this.currentQuestion) {
 			return false;
 		}
-		const firstChoice = this.currentQuestion.choices[0];
-		const lastChoice = this.currentQuestion.choices[this.currentQuestion.choices.length - 1];
-		return !!firstChoice.label && !!lastChoice.label;
+		// Check if static scale labels are defined
+		return !!this.currentQuestion.scaleStartLabel || !!this.currentQuestion.scaleEndLabel;
 	}
 
 	/**
 	 * Get the start label for the scale (e.g., "Very Difficult")
+	 * Uses the static Scale_Start_Label__c field from the question
 	 */
 	get scaleStartLabel() {
-		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
+		if (!this.currentQuestion) {
 			return '';
 		}
-		return this.currentQuestion.choices[0].label || '';
+		return this.currentQuestion.scaleStartLabel || '';
 	}
 
 	/**
 	 * Get the end label for the scale (e.g., "Very Easy")
+	 * Uses the static Scale_End_Label__c field from the question
 	 */
 	get scaleEndLabel() {
-		if (!this.currentQuestion || !this.currentQuestion.choices || this.currentQuestion.choices.length === 0) {
+		if (!this.currentQuestion) {
 			return '';
 		}
-		const lastChoice = this.currentQuestion.choices[this.currentQuestion.choices.length - 1];
-		return lastChoice.label || '';
+		return this.currentQuestion.scaleEndLabel || '';
 	}
 
 	get radioGroupClass() {
