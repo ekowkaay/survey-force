@@ -467,7 +467,7 @@ public with sharing class SurveyCreationController {
 							questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType &&
 							existingQuestionsMap.containsKey(questionId)
 						) {
-							// Update existing question - DO NOT set Survey__c to prevent reparenting
+							// Update existing question - DO NOT set Survey__c to prevent cross-survey reparenting security vulnerability
 							sq.Id = questionId;
 							questionsToUpdate.add(sq);
 						} else {
