@@ -157,6 +157,79 @@ public with sharing class SurveyCreationController {
 	}
 
 	/**
+	 * Update an existing survey with full details
+	 * @param surveyId ID of the survey to update
+	 * @param surveyName Name of the survey
+	 * @param surveyHeader Header text for the survey
+	 * @param surveySubheader Subheader text for the survey
+	 * @param thankYouText Thank you message text
+	 * @param thankYouLink Thank you link URL
+	 * @param hideSurveyName Whether to hide survey name
+	 * @param allResponsesAnonymous Whether responses are anonymous
+	 * @return CreationResult with success status
+	 */
+	@AuraEnabled
+	public static CreationResult updateSurveyWithDetails(
+		Id surveyId,
+		String surveyName,
+		String surveyHeader,
+		String surveySubheader,
+		String thankYouText,
+		String thankYouLink,
+		Boolean hideSurveyName,
+		Boolean allResponsesAnonymous
+	) {
+		CreationResult result = new CreationResult();
+		result.success = false;
+
+		try {
+			if (surveyId == null) {
+				result.message = 'Survey ID is required';
+				return result;
+			}
+
+			if (String.isBlank(surveyName)) {
+				result.message = 'Survey name is required';
+				return result;
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.Survey__c.fields.Name,
+				Schema.Survey__c.fields.Survey_Header__c,
+				Schema.Survey__c.fields.Survey_Subheader__c,
+				Schema.Survey__c.fields.Thank_You_Text__c,
+				Schema.Survey__c.fields.Thank_You_Link__c,
+				Schema.Survey__c.fields.Hide_Survey_Name__c,
+				Schema.Survey__c.fields.All_Responses_Anonymous__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToUpdate(Schema.Survey__c.getSobjectType(), fields);
+
+			Survey__c surveyToUpdate = new Survey__c();
+			surveyToUpdate.Id = surveyId;
+			surveyToUpdate.Name = surveyName;
+			surveyToUpdate.Survey_Header__c = surveyHeader;
+			surveyToUpdate.Survey_Subheader__c = surveySubheader;
+			surveyToUpdate.Thank_You_Text__c = thankYouText;
+			surveyToUpdate.Thank_You_Link__c = thankYouLink;
+			surveyToUpdate.Hide_Survey_Name__c = hideSurveyName != null ? hideSurveyName : false;
+			surveyToUpdate.All_Responses_Anonymous__c = allResponsesAnonymous != null ? allResponsesAnonymous : false;
+
+			update surveyToUpdate;
+
+			result.success = true;
+			result.message = 'Survey updated successfully';
+			result.surveyId = surveyId;
+			result.redirectUrl = '/' + surveyId;
+
+			return result;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:updateSurveyWithDetails():' + e.getMessage());
+			result.message = 'Error updating survey: ' + e.getMessage();
+			return result;
+		}
+	}
+
+	/**
 	 * Create survey questions for a given survey
 	 * @param surveyId The survey to add questions to
 	 * @param questions List of question data maps
@@ -212,6 +285,78 @@ public with sharing class SurveyCreationController {
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyCreationController:createSurveyQuestions():' + e.getMessage());
 			throw new AuraHandledException('Error creating questions: ' + e.getMessage());
+		}
+	}
+
+	/**
+	 * Update survey questions for a given survey
+	 * Deletes all existing questions and recreates them with new data
+	 * @param surveyId The survey to update questions for
+	 * @param questions List of question data maps
+	 */
+	@AuraEnabled
+	public static void updateSurveyQuestions(Id surveyId, List<Map<String, Object>> questions) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.Survey_Question__c.fields.Survey__c,
+				Schema.Survey_Question__c.fields.Question__c,
+				Schema.Survey_Question__c.fields.Type__c,
+				Schema.Survey_Question__c.fields.Required__c,
+				Schema.Survey_Question__c.fields.Choices__c,
+				Schema.Survey_Question__c.fields.OrderNumber__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.Survey_Question__c.getSobjectType(), fields);
+			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
+
+			// Delete existing questions
+			List<Survey_Question__c> existingQuestions = [
+				SELECT Id
+				FROM Survey_Question__c
+				WHERE Survey__c = :surveyId
+				WITH USER_MODE
+			];
+
+			if (!existingQuestions.isEmpty()) {
+				delete existingQuestions;
+			}
+
+			// Create new questions if any provided
+			if (questions != null && !questions.isEmpty()) {
+				List<Survey_Question__c> questionRecords = new List<Survey_Question__c>();
+
+				for (Map<String, Object> q : questions) {
+					Survey_Question__c sq = new Survey_Question__c();
+					sq.Survey__c = surveyId;
+					sq.Question__c = (String) q.get('question');
+					sq.Type__c = (String) q.get('questionType');
+					sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
+					sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+
+					// Handle choices
+					Object choicesObj = q.get('choices');
+					if (choicesObj != null && choicesObj instanceof List<Object>) {
+						List<Object> choicesList = (List<Object>) choicesObj;
+						List<String> choicesStrings = new List<String>();
+						for (Object choice : choicesList) {
+							choicesStrings.add(String.valueOf(choice));
+						}
+						sq.Choices__c = String.join(choicesStrings, '\n');
+					}
+
+					questionRecords.add(sq);
+				}
+
+				if (!questionRecords.isEmpty()) {
+					insert questionRecords;
+				}
+			}
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:updateSurveyQuestions():' + e.getMessage());
+			throw new AuraHandledException('Error updating questions: ' + e.getMessage());
 		}
 	}
 
