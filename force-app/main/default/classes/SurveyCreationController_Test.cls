@@ -304,4 +304,129 @@ private class SurveyCreationController_Test {
 			System.assert(exceptionThrown, 'Exception should be thrown for null survey ID');
 		}
 	}
+
+	@IsTest
+	private static void testUpdateIndividualQuestions() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Get existing questions
+			List<Survey_Question__c> existingQuestions = [
+				SELECT Id, Question__c, Type__c, Required__c, OrderNumber__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu.surveyId
+				ORDER BY OrderNumber__c
+				LIMIT 1
+			];
+			System.assert(!existingQuestions.isEmpty(), 'Should have at least one existing question');
+
+			Id firstQuestionId = existingQuestions[0].Id;
+			String originalQuestion = existingQuestions[0].Question__c;
+
+			// Update the first question and add a new one
+			List<Map<String, Object>> updates = new List<Map<String, Object>>();
+			
+			// Update existing question
+			Map<String, Object> updateQ = new Map<String, Object>();
+			updateQ.put('id', firstQuestionId);
+			updateQ.put('question', 'Updated Question Text');
+			updateQ.put('questionType', 'Free Text');
+			updateQ.put('required', true);
+			updateQ.put('choices', new List<String>());
+			updateQ.put('orderNumber', 1);
+			updates.add(updateQ);
+
+			// Add new question (no id)
+			Map<String, Object> newQ = new Map<String, Object>();
+			newQ.put('question', 'Brand New Question');
+			newQ.put('questionType', 'Single Select--Vertical');
+			newQ.put('required', false);
+			newQ.put('choices', new List<String>{ 'Yes', 'No' });
+			newQ.put('orderNumber', 10);
+			updates.add(newQ);
+
+			Test.startTest();
+			SurveyCreationController.updateIndividualQuestions(tu.surveyId, updates);
+			Test.stopTest();
+
+			// Verify the first question was updated
+			Survey_Question__c updatedQuestion = [
+				SELECT Id, Question__c, Type__c, Required__c
+				FROM Survey_Question__c
+				WHERE Id = :firstQuestionId
+			];
+			System.assertEquals('Updated Question Text', updatedQuestion.Question__c, 'Question should be updated');
+			System.assertEquals(true, updatedQuestion.Required__c, 'Question should now be required');
+			System.assertNotEquals(originalQuestion, updatedQuestion.Question__c, 'Question text should have changed');
+
+			// Verify the new question was created
+			List<Survey_Question__c> allQuestions = [
+				SELECT Id, Question__c, Type__c, OrderNumber__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu.surveyId
+				ORDER BY OrderNumber__c
+			];
+			
+			Boolean foundNewQuestion = false;
+			for (Survey_Question__c q : allQuestions) {
+				if (q.Question__c == 'Brand New Question') {
+					foundNewQuestion = true;
+					System.assertEquals('Single Select--Vertical', q.Type__c, 'New question type should match');
+					System.assertEquals(10, q.OrderNumber__c, 'New question order should be 10');
+				}
+			}
+			System.assert(foundNewQuestion, 'New question should be created');
+		}
+	}
+
+	@IsTest
+	private static void testUpdateIndividualQuestionsCreateOnly() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			Integer originalCount = [SELECT COUNT() FROM Survey_Question__c WHERE Survey__c = :tu.surveyId];
+
+			// Create only new questions (no updates)
+			List<Map<String, Object>> newQuestions = new List<Map<String, Object>>();
+			Map<String, Object> q1 = new Map<String, Object>();
+			q1.put('question', 'Additional Question 1');
+			q1.put('questionType', 'Free Text');
+			q1.put('required', false);
+			q1.put('orderNumber', 20);
+			newQuestions.add(q1);
+
+			Test.startTest();
+			SurveyCreationController.updateIndividualQuestions(tu.surveyId, newQuestions);
+			Test.stopTest();
+
+			Integer newCount = [SELECT COUNT() FROM Survey_Question__c WHERE Survey__c = :tu.surveyId];
+			System.assertEquals(originalCount + 1, newCount, 'Should have one additional question');
+		}
+	}
+
+	@IsTest
+	private static void testUpdateIndividualQuestionsWithNullId() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			List<Map<String, Object>> questions = new List<Map<String, Object>>();
+			Map<String, Object> q1 = new Map<String, Object>();
+			q1.put('question', 'Test Question');
+			q1.put('questionType', 'Free Text');
+			questions.add(q1);
+
+			Test.startTest();
+			Boolean exceptionThrown = false;
+			try {
+				SurveyCreationController.updateIndividualQuestions(null, questions);
+			} catch (AuraHandledException e) {
+				exceptionThrown = true;
+				System.assert(e.getMessage().contains('required'), 'Error should indicate ID is required');
+			}
+			Test.stopTest();
+
+			System.assert(exceptionThrown, 'Exception should be thrown for null survey ID');
+		}
+	}
 }

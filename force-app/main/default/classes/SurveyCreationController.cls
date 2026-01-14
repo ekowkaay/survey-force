@@ -290,7 +290,9 @@ public with sharing class SurveyCreationController {
 
 	/**
 	 * Update survey questions for a given survey
-	 * Deletes all existing questions and recreates them with new data
+	 * Replaces ALL existing questions with new data (delete + recreate)
+	 * Use this when you want to completely rebuild the question list
+	 * For selective updates, use updateIndividualQuestions instead
 	 * @param surveyId The survey to update questions for
 	 * @param questions List of question data maps
 	 */
@@ -358,6 +360,85 @@ public with sharing class SurveyCreationController {
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyCreationController:updateSurveyQuestions():' + e.getMessage());
 			throw new AuraHandledException('Error updating questions: ' + e.getMessage());
+		}
+	}
+
+	/**
+	 * Update individual survey questions without replacing all questions
+	 * Supports selective update - only updates/creates/deletes specific questions
+	 * @param surveyId The survey to update questions for
+	 * @param questions List of question data maps with optional 'id' field
+	 * Questions with 'id' will be updated, questions without 'id' will be created
+	 * Questions not in the list but existing in DB will remain unchanged
+	 */
+	@AuraEnabled
+	public static void updateIndividualQuestions(Id surveyId, List<Map<String, Object>> questions) {
+		try {
+			if (surveyId == null) {
+				throw new AuraHandledException('Survey ID is required');
+			}
+
+			if (questions == null || questions.isEmpty()) {
+				return;
+			}
+
+			List<Schema.SobjectField> fields = new List<Schema.SobjectField>{
+				Schema.Survey_Question__c.fields.Survey__c,
+				Schema.Survey_Question__c.fields.Question__c,
+				Schema.Survey_Question__c.fields.Type__c,
+				Schema.Survey_Question__c.fields.Required__c,
+				Schema.Survey_Question__c.fields.Choices__c,
+				Schema.Survey_Question__c.fields.OrderNumber__c
+			};
+			SurveyForceUtil.accessController.assertAuthorizedToUpdate(Schema.Survey_Question__c.getSobjectType(), fields);
+			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
+
+			List<Survey_Question__c> questionsToUpdate = new List<Survey_Question__c>();
+			List<Survey_Question__c> questionsToCreate = new List<Survey_Question__c>();
+
+			for (Map<String, Object> q : questions) {
+				// Check if this is an update (has id) or create (no id)
+				String questionId = (String) q.get('id');
+				
+				Survey_Question__c sq = new Survey_Question__c();
+				sq.Survey__c = surveyId;
+				sq.Question__c = (String) q.get('question');
+				sq.Type__c = (String) q.get('questionType');
+				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
+				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+
+				// Handle choices
+				Object choicesObj = q.get('choices');
+				if (choicesObj != null && choicesObj instanceof List<Object>) {
+					List<Object> choicesList = (List<Object>) choicesObj;
+					List<String> choicesStrings = new List<String>();
+					for (Object choice : choicesList) {
+						choicesStrings.add(String.valueOf(choice));
+					}
+					sq.Choices__c = String.join(choicesStrings, '\n');
+				}
+
+				// Determine if update or create based on presence of 'id'
+				if (String.isNotBlank(questionId) && questionId.startsWith('a0')) {
+					// Update existing question
+					sq.Id = (Id) questionId;
+					questionsToUpdate.add(sq);
+				} else {
+					// Create new question
+					questionsToCreate.add(sq);
+				}
+			}
+
+			// Perform DML operations
+			if (!questionsToUpdate.isEmpty()) {
+				update questionsToUpdate;
+			}
+			if (!questionsToCreate.isEmpty()) {
+				insert questionsToCreate;
+			}
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyCreationController:updateIndividualQuestions():' + e.getMessage());
+			throw new AuraHandledException('Error updating individual questions: ' + e.getMessage());
 		}
 	}
 
