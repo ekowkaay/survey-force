@@ -313,7 +313,7 @@ public with sharing class SurveyCreationController {
 			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.Survey_Question__c.getSobjectType(), new List<Schema.SobjectField>());
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
 
-			// Delete existing questions
+			// Delete existing questions using inline SOQL for better performance
 			List<Survey_Question__c> existingQuestions = [
 				SELECT Id
 				FROM Survey_Question__c

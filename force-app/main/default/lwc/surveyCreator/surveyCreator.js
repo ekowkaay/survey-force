@@ -408,7 +408,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		};
 
 		// Determine if we're creating or updating
-		const isUpdate = this.surveyId != null;
+		const isUpdate = this.surveyId !== null;
 		const surveyMethod = isUpdate
 			? updateSurveyWithDetails({
 					surveyId: this.surveyId,
