@@ -574,6 +574,28 @@
 							placeholder="Choice 1&#10;Choice 2&#10;Choice 3"
 							class="slds-m-bottom_medium"></lightning-textarea>
 					</template>
+
+					<template lwc:if={showScaleLabels}>
+						<div class="slds-grid slds-gutters slds-m-bottom_medium">
+							<div class="slds-col slds-size_1-of-2">
+								<lightning-input
+									label="Scale Start Label"
+									value={currentQuestion.scaleStartLabel}
+									onchange={handleScaleStartLabelChange}
+									placeholder="e.g., Very Difficult"></lightning-input>
+							</div>
+							<div class="slds-col slds-size_1-of-2">
+								<lightning-input
+									label="Scale End Label"
+									value={currentQuestion.scaleEndLabel}
+									onchange={handleScaleEndLabelChange}
+									placeholder="e.g., Very Easy"></lightning-input>
+							</div>
+						</div>
+						<div class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+							These labels will appear at the ends of the horizontal scale to guide respondents.
+						</div>
+					</template>
 				</div>
 				<footer class="slds-modal__footer">
 					<lightning-button label="Cancel" variant="neutral" onclick={handleCancelQuestion}></lightning-button>

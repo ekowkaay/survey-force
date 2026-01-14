@@ -47,7 +47,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		question: '',
 		questionType: 'Free Text',
 		required: false,
-		choicesText: ''
+		choicesText: '',
+		scaleStartLabel: '',
+		scaleEndLabel: ''
 	};
 	@track editingQuestionIndex = null;
 
@@ -230,6 +232,10 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		);
 	}
 
+	get showScaleLabels() {
+		return this.currentQuestion.questionType === 'Single Select--Horizontal';
+	}
+
 	// Event handlers
 	handleToggleSettings() {
 		this.showSettings = !this.showSettings;
@@ -271,7 +277,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			question: '',
 			questionType: 'Free Text',
 			required: false,
-			choicesText: ''
+			choicesText: '',
+			scaleStartLabel: '',
+			scaleEndLabel: ''
 		};
 		this.showQuestionModal = true;
 	}
@@ -286,7 +294,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			question: question.question,
 			questionType: question.questionType,
 			required: question.required,
-			choicesText: question.choicesText || ''
+			choicesText: question.choicesText || '',
+			scaleStartLabel: question.scaleStartLabel || '',
+			scaleEndLabel: question.scaleEndLabel || ''
 		};
 		this.showQuestionModal = true;
 	}
@@ -302,6 +312,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			required: question.required,
 			choices: question.choices ? [...question.choices] : [],
 			choicesText: question.choicesText || '',
+			scaleStartLabel: question.scaleStartLabel || '',
+			scaleEndLabel: question.scaleEndLabel || '',
 			orderNumber: this.questions.length + 1
 		};
 
@@ -331,6 +343,14 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.currentQuestion = { ...this.currentQuestion, choicesText: event.target.value };
 	}
 
+	handleScaleStartLabelChange(event) {
+		this.currentQuestion = { ...this.currentQuestion, scaleStartLabel: event.target.value };
+	}
+
+	handleScaleEndLabelChange(event) {
+		this.currentQuestion = { ...this.currentQuestion, scaleEndLabel: event.target.value };
+	}
+
 	handleCancelQuestion() {
 		this.showQuestionModal = false;
 	}
@@ -355,7 +375,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			questionType: this.currentQuestion.questionType,
 			required: this.currentQuestion.required,
 			choices: choices,
-			choicesText: this.currentQuestion.choicesText
+			choicesText: this.currentQuestion.choicesText,
+			scaleStartLabel: this.currentQuestion.scaleStartLabel || '',
+			scaleEndLabel: this.currentQuestion.scaleEndLabel || ''
 		};
 
 		if (this.editingQuestionIndex !== null) {
