@@ -69,7 +69,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			if (currentPageReference.state?.c__surveyId) {
 				const editMode = currentPageReference.state?.c__editMode === 'true';
 				const surveyId = currentPageReference.state.c__surveyId;
-				
+
 				// Only load if it's a different survey or different mode
 				if (surveyId !== this._loadedSurveyId || editMode !== this._loadedEditMode) {
 					this._loadedSurveyId = surveyId;
@@ -419,7 +419,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 					thankYouLink: surveyData.thankYouLink,
 					hideSurveyName: surveyData.hideSurveyName,
 					allResponsesAnonymous: surveyData.allResponsesAnonymous
-			  })
+				})
 			: createSurveyWithDetails(surveyData);
 
 		surveyMethod

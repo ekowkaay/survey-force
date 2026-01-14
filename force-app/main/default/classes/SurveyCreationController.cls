@@ -427,11 +427,7 @@ public with sharing class SurveyCreationController {
 					// Security check: verify the question belongs to the specified survey
 					if (existingQ.Survey__c != surveyId) {
 						throw new AuraHandledException(
-							'Security violation: Question ' +
-								existingQ.Id +
-								' does not belong to Survey ' +
-								surveyId +
-								'. Cannot update questions from other surveys.'
+							'Security violation: Question ' + existingQ.Id + ' does not belong to Survey ' + surveyId + '. Cannot update questions from other surveys.'
 						);
 					}
 					existingQuestionsMap.put(existingQ.Id, existingQ);
@@ -463,10 +459,7 @@ public with sharing class SurveyCreationController {
 				if (String.isNotBlank(questionIdStr)) {
 					try {
 						Id questionId = Id.valueOf(questionIdStr);
-						if (
-							questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType &&
-							existingQuestionsMap.containsKey(questionId)
-						) {
+						if (questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType && existingQuestionsMap.containsKey(questionId)) {
 							// Update existing question - DO NOT set Survey__c to prevent cross-survey reparenting security vulnerability
 							sq.Id = questionId;
 							questionsToUpdate.add(sq);
