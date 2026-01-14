@@ -453,22 +453,6 @@ export default class SurveyTaker extends LightningElement {
 		this.handleCurrentResponseChange(syntheticEvent);
 	}
 
-	handleScaleSelection(event) {
-		if (!this.currentQuestion) return;
-
-		const value = event.currentTarget.dataset.value;
-		const questionId = this.currentQuestion.id;
-
-		if (!this.responses[questionId]) {
-			this.responses[questionId] = { questionId, response: '', responses: null };
-		}
-
-		this.responses[questionId].response = value;
-
-		// Force LWC reactivity by reassigning the responses object
-		this.responses = { ...this.responses };
-	}
-
 	handleCheckboxChange(event) {
 		if (!this.currentQuestion) return;
 

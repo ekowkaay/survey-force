@@ -214,12 +214,6 @@ h1 {
 	min-width: 80px;
 }
 
-.radio-horizontal-scale {
-	flex: 1;
-	display: flex;
-	justify-content: center;
-}
-
 /* Horizontal scale radio button styling */
 .scale-radio-wrapper {
 	flex: 1;
@@ -589,10 +583,6 @@ footer.footer {
 
 	.scale-radio-label {
 		font-size: 0.75rem;
-	}
-
-	.radio-horizontal-scale {
-		order: 0;
 	}
 
 	.radio-vertical-item {
