@@ -396,13 +396,53 @@ public with sharing class SurveyCreationController {
 
 			List<Survey_Question__c> questionsToUpdate = new List<Survey_Question__c>();
 			List<Survey_Question__c> questionsToCreate = new List<Survey_Question__c>();
+			Set<Id> questionIdsToUpdate = new Set<Id>();
 
+			// First pass: collect question IDs that need to be updated
 			for (Map<String, Object> q : questions) {
-				// Check if this is an update (has id) or create (no id)
 				String questionIdStr = (String) q.get('id');
-				
+				if (String.isNotBlank(questionIdStr)) {
+					try {
+						Id questionId = Id.valueOf(questionIdStr);
+						if (questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType) {
+							questionIdsToUpdate.add(questionId);
+						}
+					} catch (Exception e) {
+						// Invalid ID format - will be handled as create in second pass
+					}
+				}
+			}
+
+			// Query existing questions to verify they belong to the specified survey
+			Map<Id, Survey_Question__c> existingQuestionsMap = new Map<Id, Survey_Question__c>();
+			if (!questionIdsToUpdate.isEmpty()) {
+				List<Survey_Question__c> existingQuestions = [
+					SELECT Id, Survey__c
+					FROM Survey_Question__c
+					WHERE Id IN :questionIdsToUpdate
+					WITH USER_MODE
+				];
+
+				for (Survey_Question__c existingQ : existingQuestions) {
+					// Security check: verify the question belongs to the specified survey
+					if (existingQ.Survey__c != surveyId) {
+						throw new AuraHandledException(
+							'Security violation: Question ' +
+								existingQ.Id +
+								' does not belong to Survey ' +
+								surveyId +
+								'. Cannot update questions from other surveys.'
+						);
+					}
+					existingQuestionsMap.put(existingQ.Id, existingQ);
+				}
+			}
+
+			// Second pass: build update and create lists
+			for (Map<String, Object> q : questions) {
+				String questionIdStr = (String) q.get('id');
+
 				Survey_Question__c sq = new Survey_Question__c();
-				sq.Survey__c = surveyId;
 				sq.Question__c = (String) q.get('question');
 				sq.Type__c = (String) q.get('questionType');
 				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
@@ -422,21 +462,27 @@ public with sharing class SurveyCreationController {
 				// Determine if update or create based on presence of valid ID
 				if (String.isNotBlank(questionIdStr)) {
 					try {
-						// Try to convert to ID - if successful and it's a Survey_Question__c ID, update
 						Id questionId = Id.valueOf(questionIdStr);
-						if (questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType) {
+						if (
+							questionId.getSObjectType() == Schema.Survey_Question__c.SObjectType &&
+							existingQuestionsMap.containsKey(questionId)
+						) {
+							// Update existing question - DO NOT set Survey__c to prevent reparenting
 							sq.Id = questionId;
 							questionsToUpdate.add(sq);
 						} else {
-							// Invalid object type - treat as create
+							// Invalid ID or doesn't exist - treat as create
+							sq.Survey__c = surveyId;
 							questionsToCreate.add(sq);
 						}
 					} catch (Exception e) {
 						// Invalid ID format - treat as create
+						sq.Survey__c = surveyId;
 						questionsToCreate.add(sq);
 					}
 				} else {
 					// Create new question
+					sq.Survey__c = surveyId;
 					questionsToCreate.add(sq);
 				}
 			}

@@ -429,4 +429,100 @@ private class SurveyCreationController_Test {
 			System.assert(exceptionThrown, 'Exception should be thrown for null survey ID');
 		}
 	}
+
+	@IsTest
+	private static void testUpdateIndividualQuestionsSecurityViolation() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			// Create two separate surveys
+			SurveyTestingUtil tu1 = new SurveyTestingUtil();
+			SurveyTestingUtil tu2 = new SurveyTestingUtil();
+
+			// Get a question from Survey 1
+			List<Survey_Question__c> survey1Questions = [
+				SELECT Id, Survey__c, Question__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu1.surveyId
+				LIMIT 1
+			];
+			System.assert(!survey1Questions.isEmpty(), 'Survey 1 should have questions');
+			Id survey1QuestionId = survey1Questions[0].Id;
+
+			// Attempt to update Survey 1's question while editing Survey 2 (malicious attempt)
+			List<Map<String, Object>> maliciousUpdate = new List<Map<String, Object>>();
+			Map<String, Object> q1 = new Map<String, Object>();
+			q1.put('id', survey1QuestionId); // Question from Survey 1
+			q1.put('question', 'Hacked Question Text');
+			q1.put('questionType', 'Free Text');
+			q1.put('required', false);
+			q1.put('orderNumber', 1);
+			maliciousUpdate.add(q1);
+
+			Test.startTest();
+			Boolean securityExceptionThrown = false;
+			try {
+				// Try to update Survey 2 with Survey 1's question - should fail
+				SurveyCreationController.updateIndividualQuestions(tu2.surveyId, maliciousUpdate);
+			} catch (AuraHandledException e) {
+				securityExceptionThrown = true;
+				System.assert(e.getMessage().contains('Security violation'), 'Should indicate security violation');
+				System.assert(e.getMessage().contains('does not belong to Survey'), 'Should explain the violation');
+			}
+			Test.stopTest();
+
+			System.assert(securityExceptionThrown, 'Security exception should be thrown');
+
+			// Verify Survey 1's question was NOT modified
+			Survey_Question__c unchangedQuestion = [
+				SELECT Id, Survey__c, Question__c
+				FROM Survey_Question__c
+				WHERE Id = :survey1QuestionId
+			];
+			System.assertNotEquals('Hacked Question Text', unchangedQuestion.Question__c, 'Question should not be modified');
+			System.assertEquals(tu1.surveyId, unchangedQuestion.Survey__c, 'Question should still belong to Survey 1');
+		}
+	}
+
+	@IsTest
+	private static void testUpdateIndividualQuestionsNoReparenting() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Get an existing question
+			List<Survey_Question__c> existingQuestions = [
+				SELECT Id, Survey__c, Question__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu.surveyId
+				LIMIT 1
+			];
+			System.assert(!existingQuestions.isEmpty(), 'Should have at least one question');
+			Id questionId = existingQuestions[0].Id;
+			Id originalSurveyId = existingQuestions[0].Survey__c;
+
+			// Update the question
+			List<Map<String, Object>> updates = new List<Map<String, Object>>();
+			Map<String, Object> q1 = new Map<String, Object>();
+			q1.put('id', questionId);
+			q1.put('question', 'Updated Question');
+			q1.put('questionType', 'Free Text');
+			q1.put('required', true);
+			q1.put('orderNumber', 1);
+			updates.add(q1);
+
+			Test.startTest();
+			SurveyCreationController.updateIndividualQuestions(tu.surveyId, updates);
+			Test.stopTest();
+
+			// Verify the question was updated but still belongs to the same survey
+			Survey_Question__c updatedQuestion = [
+				SELECT Id, Survey__c, Question__c, Required__c
+				FROM Survey_Question__c
+				WHERE Id = :questionId
+			];
+			System.assertEquals('Updated Question', updatedQuestion.Question__c, 'Question text should be updated');
+			System.assertEquals(true, updatedQuestion.Required__c, 'Required flag should be updated');
+			System.assertEquals(originalSurveyId, updatedQuestion.Survey__c, 'Survey__c should remain unchanged');
+		}
+	}
 }
