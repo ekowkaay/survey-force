@@ -26,7 +26,7 @@ Integer totalUpdated = 0;
 try {
     // Query all horizontal scale survey questions
     List<Survey_Question__c> questions = [
-        SELECT Id, Name, Question__c, Choices__c, Type__c, Survey__r.Name
+        SELECT Id, Name, Question__c, Choices__c, Type__c, OrderNumber__c, Survey__r.Name
         FROM Survey_Question__c
         WHERE Type__c = 'Single Select--Horizontal'
         AND Choices__c != null
@@ -110,7 +110,9 @@ try {
     
 } catch (DmlException e) {
     System.debug('ERROR during update: ' + e.getMessage());
-    System.debug('Failed records: ' + e.getDmlMessage(0));
+    if (e.getNumDml() > 0) {
+        System.debug('Failed records: ' + e.getDmlMessage(0));
+    }
 } catch (Exception e) {
     System.debug('ERROR: ' + e.getMessage());
     System.debug('Stack Trace: ' + e.getStackTraceString());

@@ -133,11 +133,12 @@ for (Survey_Question__c sq : [
     SELECT Id, Choices__c, Type__c
     FROM Survey_Question__c
     WHERE Type__c = 'Single Select--Horizontal'
-    AND Choices__c LIKE '1%2%3%4%5%'
+    AND Choices__c != null
     WITH USER_MODE
 ]) {
-    // Replace numeric scale with labeled scale
-    if (sq.Choices__c != null && sq.Choices__c.trim().equals('1\n2\n3\n4\n5')) {
+    // Check if choices match exact numeric scale format
+    String trimmedChoices = sq.Choices__c.trim();
+    if (trimmedChoices.equals('1\n2\n3\n4\n5')) {
         sq.Choices__c = 'Very Difficult\n2\n3\n4\nVery Easy';
         questionsToUpdate.add(sq);
     }
