@@ -284,13 +284,14 @@ export default class SurveyTaker extends LightningElement {
 
 	/**
 	 * Check if scale has end labels (for horizontal layout)
+	 * Returns true if both start and end labels are defined
 	 */
 	get hasScaleEndLabels() {
 		if (!this.currentQuestion) {
 			return false;
 		}
-		// Check if static scale labels are defined
-		return !!this.currentQuestion.scaleStartLabel || !!this.currentQuestion.scaleEndLabel;
+		// Require both labels to be set for proper display
+		return !!this.currentQuestion.scaleStartLabel && !!this.currentQuestion.scaleEndLabel;
 	}
 
 	/**

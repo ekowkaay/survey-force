@@ -45,15 +45,18 @@ The static labels provide clear context without being part of the selectable cho
    4
    5
    ```
-4. Set **Scale Start Label** to describe the lowest value (e.g., "Very Difficult")
-5. Set **Scale End Label** to describe the highest value (e.g., "Very Easy")
+4. Set **Scale Start Label** to describe the lowest numeric value (e.g., "Very Difficult")
+5. Set **Scale End Label** to describe the highest numeric value (e.g., "Very Easy")
 6. Save the record
+
+**Important**: The start label corresponds to choice "1" and the end label corresponds to choice "5". Ensure your labels semantically match this direction (e.g., "Very Difficult" at 1 means selecting 1 indicates high difficulty).
 
 ### Result
 Survey respondents will see:
 - Clear labels at both ends of the scale showing what each extreme means
 - Numeric buttons (1, 2, 3, 4, 5) to make their selection
 - Easy understanding of the scale direction and meaning
+- Intuitive mapping: lower numbers = start label, higher numbers = end label
 
 ## Recommended Scale Labels
 
