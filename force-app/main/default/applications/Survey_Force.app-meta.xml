@@ -5,6 +5,7 @@
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <label>Survey Force</label>
     <tabs>Survey__c</tabs>
+    <tabs>Survey_Templates</tabs>
     <tabs>SurveyTaker__c</tabs>
     <tabs>standard-report</tabs>
     <tabs>Survey_Question__c</tabs>
