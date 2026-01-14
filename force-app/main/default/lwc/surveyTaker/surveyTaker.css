@@ -208,50 +208,51 @@ h1 {
 	justify-content: center;
 }
 
-/* Custom horizontal radio button styling */
-.radio-button-group {
+/* Vertical radio button styling */
+.radio-vertical-container {
 	display: flex;
-	gap: 0.5rem;
-	justify-content: space-between;
+	flex-direction: column;
+	gap: 0.75rem;
 	width: 100%;
-	flex-wrap: wrap;
+	max-width: 600px;
+	margin: 0 auto;
 }
 
-.radio-button-item {
-	flex: 1;
-	min-width: 60px;
-}
-
-.radio-button-item input[type='radio'] {
-	position: absolute;
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.radio-button-label {
-	display: block;
-	text-align: center;
-	padding: 0.75rem 0.5rem;
+.radio-vertical-item {
+	display: flex;
+	align-items: center;
 	background: #f8fafc;
 	border: 2px solid #e2e8f0;
-	border-radius: 0.5rem;
-	cursor: pointer;
+	border-radius: 0.75rem;
+	padding: 1rem 1.25rem;
 	transition: all 0.2s ease;
-	font-weight: 600;
-	color: #334155;
+	cursor: pointer;
 }
 
-.radio-button-item input[type='radio']:checked + .radio-button-label {
-	background: #f97316;
-	border-color: #f97316;
-	color: white;
-	box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.3);
-}
-
-.radio-button-label:hover {
+.radio-vertical-item:hover {
 	border-color: #f97316;
 	box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
+}
+
+.radio-vertical-item input[type='radio'] {
+	width: 20px;
+	height: 20px;
+	margin-right: 1rem;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.radio-vertical-item input[type='radio']:checked + .radio-vertical-label {
+	color: #f97316;
+	font-weight: 700;
+}
+
+.radio-vertical-label {
+	flex: 1;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #334155;
+	cursor: pointer;
 }
 
 /* Scale buttons for horizontal layout */
@@ -512,17 +513,25 @@ footer.footer {
 		order: 0;
 	}
 
-	.radio-button-group {
-		order: 0;
-		flex-direction: row;
-		justify-content: center;
+	.radio-vertical-item {
+		padding: 0.75rem 1rem;
 	}
 
-	.radio-button-item {
+	.radio-vertical-label {
+		font-size: 0.875rem;
+	}
+
+	.scale-buttons-wrapper {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+	}
+
+	.scale-button-container {
 		min-width: 50px;
+		flex-shrink: 0;
 	}
 
-	.radio-button-label {
+	.scaleButton {
 		padding: 0.5rem 0.25rem;
 		font-size: 0.875rem;
 	}
