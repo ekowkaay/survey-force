@@ -192,16 +192,7 @@ private class SurveyCreationController_Test {
 		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
 		System.runAs(u) {
 			Test.startTest();
-			SurveyCreationController.CreationResult result = SurveyCreationController.updateSurveyWithDetails(
-				null,
-				'Test Survey',
-				'Header',
-				'Subheader',
-				'Thank you',
-				'',
-				false,
-				false
-			);
+			SurveyCreationController.CreationResult result = SurveyCreationController.updateSurveyWithDetails(null, 'Test Survey', 'Header', 'Subheader', 'Thank you', '', false, false);
 			Test.stopTest();
 
 			System.assertEquals(false, result.success, 'Update should fail without survey ID');
@@ -216,16 +207,7 @@ private class SurveyCreationController_Test {
 			SurveyTestingUtil tu = new SurveyTestingUtil();
 
 			Test.startTest();
-			SurveyCreationController.CreationResult result = SurveyCreationController.updateSurveyWithDetails(
-				tu.surveyId,
-				'',
-				'Header',
-				'Subheader',
-				'Thank you',
-				'',
-				false,
-				false
-			);
+			SurveyCreationController.CreationResult result = SurveyCreationController.updateSurveyWithDetails(tu.surveyId, '', 'Header', 'Subheader', 'Thank you', '', false, false);
 			Test.stopTest();
 
 			System.assertEquals(false, result.success, 'Update should fail without survey name');
@@ -326,7 +308,7 @@ private class SurveyCreationController_Test {
 
 			// Update the first question and add a new one
 			List<Map<String, Object>> updates = new List<Map<String, Object>>();
-			
+
 			// Update existing question
 			Map<String, Object> updateQ = new Map<String, Object>();
 			updateQ.put('id', firstQuestionId);
@@ -367,7 +349,7 @@ private class SurveyCreationController_Test {
 				WHERE Survey__c = :tu.surveyId
 				ORDER BY OrderNumber__c
 			];
-			
+
 			Boolean foundNewQuestion = false;
 			for (Survey_Question__c q : allQuestions) {
 				if (q.Question__c == 'Brand New Question') {
