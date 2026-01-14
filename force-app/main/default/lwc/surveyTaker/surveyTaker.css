@@ -186,7 +186,7 @@ h1 {
 	margin: 0 auto;
 }
 
-/* End labels for scale (e.g., "Disagree" and "Strongly Agree") */
+/* End labels for scale (e.g., "Very Difficult" and "Very Easy") */
 .scale-end-label {
 	font-size: 0.875rem;
 	font-weight: 700;

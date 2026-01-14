@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Scale_End_Label__c</fullName>
+    <description>Label displayed at the end (right side) of a horizontal scale question. For example: &quot;Very Easy&quot;, &quot;Strongly Agree&quot;, or &quot;Very Satisfied&quot;. This helps users understand what the highest value on the scale represents.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Enter the label for the end of the scale (e.g., &quot;Very Easy&quot;). This will be displayed on the right side of horizontal scale questions to guide respondents.</inlineHelpText>
+    <label>Scale End Label</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
