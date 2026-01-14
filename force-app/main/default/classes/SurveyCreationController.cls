@@ -268,12 +268,7 @@ public with sharing class SurveyCreationController {
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
 				
 				// Handle scale labels
-				if (q.get('scaleStartLabel') != null) {
-					sq.Scale_Start_Label__c = (String) q.get('scaleStartLabel');
-				}
-				if (q.get('scaleEndLabel') != null) {
-					sq.Scale_End_Label__c = (String) q.get('scaleEndLabel');
-				}
+				populateScaleLabels(sq, q);
 
 				// Handle choices
 				Object choicesObj = q.get('choices');
@@ -352,12 +347,7 @@ public with sharing class SurveyCreationController {
 					sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
 					
 					// Handle scale labels
-					if (q.get('scaleStartLabel') != null) {
-						sq.Scale_Start_Label__c = (String) q.get('scaleStartLabel');
-					}
-					if (q.get('scaleEndLabel') != null) {
-						sq.Scale_End_Label__c = (String) q.get('scaleEndLabel');
-					}
+					populateScaleLabels(sq, q);
 
 					// Handle choices
 					Object choicesObj = q.get('choices');
@@ -467,12 +457,7 @@ public with sharing class SurveyCreationController {
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
 				
 				// Handle scale labels
-				if (q.get('scaleStartLabel') != null) {
-					sq.Scale_Start_Label__c = (String) q.get('scaleStartLabel');
-				}
-				if (q.get('scaleEndLabel') != null) {
-					sq.Scale_End_Label__c = (String) q.get('scaleEndLabel');
-				}
+				populateScaleLabels(sq, q);
 
 				// Handle choices
 				Object choicesObj = q.get('choices');
@@ -673,8 +658,8 @@ public with sharing class SurveyCreationController {
 				qd.questionType = q.Type__c;
 				qd.required = q.Required__c != null ? q.Required__c : false;
 				qd.hideOnSurvey = q.Hide_on_Survey__c != null ? q.Hide_on_Survey__c : false;
-				qd.scaleStartLabel = q.Scale_Start_Label__c;
-				qd.scaleEndLabel = q.Scale_End_Label__c;
+				qd.scaleStartLabel = q.Scale_Start_Label__c != null ? q.Scale_Start_Label__c : '';
+				qd.scaleEndLabel = q.Scale_End_Label__c != null ? q.Scale_End_Label__c : '';
 
 				// Parse choices
 				qd.choices = new List<String>();
@@ -693,6 +678,20 @@ public with sharing class SurveyCreationController {
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyCreationController:getSurveyDetails():' + e.getMessage());
 			throw new AuraHandledException('Error loading survey details: ' + e.getMessage());
+		}
+	}
+
+	/**
+	 * Helper method to populate scale label fields on Survey_Question__c record
+	 * @param sq The Survey_Question__c record to populate
+	 * @param questionData Map containing question data including scale labels
+	 */
+	private static void populateScaleLabels(Survey_Question__c sq, Map<String, Object> questionData) {
+		if (questionData.get('scaleStartLabel') != null) {
+			sq.Scale_Start_Label__c = (String) questionData.get('scaleStartLabel');
+		}
+		if (questionData.get('scaleEndLabel') != null) {
+			sq.Scale_End_Label__c = (String) questionData.get('scaleEndLabel');
 		}
 	}
 
