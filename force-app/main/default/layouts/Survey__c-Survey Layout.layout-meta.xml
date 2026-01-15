@@ -50,6 +50,10 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>Survey_Subheader__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Thank_You_Link__c</field>
             </layoutItems>
             <layoutItems>

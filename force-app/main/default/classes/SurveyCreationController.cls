@@ -251,7 +251,9 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Type__c,
 				Schema.Survey_Question__c.fields.Required__c,
 				Schema.Survey_Question__c.fields.Choices__c,
-				Schema.Survey_Question__c.fields.OrderNumber__c
+				Schema.Survey_Question__c.fields.OrderNumber__c,
+				Schema.Survey_Question__c.fields.Scale_Start_Label__c,
+				Schema.Survey_Question__c.fields.Scale_End_Label__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
 
@@ -264,6 +266,9 @@ public with sharing class SurveyCreationController {
 				sq.Type__c = (String) q.get('questionType');
 				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+				
+				// Handle scale labels
+				populateScaleLabels(sq, q);
 
 				// Handle choices
 				Object choicesObj = q.get('choices');
@@ -309,7 +314,9 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Type__c,
 				Schema.Survey_Question__c.fields.Required__c,
 				Schema.Survey_Question__c.fields.Choices__c,
-				Schema.Survey_Question__c.fields.OrderNumber__c
+				Schema.Survey_Question__c.fields.OrderNumber__c,
+				Schema.Survey_Question__c.fields.Scale_Start_Label__c,
+				Schema.Survey_Question__c.fields.Scale_End_Label__c
 			};
 			// Check delete permission at object level
 			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.Survey_Question__c.getSobjectType());
@@ -338,6 +345,9 @@ public with sharing class SurveyCreationController {
 					sq.Type__c = (String) q.get('questionType');
 					sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 					sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+					
+					// Handle scale labels
+					populateScaleLabels(sq, q);
 
 					// Handle choices
 					Object choicesObj = q.get('choices');
@@ -389,7 +399,9 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Type__c,
 				Schema.Survey_Question__c.fields.Required__c,
 				Schema.Survey_Question__c.fields.Choices__c,
-				Schema.Survey_Question__c.fields.OrderNumber__c
+				Schema.Survey_Question__c.fields.OrderNumber__c,
+				Schema.Survey_Question__c.fields.Scale_Start_Label__c,
+				Schema.Survey_Question__c.fields.Scale_End_Label__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToUpdate(Schema.Survey_Question__c.getSobjectType(), fields);
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), fields);
@@ -443,6 +455,9 @@ public with sharing class SurveyCreationController {
 				sq.Type__c = (String) q.get('questionType');
 				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
+				
+				// Handle scale labels
+				populateScaleLabels(sq, q);
 
 				// Handle choices
 				Object choicesObj = q.get('choices');
@@ -552,6 +567,10 @@ public with sharing class SurveyCreationController {
 		public List<String> choices { get; set; }
 		@AuraEnabled
 		public Boolean hideOnSurvey { get; set; }
+		@AuraEnabled
+		public String scaleStartLabel { get; set; }
+		@AuraEnabled
+		public String scaleEndLabel { get; set; }
 	}
 
 	/**
@@ -614,12 +633,15 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Type__c,
 				Schema.Survey_Question__c.fields.Required__c,
 				Schema.Survey_Question__c.fields.Choices__c,
-				Schema.Survey_Question__c.fields.Hide_on_Survey__c
+				Schema.Survey_Question__c.fields.Hide_on_Survey__c,
+				Schema.Survey_Question__c.fields.Scale_Start_Label__c,
+				Schema.Survey_Question__c.fields.Scale_End_Label__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
 
 			List<Survey_Question__c> questionRecords = [
-				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c
+				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c,
+					   Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c = :surveyId
 				WITH USER_MODE
@@ -636,6 +658,8 @@ public with sharing class SurveyCreationController {
 				qd.questionType = q.Type__c;
 				qd.required = q.Required__c != null ? q.Required__c : false;
 				qd.hideOnSurvey = q.Hide_on_Survey__c != null ? q.Hide_on_Survey__c : false;
+				qd.scaleStartLabel = q.Scale_Start_Label__c != null ? q.Scale_Start_Label__c : '';
+				qd.scaleEndLabel = q.Scale_End_Label__c != null ? q.Scale_End_Label__c : '';
 
 				// Parse choices
 				qd.choices = new List<String>();
@@ -654,6 +678,20 @@ public with sharing class SurveyCreationController {
 		} catch (Exception e) {
 			SurveyForceUtil.log('SurveyCreationController:getSurveyDetails():' + e.getMessage());
 			throw new AuraHandledException('Error loading survey details: ' + e.getMessage());
+		}
+	}
+
+	/**
+	 * Helper method to populate scale label fields on Survey_Question__c record
+	 * @param sq The Survey_Question__c record to populate
+	 * @param questionData Map containing question data including scale labels
+	 */
+	private static void populateScaleLabels(Survey_Question__c sq, Map<String, Object> questionData) {
+		if (questionData.get('scaleStartLabel') != null) {
+			sq.Scale_Start_Label__c = (String) questionData.get('scaleStartLabel');
+		}
+		if (questionData.get('scaleEndLabel') != null) {
+			sq.Scale_End_Label__c = (String) questionData.get('scaleEndLabel');
 		}
 	}
 
