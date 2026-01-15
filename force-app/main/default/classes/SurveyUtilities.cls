@@ -248,7 +248,12 @@ public with sharing class SurveyUtilities {
 					// Build survey URL - use configured site URL if available, otherwise use org domain
 					// Note: Survey ID is Salesforce-generated and safe to use in URL without encoding
 					if (String.isNotBlank(siteURL)) {
-						result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+						// Check if siteURL already ends with /TakeSurvey to avoid duplicate paths
+						if (siteURL.endsWith('/TakeSurvey')) {
+							result.surveyUrl = siteURL + '?id=' + newSurvey.Id;
+						} else {
+							result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+						}
 						result.message = 'Survey created successfully';
 					} else {
 						// Fallback to org domain URL when site URL is not configured
@@ -543,7 +548,12 @@ public with sharing class SurveyUtilities {
 
 		// Use /survey path for token-based access
 		// This should match the Experience Site page URL path
-		return baseUrl + '/survey?token=' + token;
+		// Check if baseUrl already ends with /survey to avoid duplicate paths
+		if (baseUrl.endsWith('/survey')) {
+			return baseUrl + '?token=' + token;
+		} else {
+			return baseUrl + '/survey?token=' + token;
+		}
 	}
 
 	/**
