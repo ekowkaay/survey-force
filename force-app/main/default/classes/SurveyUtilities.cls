@@ -249,15 +249,15 @@ public with sharing class SurveyUtilities {
 					// Note: Survey ID is Salesforce-generated and safe to use in URL without encoding
 					if (String.isNotBlank(siteURL)) {
 						// Check if siteURL already ends with /TakeSurvey to avoid duplicate paths
-						if (siteURL.toLowerCase().endsWith('/takesurvey')) {
+						if (siteURL.toLowerCase().endsWith(SurveyForceConstants.TAKE_SURVEY_PATH.toLowerCase())) {
 							result.surveyUrl = siteURL + '?id=' + newSurvey.Id;
 						} else {
-							result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
+							result.surveyUrl = siteURL + SurveyForceConstants.TAKE_SURVEY_PATH + '?id=' + newSurvey.Id;
 						}
 						result.message = 'Survey created successfully';
 					} else {
 						// Fallback to org domain URL when site URL is not configured
-						result.surveyUrl = orgDomainUrl + '/TakeSurvey?id=' + newSurvey.Id;
+						result.surveyUrl = orgDomainUrl + SurveyForceConstants.TAKE_SURVEY_PATH + '?id=' + newSurvey.Id;
 						result.message = 'Survey created successfully. Note: Site URL not configured for training type: ' + tReq.Training_Type__c;
 					}
 				}
@@ -549,10 +549,10 @@ public with sharing class SurveyUtilities {
 		// Use /survey path for token-based access
 		// This should match the Experience Site page URL path
 		// Check if baseUrl already ends with /survey to avoid duplicate paths
-		if (baseUrl.toLowerCase().endsWith('/survey')) {
+		if (baseUrl.toLowerCase().endsWith(SurveyForceConstants.SURVEY_PAGE_PATH.toLowerCase())) {
 			return baseUrl + '?token=' + token;
 		} else {
-			return baseUrl + '/survey?token=' + token;
+			return baseUrl + SurveyForceConstants.SURVEY_PAGE_PATH + '?token=' + token;
 		}
 	}
 
