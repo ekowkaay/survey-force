@@ -3,11 +3,50 @@
     <fullName>Scale_End_Label__c</fullName>
     <description>Label displayed at the end (right side) of a horizontal scale question. For example: &quot;Very Easy&quot;, &quot;Strongly Agree&quot;, or &quot;Very Satisfied&quot;. This helps users understand what the highest value on the scale represents.</description>
     <externalId>false</externalId>
-    <inlineHelpText>Enter the label for the end of the scale (e.g., &quot;Very Easy&quot;). This will be displayed on the right side of horizontal scale questions to guide respondents.</inlineHelpText>
+    <inlineHelpText>Select the label for the end of the scale. This will be displayed on the right side of horizontal scale questions to guide respondents.</inlineHelpText>
     <label>Scale End Label</label>
-    <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
-    <type>Text</type>
-    <unique>false</unique>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Very Easy</fullName>
+                <default>false</default>
+                <label>Very Easy</label>
+            </value>
+            <value>
+                <fullName>Strongly Agree</fullName>
+                <default>false</default>
+                <label>Strongly Agree</label>
+            </value>
+            <value>
+                <fullName>Very Satisfied</fullName>
+                <default>false</default>
+                <label>Very Satisfied</label>
+            </value>
+            <value>
+                <fullName>Very Likely</fullName>
+                <default>false</default>
+                <label>Very Likely</label>
+            </value>
+            <value>
+                <fullName>Excellent</fullName>
+                <default>false</default>
+                <label>Excellent</label>
+            </value>
+            <value>
+                <fullName>Extremely</fullName>
+                <default>false</default>
+                <label>Extremely</label>
+            </value>
+            <value>
+                <fullName>Always</fullName>
+                <default>false</default>
+                <label>Always</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
 </CustomField>

@@ -236,6 +236,30 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		return this.currentQuestion.questionType === 'Single Select--Horizontal';
 	}
 
+	get scaleStartLabelOptions() {
+		return [
+			{ label: 'Very Difficult', value: 'Very Difficult' },
+			{ label: 'Strongly Disagree', value: 'Strongly Disagree' },
+			{ label: 'Very Dissatisfied', value: 'Very Dissatisfied' },
+			{ label: 'Very Unlikely', value: 'Very Unlikely' },
+			{ label: 'Very Poor', value: 'Very Poor' },
+			{ label: 'Not at All', value: 'Not at All' },
+			{ label: 'Never', value: 'Never' }
+		];
+	}
+
+	get scaleEndLabelOptions() {
+		return [
+			{ label: 'Very Easy', value: 'Very Easy' },
+			{ label: 'Strongly Agree', value: 'Strongly Agree' },
+			{ label: 'Very Satisfied', value: 'Very Satisfied' },
+			{ label: 'Very Likely', value: 'Very Likely' },
+			{ label: 'Excellent', value: 'Excellent' },
+			{ label: 'Extremely', value: 'Extremely' },
+			{ label: 'Always', value: 'Always' }
+		];
+	}
+
 	// Event handlers
 	handleToggleSettings() {
 		this.showSettings = !this.showSettings;
@@ -344,11 +368,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	}
 
 	handleScaleStartLabelChange(event) {
-		this.currentQuestion = { ...this.currentQuestion, scaleStartLabel: event.target.value };
+		this.currentQuestion = { ...this.currentQuestion, scaleStartLabel: event.detail.value };
 	}
 
 	handleScaleEndLabelChange(event) {
-		this.currentQuestion = { ...this.currentQuestion, scaleEndLabel: event.target.value };
+		this.currentQuestion = { ...this.currentQuestion, scaleEndLabel: event.detail.value };
 	}
 
 	handleCancelQuestion() {

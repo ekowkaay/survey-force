@@ -3,11 +3,50 @@
     <fullName>Scale_Start_Label__c</fullName>
     <description>Label displayed at the start (left side) of a horizontal scale question. For example: &quot;Very Difficult&quot;, &quot;Strongly Disagree&quot;, or &quot;Very Dissatisfied&quot;. This helps users understand what the lowest value on the scale represents.</description>
     <externalId>false</externalId>
-    <inlineHelpText>Enter the label for the start of the scale (e.g., &quot;Very Difficult&quot;). This will be displayed on the left side of horizontal scale questions to guide respondents.</inlineHelpText>
+    <inlineHelpText>Select the label for the start of the scale. This will be displayed on the left side of horizontal scale questions to guide respondents.</inlineHelpText>
     <label>Scale Start Label</label>
-    <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
-    <type>Text</type>
-    <unique>false</unique>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Very Difficult</fullName>
+                <default>false</default>
+                <label>Very Difficult</label>
+            </value>
+            <value>
+                <fullName>Strongly Disagree</fullName>
+                <default>false</default>
+                <label>Strongly Disagree</label>
+            </value>
+            <value>
+                <fullName>Very Dissatisfied</fullName>
+                <default>false</default>
+                <label>Very Dissatisfied</label>
+            </value>
+            <value>
+                <fullName>Very Unlikely</fullName>
+                <default>false</default>
+                <label>Very Unlikely</label>
+            </value>
+            <value>
+                <fullName>Very Poor</fullName>
+                <default>false</default>
+                <label>Very Poor</label>
+            </value>
+            <value>
+                <fullName>Not at All</fullName>
+                <default>false</default>
+                <label>Not at All</label>
+            </value>
+            <value>
+                <fullName>Never</fullName>
+                <default>false</default>
+                <label>Never</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
 </CustomField>
