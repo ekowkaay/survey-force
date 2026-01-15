@@ -249,7 +249,7 @@ public with sharing class SurveyUtilities {
 					// Note: Survey ID is Salesforce-generated and safe to use in URL without encoding
 					if (String.isNotBlank(siteURL)) {
 						// Check if siteURL already ends with /TakeSurvey to avoid duplicate paths
-						if (siteURL.endsWith('/TakeSurvey')) {
+						if (siteURL.toLowerCase().endsWith('/takesurvey')) {
 							result.surveyUrl = siteURL + '?id=' + newSurvey.Id;
 						} else {
 							result.surveyUrl = siteURL + '/TakeSurvey?id=' + newSurvey.Id;
@@ -549,7 +549,7 @@ public with sharing class SurveyUtilities {
 		// Use /survey path for token-based access
 		// This should match the Experience Site page URL path
 		// Check if baseUrl already ends with /survey to avoid duplicate paths
-		if (baseUrl.endsWith('/survey')) {
+		if (baseUrl.toLowerCase().endsWith('/survey')) {
 			return baseUrl + '?token=' + token;
 		} else {
 			return baseUrl + '/survey?token=' + token;
