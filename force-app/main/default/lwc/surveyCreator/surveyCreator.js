@@ -132,7 +132,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 					choices: q.choices || [],
 					choicesText: (q.choices || []).join('\n'),
 					orderNumber: q.orderNumber,
-					hideOnSurvey: q.hideOnSurvey
+					hideOnSurvey: q.hideOnSurvey,
+					scaleStartLabel: q.scaleStartLabel || '',
+					scaleEndLabel: q.scaleEndLabel || ''
 				}));
 
 				// Set mode based on editMode parameter
