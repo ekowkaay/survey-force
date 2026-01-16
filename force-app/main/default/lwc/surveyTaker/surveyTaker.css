@@ -431,6 +431,7 @@ lightning-radio-group {
 .submitted-content p {
 	margin: 0;
 	line-height: 1.6;
+	white-space: pre-line;
 }
 
 .submitted-icon {
@@ -451,6 +452,7 @@ lightning-radio-group {
 .error-content p {
 	margin: 0;
 	line-height: 1.6;
+	white-space: pre-line;
 }
 
 .error-icon {
