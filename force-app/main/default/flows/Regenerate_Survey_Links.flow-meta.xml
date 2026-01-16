@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <description>Screen flow to regenerate survey links and invitations for Training Request records. Use when survey templates or questions have been updated.</description>
+    <interviewLabel>Regenerate Survey Links {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Regenerate Survey Links</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Screen_Introduction</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    
+    <!-- Variable to store selected Training Request IDs -->
+    <variables>
+        <name>var_TrainingRequestIds</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <!-- Variable to store regeneration result -->
+    <variables>
+        <name>var_RegenerationResult</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>SurveyRegenerationController.RegenerationResult</objectType>
+    </variables>
+    
+    <!-- Screen 1: Introduction and Selection -->
+    <screens>
+        <name>Screen_Introduction</name>
+        <label>Select Training Requests</label>
+        <locationX>50</locationX>
+        <locationY>100</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Confirmation</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Intro_Text</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;Regenerate Survey Links&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;This tool will regenerate survey links and invitations for the selected Training Request records.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;⚠️ Important:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;All existing survey invitations will be deleted&lt;/li&gt;&lt;li&gt;New survey links with fresh tokens will be generated&lt;/li&gt;&lt;li&gt;Previous survey links will no longer work&lt;/li&gt;&lt;li&gt;Participants will need to use the new links&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;When to use:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Survey template questions have been updated&lt;/li&gt;&lt;li&gt;Survey needs to be redistributed with new content&lt;/li&gt;&lt;li&gt;Links need to be refreshed for security reasons&lt;/li&gt;&lt;/ul&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Input_TrainingRequestIds</name>
+            <dataType>String</dataType>
+            <fieldText>Training Request IDs (comma-separated)</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Enter the Training Request record IDs separated by commas. You can select multiple records from a list view and paste the IDs here.</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Checkbox_RegenerateParticipant</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Regenerate Participant Survey Links</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Checkbox_RegenerateCustomer</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Regenerate Customer Survey Links</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Checkbox_RegenerateTrainer</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Regenerate Trainer Survey Links</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    
+    <!-- Screen 2: Confirmation -->
+    <screens>
+        <name>Screen_Confirmation</name>
+        <label>Confirm Regeneration</label>
+        <locationX>50</locationX>
+        <locationY>200</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Assignment_PrepareIds</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Confirmation_Warning</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(194, 57, 52);&quot;&gt;⚠️ Final Confirmation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;You are about to regenerate survey links for the selected Training Request records.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;This action will:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Delete all existing survey invitations&lt;/li&gt;&lt;li&gt;Generate new survey links with new tokens&lt;/li&gt;&lt;li&gt;Update Training Request and Participant records&lt;/li&gt;&lt;li&gt;Invalidate all previous survey links&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b style=&quot;color: rgb(194, 57, 52);&quot;&gt;This action cannot be undone.&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Click &lt;b&gt;Next&lt;/b&gt; to proceed or &lt;b&gt;Previous&lt;/b&gt; to go back.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    
+    <!-- Assignment: Parse and prepare Training Request IDs -->
+    <assignments>
+        <name>Assignment_PrepareIds</name>
+        <label>Prepare Training Request IDs</label>
+        <locationX>50</locationX>
+        <locationY>300</locationY>
+        <assignmentItems>
+            <assignToReference>var_TrainingRequestIds</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>Input_TrainingRequestIds</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Action_RegenerateSurveys</targetReference>
+        </connector>
+    </assignments>
+    
+    <!-- Action: Call Invocable Apex -->
+    <actionCalls>
+        <name>Action_RegenerateSurveys</name>
+        <label>Regenerate Survey Links</label>
+        <locationX>50</locationX>
+        <locationY>400</locationY>
+        <actionName>SurveyRegenerationController</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Screen_Results</targetReference>
+        </connector>
+        <inputParameters>
+            <name>trainingRequestIds</name>
+            <value>
+                <elementReference>var_TrainingRequestIds</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>regenerateParticipant</name>
+            <value>
+                <elementReference>Checkbox_RegenerateParticipant</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>regenerateCustomer</name>
+            <value>
+                <elementReference>Checkbox_RegenerateCustomer</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>regenerateTrainer</name>
+            <value>
+                <elementReference>Checkbox_RegenerateTrainer</elementReference>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <assignToReference>var_RegenerationResult</assignToReference>
+            <name>outputVariable</name>
+        </outputParameters>
+    </actionCalls>
+    
+    <!-- Screen 3: Results -->
+    <screens>
+        <name>Screen_Results</name>
+        <label>Regeneration Results</label>
+        <locationX>50</locationX>
+        <locationY>500</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Display_Results_Success</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(4, 132, 75);&quot;&gt;✓ Survey Links Regenerated Successfully&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;The survey links and invitations have been regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_RegenerationResult.totalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_RegenerationResult.totalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_RegenerationResult.totalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_RegenerationResult.participantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_RegenerationResult.customerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_RegenerationResult.trainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.message}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>var_RegenerationResult.success</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>true</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Display_Results_Error</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(194, 57, 52);&quot;&gt;⚠️ Regeneration Completed with Errors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Some survey links could not be regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_RegenerationResult.totalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_RegenerationResult.totalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_RegenerationResult.totalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_RegenerationResult.participantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_RegenerationResult.customerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_RegenerationResult.trainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.message}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Error Details:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.errorDetails}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>var_RegenerationResult.success</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>false</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Display_Next_Steps</name>
+            <fieldText>&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Next Steps:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Review the updated Training Request records&lt;/li&gt;&lt;li&gt;Distribute new survey links to participants&lt;/li&gt;&lt;li&gt;Previous survey links are no longer valid&lt;/li&gt;&lt;/ul&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+</Flow>
