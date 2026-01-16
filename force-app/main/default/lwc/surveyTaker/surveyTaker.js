@@ -107,8 +107,6 @@ export default class SurveyTaker extends LightningElement {
 	@track isSubmitting = false;
 	@track isSubmitted = false;
 	@track error = null;
-	@track errorTitle = 'Error';
-	@track errorHelp = 'Unable to load survey.';
 
 	@track surveyName = '';
 	@track surveyHeader = '';
@@ -353,8 +351,6 @@ export default class SurveyTaker extends LightningElement {
 	loadSurveyData() {
 		this.isLoading = true;
 		this.error = null;
-		this.errorTitle = 'Error';
-		this.errorHelp = 'Unable to load survey.';
 		const recordIdToLoad = this.effectiveRecordId;
 		const tokenToLoad = this.effectiveToken;
 
@@ -403,30 +399,12 @@ export default class SurveyTaker extends LightningElement {
 					// Initialize responses map
 					this.initializeResponses();
 				} else {
-					this.errorTitle = 'Survey Not Found';
-					this.errorHelp = 'The survey you are looking for is not available.';
 					this.error = 'Survey not found or not available';
 				}
 				this.isLoading = false;
 			})
 			.catch((err) => {
-				const errorMessage = err.body?.message || err.message || 'Error loading survey';
-				
-				// Check if this is an expiration or already-submitted error
-				if (errorMessage.includes('already been completed') || errorMessage.includes('already taken')) {
-					this.errorTitle = 'Already Submitted';
-					this.errorHelp = 'This survey has already been completed.';
-					this.error = this.alreadySubmittedMessage || errorMessage;
-				} else if (errorMessage.includes('expired') || errorMessage.includes('closed') || errorMessage.includes('survey window')) {
-					this.errorTitle = 'Survey Expired';
-					this.errorHelp = 'The survey window has closed.';
-					this.error = this.expirationMessage || errorMessage;
-				} else {
-					this.errorTitle = 'Error';
-					this.errorHelp = 'Unable to load survey.';
-					this.error = errorMessage;
-				}
-				
+				this.error = err.body?.message || err.message || 'Error loading survey';
 				this.isLoading = false;
 			});
 	}
