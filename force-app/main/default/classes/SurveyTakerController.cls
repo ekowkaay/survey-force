@@ -21,6 +21,10 @@ public with sharing class SurveyTakerController {
 		public String eventTopic { get; set; }
 		@AuraEnabled
 		public String eventDate { get; set; }
+		@AuraEnabled
+		public String expirationMessage { get; set; }
+		@AuraEnabled
+		public String alreadySubmittedMessage { get; set; }
 	}
 
 	/**
@@ -114,12 +118,14 @@ public with sharing class SurveyTakerController {
 					Schema.Survey__c.fields.Thank_You_Text__c,
 					Schema.Survey__c.fields.Thank_You_Link__c,
 					Schema.Survey__c.fields.All_Responses_Anonymous__c,
-					Schema.Survey__c.fields.Survey_Container_CSS__c
+					Schema.Survey__c.fields.Survey_Container_CSS__c,
+					Schema.Survey__c.fields.Survey_Expiration_Message__c,
+					Schema.Survey__c.fields.Already_Submitted_Message__c
 				};
 				SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
 
 				survey = [
-					SELECT Id, Name, Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c
+					SELECT Id, Name, Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c, Survey_Expiration_Message__c, Already_Submitted_Message__c
 					FROM Survey__c
 					WHERE Id = :surveyId
 					WITH USER_MODE
@@ -137,6 +143,8 @@ public with sharing class SurveyTakerController {
 			result.invitationHeader = survey.Survey_Header__c;
 			result.eventTopic = null;
 			result.eventDate = null;
+			result.expirationMessage = survey.Survey_Expiration_Message__c;
+			result.alreadySubmittedMessage = survey.Already_Submitted_Message__c;
 
 			// Set anonymous option
 			result.anonymousOption = (System.UserInfo.getUserType() == 'Guest' || survey.All_Responses_Anonymous__c)

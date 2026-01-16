@@ -9,8 +9,13 @@
 
 		<!-- Error State -->
 		<template if:true={error}>
-			<div class="slds-box slds-theme_error slds-m-around_medium">
-				<p class="slds-text-heading_small">{error}</p>
+			<div class="error-shell">
+				<section class="card">
+					<div class="error-content">
+						<lightning-icon icon-name="utility:error" size="large" class="error-icon" alternative-text="Error"></lightning-icon>
+						<lightning-formatted-rich-text value={error}></lightning-formatted-rich-text>
+					</div>
+				</section>
 			</div>
 		</template>
 
@@ -18,8 +23,6 @@
 		<template if:true={isSubmitted}>
 			<div class="submitted-shell">
 				<section class="card">
-					<div class="questionTitle">Thank you!</div>
-					<div class="questionHelp">Your response has been recorded.</div>
 					<div class="submitted-content">
 						<lightning-icon icon-name="utility:success" size="large" class="submitted-icon" alternative-text="Success"></lightning-icon>
 						<lightning-formatted-rich-text value={thankYouText}></lightning-formatted-rich-text>

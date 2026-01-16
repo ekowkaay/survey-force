@@ -59,7 +59,7 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 	public static Survey__c getSurveyForGuestUser(Id surveyId) {
 		try {
 			List<Survey__c> surveys = [
-				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Hide_Survey_Name__c, Survey_Container_CSS__c
+				SELECT Id, Name, Thank_You_Link__c, Thank_You_Text__c, All_Responses_Anonymous__c, Survey_Header__c, Hide_Survey_Name__c, Survey_Container_CSS__c, Survey_Expiration_Message__c, Already_Submitted_Message__c
 				FROM Survey__c
 				WHERE Id = :surveyId
 				LIMIT 1
@@ -67,6 +67,26 @@ public without sharing class ViewSurveyControllerWithoutSharing {
 			return surveys.isEmpty() ? null : surveys[0];
 		} catch (Exception e) {
 			System.debug('Error querying survey: ' + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Query Survey messages without sharing rules enforcement for guest user access
+	 * @param surveyId The ID of the survey to query
+	 * @return The Survey record with message fields if it exists, null otherwise
+	 */
+	public static Survey__c getSurveyMessagesForGuestUser(Id surveyId) {
+		try {
+			List<Survey__c> surveys = [
+				SELECT Id, Survey_Expiration_Message__c, Already_Submitted_Message__c
+				FROM Survey__c
+				WHERE Id = :surveyId
+				LIMIT 1
+			];
+			return surveys.isEmpty() ? null : surveys[0];
+		} catch (Exception e) {
+			System.debug('Error querying survey messages: ' + e.getMessage());
 			return null;
 		}
 	}

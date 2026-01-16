@@ -432,6 +432,21 @@ lightning-radio-group {
 	margin-bottom: 1rem;
 }
 
+/* Error */
+.error-shell {
+	padding: 2rem 1rem 4rem;
+}
+
+.error-content {
+	margin-top: 1.5rem;
+	text-align: center;
+	color: #334155;
+}
+
+.error-icon {
+	margin-bottom: 1rem;
+}
+
 /* Footer (decorative) */
 footer.footer {
 	padding: 0;
