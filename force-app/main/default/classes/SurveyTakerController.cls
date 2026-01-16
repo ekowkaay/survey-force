@@ -125,7 +125,18 @@ public with sharing class SurveyTakerController {
 				SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
 
 				survey = [
-					SELECT Id, Name, Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c, Survey_Expiration_Message__c, Already_Submitted_Message__c
+					SELECT
+						Id,
+						Name,
+						Survey_Header__c,
+						Survey_Subheader__c,
+						Hide_Survey_Name__c,
+						Thank_You_Text__c,
+						Thank_You_Link__c,
+						All_Responses_Anonymous__c,
+						Survey_Container_CSS__c,
+						Survey_Expiration_Message__c,
+						Already_Submitted_Message__c
 					FROM Survey__c
 					WHERE Id = :surveyId
 					WITH USER_MODE
@@ -183,8 +194,7 @@ public with sharing class SurveyTakerController {
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
 
 			questionRecords = [
-				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c, 
-					   Scale_Start_Label__c, Scale_End_Label__c
+				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c, Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c = :surveyId
 				WITH USER_MODE

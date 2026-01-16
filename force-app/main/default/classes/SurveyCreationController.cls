@@ -266,7 +266,7 @@ public with sharing class SurveyCreationController {
 				sq.Type__c = (String) q.get('questionType');
 				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
-				
+
 				// Handle scale labels
 				populateScaleLabels(sq, q);
 
@@ -345,7 +345,7 @@ public with sharing class SurveyCreationController {
 					sq.Type__c = (String) q.get('questionType');
 					sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 					sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
-					
+
 					// Handle scale labels
 					populateScaleLabels(sq, q);
 
@@ -455,7 +455,7 @@ public with sharing class SurveyCreationController {
 				sq.Type__c = (String) q.get('questionType');
 				sq.Required__c = q.get('required') != null ? (Boolean) q.get('required') : false;
 				sq.OrderNumber__c = q.get('orderNumber') != null ? (Decimal) q.get('orderNumber') : 0;
-				
+
 				// Handle scale labels
 				populateScaleLabels(sq, q);
 
@@ -640,8 +640,7 @@ public with sharing class SurveyCreationController {
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
 
 			List<Survey_Question__c> questionRecords = [
-				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c,
-					   Scale_Start_Label__c, Scale_End_Label__c
+				SELECT Id, Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c, Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c = :surveyId
 				WITH USER_MODE

@@ -318,11 +318,9 @@ public with sharing class SurveyInvitationController {
 
 			// Get survey messages for customizable responses
 			Survey__c survey = ViewSurveyControllerWithoutSharing.getSurveyMessagesForGuestUser(invitation.Survey__c);
-			String alreadySubmittedMessage = String.isNotBlank(survey.Already_Submitted_Message__c) 
-				? survey.Already_Submitted_Message__c 
-				: 'This survey has already been completed';
-			String expirationMessage = String.isNotBlank(survey.Survey_Expiration_Message__c) 
-				? survey.Survey_Expiration_Message__c 
+			String alreadySubmittedMessage = String.isNotBlank(survey.Already_Submitted_Message__c) ? survey.Already_Submitted_Message__c : 'This survey has already been completed';
+			String expirationMessage = String.isNotBlank(survey.Survey_Expiration_Message__c)
+				? survey.Survey_Expiration_Message__c
 				: 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
 
 			if (invitation.Status__c == STATUS_COMPLETED) {

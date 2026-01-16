@@ -7,6 +7,7 @@ This guide explains how to configure static scale labels for horizontal scale su
 ## New Static Label Fields
 
 Survey questions now have dedicated fields for scale endpoint labels:
+
 - **Scale Start Label** (`Scale_Start_Label__c`) - Displayed on the left side of horizontal scales
 - **Scale End Label** (`Scale_End_Label__c`) - Displayed on the right side of horizontal scales
 
@@ -15,14 +16,18 @@ These labels help respondents understand what each end of the scale represents.
 ## How It Works
 
 ### Before (Without Static Labels)
+
 When scale labels were not set, the scale appeared without context:
+
 ```
 Question: "How would you rate the difficulty of this training?"
 [1] [2] [3] [4] [5]
 ```
 
 ### After (With Static Labels)
+
 With static scale labels configured:
+
 ```
 Question: "How would you rate the difficulty of this training?"
 Very Difficult ◄─────────────────► Very Easy
@@ -52,7 +57,9 @@ The static labels provide clear context without being part of the selectable cho
 **Important**: The start label corresponds to choice "1" and the end label corresponds to choice "5". Ensure your labels semantically match this direction (e.g., "Very Difficult" at 1 means selecting 1 indicates high difficulty).
 
 ### Result
+
 Survey respondents will see:
+
 - Clear labels at both ends of the scale showing what each extreme means
 - Numeric buttons (1, 2, 3, 4, 5) to make their selection
 - Easy understanding of the scale direction and meaning
@@ -61,22 +68,27 @@ Survey respondents will see:
 ## Recommended Scale Labels
 
 ### Difficulty Scale
+
 - **Start**: Very Difficult
 - **End**: Very Easy
 
 ### Agreement Scale
+
 - **Start**: Strongly Disagree
 - **End**: Strongly Agree
 
 ### Satisfaction Scale
+
 - **Start**: Very Dissatisfied
 - **End**: Very Satisfied
 
 ### Likelihood Scale
+
 - **Start**: Very Unlikely
 - **End**: Very Likely
 
 ### Quality Scale
+
 - **Start**: Very Poor
 - **End**: Excellent
 
@@ -84,12 +96,14 @@ Survey respondents will see:
 
 ### Architecture
 
-**Survey_Question__c Fields:**
+**Survey_Question\_\_c Fields:**
+
 - `Scale_Start_Label__c` (Text, 255) - Static label for scale start
 - `Scale_End_Label__c` (Text, 255) - Static label for scale end
 - `Choices__c` (Long Text Area) - Numeric choices (1, 2, 3, 4, 5)
 
 **Data Flow:**
+
 1. Question record stores static labels separate from choices
 2. `SurveyTakerController` fetches both labels and choices
 3. `surveyTaker` LWC displays labels at scale endpoints
@@ -99,6 +113,7 @@ Survey respondents will see:
 ### Display Logic
 
 For horizontal scale layouts in the `surveyTaker` LWC component:
+
 - `scaleStartLabel`: Returns `currentQuestion.scaleStartLabel`
 - `scaleEndLabel`: Returns `currentQuestion.scaleEndLabel`
 - `hasScaleEndLabels`: Returns true if either label is set
@@ -125,6 +140,7 @@ For horizontal scale layouts in the `surveyTaker` LWC component:
 ### Example 1: Training Difficulty
 
 **Question**: "How would you rate the difficulty of this training?"
+
 - **Scale Start Label**: Very Difficult
 - **Scale End Label**: Very Easy
 - **Choices**: 1\n2\n3\n4\n5
@@ -132,6 +148,7 @@ For horizontal scale layouts in the `surveyTaker` LWC component:
 ### Example 2: Content Quality
 
 **Question**: "How would you rate the quality of the training materials?"
+
 - **Scale Start Label**: Very Poor
 - **Scale End Label**: Excellent
 - **Choices**: 1\n2\n3\n4\n5
@@ -139,6 +156,7 @@ For horizontal scale layouts in the `surveyTaker` LWC component:
 ### Example 3: Recommendation Likelihood
 
 **Question**: "How likely are you to recommend this training?"
+
 - **Scale Start Label**: Very Unlikely
 - **Scale End Label**: Very Likely
 - **Choices**: 1\n2\n3\n4\n5
@@ -146,7 +164,7 @@ For horizontal scale layouts in the `surveyTaker` LWC component:
 ## Troubleshooting
 
 **Q: I don't see the Scale Start/End Label fields**  
-A: Deploy the metadata to add these fields to your org. They are new custom fields on Survey_Question__c.
+A: Deploy the metadata to add these fields to your org. They are new custom fields on Survey_Question\_\_c.
 
 **Q: Do I need to update existing questions?**  
 A: Yes, edit existing horizontal scale questions to add the appropriate scale labels.
@@ -165,18 +183,21 @@ A: No. Responses store the numeric value selected (e.g., "0", "1", "2", "3", "4"
 If you previously had labels embedded in the Choices field:
 
 ### Old Format (No Longer Recommended)
+
 ```
 Choices__c: Very Difficult\n2\n3\n4\nVery Easy
 ```
 
 ### New Format (Recommended)
+
 ```
 Scale Start Label: Very Difficult
-Scale End Label: Very Easy  
+Scale End Label: Very Easy
 Choices__c: 1\n2\n3\n4\n5
 ```
 
 **Benefits:**
+
 - Cleaner separation between labels and values
 - Easier to maintain and update
 - More consistent user experience
