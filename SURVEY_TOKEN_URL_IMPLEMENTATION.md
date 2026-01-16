@@ -191,6 +191,21 @@ String tokenUrl = SurveyUtilities.generateSingleSurveyInvitation(
 
 ## Troubleshooting
 
+### Duplicate `/survey` or `/TakeSurvey` in URL
+
+**Cause:** Site URL configured in custom metadata already includes the path suffix
+
+**Example:** If SiteURL custom metadata contains `https://example.force.com/survey` instead of `https://example.force.com`, it would create URLs like `https://example.force.com/survey/survey?token=...`
+
+**Solution:**
+
+1. Review SiteURL custom metadata records
+2. Ensure URLs contain only the base domain without path suffixes
+3. Correct format: `https://example.force.com` (without `/survey` or `/TakeSurvey`)
+4. The system automatically appends the appropriate path based on URL type
+
+**Note:** The URL generation methods in `SurveyUtilities.cls` now automatically detect and prevent duplicate paths, so this issue should not occur with updated code.
+
 ### "URL No Longer Exists" Error
 
 **Cause:** Token URL points to wrong base URL or token is invalid/expired
