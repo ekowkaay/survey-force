@@ -11,8 +11,6 @@
 		<template if:true={error}>
 			<div class="error-shell">
 				<section class="card">
-					<div class="questionTitle">Survey Unavailable</div>
-					<div class="questionHelp">We're unable to load this survey.</div>
 					<div class="error-content">
 						<lightning-icon icon-name="utility:error" size="large" class="error-icon" alternative-text="Error"></lightning-icon>
 						<p>{error}</p>
@@ -25,8 +23,6 @@
 		<template if:true={isSubmitted}>
 			<div class="submitted-shell">
 				<section class="card">
-					<div class="questionTitle">Thank you!</div>
-					<div class="questionHelp">Your response has been recorded.</div>
 					<div class="submitted-content">
 						<lightning-icon icon-name="utility:success" size="large" class="submitted-icon" alternative-text="Success"></lightning-icon>
 						<p>{thankYouText}</p>

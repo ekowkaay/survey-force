@@ -3,6 +3,8 @@
     <fullName>Survey_Subheader__c</fullName>
     <externalId>false</externalId>
     <label>Survey Subheader</label>
+    <length>32768</length>
     <trackTrending>false</trackTrending>
-    <type>TextArea</type>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
 </CustomField>
