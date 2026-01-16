@@ -31,31 +31,32 @@ The regeneration process:
 
 ## Usage Instructions
 
-### Method 1: Using the Flow (Recommended)
+### Method 1: Using the Lightning Web Component (Recommended)
 
-1. **Navigate to Training Requests**
-   - Go to the Training Request object
-   - Use List View to select records you want to regenerate
+1. **Navigate to Survey Regeneration**
+   - Go to the "Survey Regeneration" tab in the Survey Force app
+   - OR click on "Regenerate Survey Links" quick action on a Training Request record page
 
-2. **Launch the Flow**
-   - Click on "Regenerate Survey Links" quick action (if available on page layout)
-   - OR navigate to Flows and launch "Regenerate Survey Links"
-
-3. **Enter Training Request IDs**
+2. **Enter Training Request IDs**
    - Copy the IDs of the Training Request records you want to regenerate
    - Paste them in the input field (comma-separated for multiple records)
 
-4. **Select Survey Types**
+3. **Select Survey Types**
    - Check the boxes for which survey types to regenerate:
      - ☑ Regenerate Participant Survey Links
      - ☑ Regenerate Customer Survey Links
      - ☑ Regenerate Trainer Survey Links
    - Default: All survey types are selected
 
-5. **Confirm and Execute**
-   - Review the warning message
-   - Click "Next" to proceed
-   - Review the results summary
+4. **Review and Confirm**
+   - Click "Next" to proceed to confirmation screen
+   - Review the warning message about irreversible action
+   - Click "Confirm & Regenerate" to execute
+
+5. **View Results**
+   - Review the results summary with statistics
+   - Check for any errors in the error details section
+   - Click "Regenerate More" to start a new regeneration
 
 ### Method 2: Using Apex (Advanced)
 

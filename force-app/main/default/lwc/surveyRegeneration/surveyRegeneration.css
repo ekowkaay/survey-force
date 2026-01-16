@@ -1,0 +1,15 @@
+.loading-container {
+	min-height: 200px;
+}
+
+.slds-list_dotted {
+	margin-left: 1rem;
+}
+
+.slds-dl_horizontal__label {
+	font-weight: bold;
+}
+
+.slds-dl_horizontal__detail {
+	margin-bottom: 0.5rem;
+}

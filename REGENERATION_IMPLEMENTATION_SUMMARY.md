@@ -19,9 +19,11 @@ Administrators needed a better way to regenerate survey links when survey templa
 1. **Invocable Apex Controller** - `SurveyRegenerationController.cls`
 2. **Test Class** - `SurveyRegenerationController_Test.cls`
 3. **Permission Set** - `SurveyForce_SurveyRegeneration_Execute.permissionset-meta.xml`
-4. **Screen Flow** - `Regenerate_Survey_Links.flow-meta.xml`
-5. **Quick Action** - `Training_Request__c.Regenerate_Survey_Links.quickAction-meta.xml`
-6. **Documentation** - `SURVEY_REGENERATION_GUIDE.md` and `Permissions.md`
+4. **Lightning Web Component** - `surveyRegeneration` (JS, HTML, CSS, XML)
+5. **Flexipage** - `Survey_Regeneration.flexipage-meta.xml`
+6. **Tab** - `Survey_Regeneration.tab-meta.xml`
+7. **Quick Action** - `Training_Request__c.Regenerate_Survey_Links.quickAction-meta.xml`
+8. **Documentation** - `SURVEY_REGENERATION_GUIDE.md` and `Permissions.md`
 
 ## Technical Details
 
@@ -47,28 +49,38 @@ Administrators needed a better way to regenerate survey links when survey templa
 - Test Coverage: 85%+ expected
 - Test Cases: 8 comprehensive scenarios
 
-### Regenerate_Survey_Links Flow
+### surveyRegeneration Lightning Web Component
 
-**Screens:**
-1. **Introduction Screen** - Select Training Requests and survey types
-2. **Confirmation Screen** - Warning about irreversible action
-3. **Results Screen** - Success/error summary with statistics
+**User Interface:**
+- 3-step wizard interface built with Lightning Design System
+- Step 1: Input form with Training Request IDs and survey type selection
+- Step 2: Confirmation screen with warnings about irreversible action
+- Step 3: Results screen with detailed statistics
 
-**Flow Variables:**
-- `var_TrainingRequestIds` - Collection of Training Request IDs
-- `var_Success` - Boolean success indicator
-- `var_Message` - Summary message
-- `var_TotalProcessed` - Count of processed records
-- `var_TotalSuccess` - Count of successful regenerations
-- `var_TotalFailed` - Count of failed regenerations
-- `var_ParticipantLinksGenerated` - Count of participant links
-- `var_CustomerLinksGenerated` - Count of customer links
-- `var_TrainerLinksGenerated` - Count of trainer links
-- `var_ErrorDetails` - Detailed error information
+**Component Features:**
+- Modern LWC implementation following Salesforce best practices
+- Responsive design with SLDS styling
+- Real-time validation and error handling
+- Clear visual feedback for success/error states
+- Toast notifications for user actions
 
 **Integration Points:**
-- Invocable Apex: `SurveyRegenerationController.regenerateSurveyLinks`
-- Quick Action: Available on Training_Request__c record pages
+- Calls `SurveyRegenerationController.regenerateSurveyLinks` Apex method
+- Can be embedded on Training Request record pages via Quick Action
+- Available as standalone tab in Survey Force app
+- Supports bulk operations with comma-separated IDs
+
+**Component Files:**
+- `surveyRegeneration.js` - Component logic and Apex integration
+- `surveyRegeneration.html` - Template with 3-step workflow
+- `surveyRegeneration.css` - Custom styling
+- `surveyRegeneration.js-meta.xml` - Component metadata and targets
+
+**Deployment Targets:**
+- Lightning App Pages
+- Lightning Record Pages (Training_Request__c)
+- Lightning Home Pages
+- Lightning Tabs
 
 ### Permission Set
 
@@ -137,12 +149,12 @@ Administrators needed a better way to regenerate survey links when survey templa
 
 1. **Quick Action** (Recommended)
    - Click "Regenerate Survey Links" on Training Request record
-   - Automatic ID population for single records
+   - Launches LWC component in modal/inline mode
    - Streamlined workflow
 
-2. **Direct Flow Launch**
-   - Navigate to Flows
-   - Launch "Regenerate Survey Links"
+2. **Survey Regeneration Tab**
+   - Navigate to "Survey Regeneration" tab in Survey Force app
+   - Full-page LWC component interface
    - Enter comma-separated Training Request IDs
    - Suitable for bulk operations
 
@@ -198,7 +210,7 @@ The architecture is designed to be extensible. To add support for other custom o
 
 1. **Create similar invocable method** following the pattern
 2. **Adjust SOQL queries** for your object structure
-3. **Create new Flow** with appropriate screens
+3. **Create new LWC component or extend existing** with appropriate screens
 4. **Update permission set** with new object access
 
 ### Key Design Patterns Used
@@ -207,7 +219,7 @@ The architecture is designed to be extensible. To add support for other custom o
 - **Single Responsibility** - Each method has one clear purpose
 - **Error Handling** - Comprehensive try-catch blocks
 - **Result Wrappers** - Clear output structures
-- **Invocable Methods** - Flow integration ready
+- **Invocable Methods** - LWC and Flow integration ready
 
 ## Documentation
 
@@ -235,9 +247,12 @@ When deploying this feature to an org:
 
 - [ ] Deploy Apex classes (`SurveyRegenerationController` and test)
 - [ ] Deploy Permission Set (`SurveyForce_SurveyRegeneration_Execute`)
-- [ ] Deploy Flow (`Regenerate_Survey_Links`)
+- [ ] Deploy LWC component (`surveyRegeneration`)
+- [ ] Deploy Flexipage (`Survey_Regeneration`)
+- [ ] Deploy Tab (`Survey_Regeneration`)
 - [ ] Deploy Quick Action (`Training_Request__c.Regenerate_Survey_Links`)
 - [ ] Add Quick Action to Training Request page layouts (optional)
+- [ ] Add Tab to Survey Force app navigation
 - [ ] Assign Permission Set to appropriate users
 - [ ] Test with 1-2 records before bulk operations
 - [ ] Review debug logs for any issues
@@ -245,7 +260,7 @@ When deploying this feature to an org:
 
 ## Known Limitations
 
-1. **Flow Input Limitation** - Training Request IDs must be entered as comma-separated text (no native multi-select from Flow)
+1. **Manual ID Entry** - Training Request IDs must be entered as comma-separated text (no native multi-select UI component)
 2. **Single Transaction Limit** - Maximum 200 Training Requests per execution (Salesforce governor limits)
 3. **No Rollback Preview** - Once executed, changes cannot be undone (by design for data integrity)
 4. **Synchronous Execution** - Large batches may approach timeout limits (use batch processing for >200 records)
@@ -261,6 +276,7 @@ Potential improvements for future versions:
 5. **Scheduled Regeneration** - Automated regeneration on a schedule
 6. **Cross-Object Support** - Generic regeneration for any object with survey links
 7. **Preview Mode** - Show what would be regenerated before executing
+8. **Record Picker Component** - Interactive record selection instead of manual ID entry
 
 ## Support & Troubleshooting
 
@@ -281,7 +297,7 @@ Potential improvements for future versions:
 2. Check Salesforce debug logs
 3. Verify permission set assignments
 4. Contact Salesforce administrator
-5. Review error details in Flow results screen
+5. Review error details in LWC results screen
 
 ## Success Metrics
 
@@ -314,7 +330,7 @@ This implementation follows:
 
 - **v1.0.0** (January 2026) - Initial release
   - Invocable Apex controller
-  - Screen Flow with 3 screens
+  - Lightning Web Component with 3-step wizard
   - Permission set
   - Quick Action
   - Comprehensive documentation

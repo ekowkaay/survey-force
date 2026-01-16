@@ -1,0 +1,165 @@
+<template>
+	<lightning-card title="Regenerate Survey Links" icon-name="standard:link">
+		<!-- Loading Spinner -->
+		<template lwc:if={isLoading}>
+			<div class="slds-is-relative loading-container">
+				<lightning-spinner alternative-text="Processing..." size="medium"></lightning-spinner>
+			</div>
+		</template>
+
+		<!-- Step 1: Input Form -->
+		<template lwc:if={showConfirmation}>
+			<template lwc:else>
+				<div class="slds-p-around_medium">
+					<!-- Introduction -->
+					<div class="slds-box slds-theme_default slds-m-bottom_medium">
+						<h3 class="slds-text-heading_small slds-m-bottom_small">Regenerate Survey Links</h3>
+						<p class="slds-text-body_regular slds-m-bottom_small">
+							This tool will regenerate survey links and invitations for the selected Training Request records.
+						</p>
+						<div class="slds-box slds-theme_warning slds-m-top_small">
+							<p class="slds-text-heading_small slds-m-bottom_xx-small">⚠️ Important:</p>
+							<ul class="slds-list_dotted">
+								<li>All existing survey invitations will be deleted</li>
+								<li>New survey links with fresh tokens will be generated</li>
+								<li>Previous survey links will no longer work</li>
+								<li>Participants will need to use the new links</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Input Fields -->
+					<div class="slds-grid slds-wrap slds-gutters">
+						<div class="slds-col slds-size_1-of-1">
+							<lightning-textarea
+								label="Training Request IDs (comma-separated)"
+								value={trainingRequestIds}
+								onchange={handleTrainingRequestIdsChange}
+								placeholder="Enter Training Request IDs separated by commas"
+								required
+								message-when-value-missing="Please enter at least one Training Request ID"></lightning-textarea>
+							<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+								Enter the Training Request record IDs separated by commas. You can select multiple records from a list view and paste the IDs here.
+							</p>
+						</div>
+					</div>
+
+					<!-- Survey Type Selection -->
+					<div class="slds-m-top_medium">
+						<fieldset class="slds-form-element">
+							<legend class="slds-form-element__legend slds-form-element__label">Survey Types to Regenerate</legend>
+							<div class="slds-form-element__control">
+								<lightning-input type="checkbox" label="Regenerate Participant Survey Links" checked={regenerateParticipant} onchange={handleParticipantChange}></lightning-input>
+								<lightning-input type="checkbox" label="Regenerate Customer Survey Links" checked={regenerateCustomer} onchange={handleCustomerChange}></lightning-input>
+								<lightning-input type="checkbox" label="Regenerate Trainer Survey Links" checked={regenerateTrainer} onchange={handleTrainerChange}></lightning-input>
+							</div>
+						</fieldset>
+					</div>
+
+					<!-- When to Use -->
+					<div class="slds-box slds-theme_shade slds-m-top_medium">
+						<p class="slds-text-heading_small slds-m-bottom_xx-small">When to use:</p>
+						<ul class="slds-list_dotted">
+							<li>Survey template questions have been updated</li>
+							<li>Survey needs to be redistributed with new content</li>
+							<li>Links need to be refreshed for security reasons</li>
+						</ul>
+					</div>
+
+					<!-- Actions -->
+					<div class="slds-m-top_medium">
+						<lightning-button variant="brand" label="Next" onclick={handleNext} disabled={isNextDisabled}></lightning-button>
+					</div>
+				</div>
+			</template>
+		</template>
+
+		<!-- Step 2: Confirmation -->
+		<template lwc:if={showConfirmation}>
+			<div class="slds-p-around_medium">
+				<div class="slds-box slds-theme_error">
+					<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Final Confirmation</h3>
+					<p class="slds-text-body_regular slds-m-bottom_small">You are about to regenerate survey links for the selected Training Request records.</p>
+					<p class="slds-text-heading_small slds-m-bottom_xx-small">This action will:</p>
+					<ul class="slds-list_dotted">
+						<li>Delete all existing survey invitations</li>
+						<li>Generate new survey links with new tokens</li>
+						<li>Update Training Request and Participant records</li>
+						<li>Invalidate all previous survey links</li>
+					</ul>
+					<p class="slds-text-body_regular slds-m-top_small" style="color: #c23934; font-weight: bold;">This action cannot be undone.</p>
+				</div>
+
+				<!-- Actions -->
+				<div class="slds-m-top_medium">
+					<lightning-button label="Previous" onclick={handleBack} class="slds-m-right_small"></lightning-button>
+					<lightning-button variant="destructive" label="Confirm & Regenerate" onclick={handleConfirm} disabled={isLoading}></lightning-button>
+				</div>
+			</div>
+		</template>
+
+		<!-- Step 3: Results -->
+		<template lwc:if={showResults}>
+			<div class="slds-p-around_medium">
+				<!-- Success Message -->
+				<template lwc:if={showSuccessMessage}>
+					<div class="slds-box slds-theme_success slds-m-bottom_medium">
+						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #027e46">✓ Survey Links Regenerated Successfully</h3>
+						<p class="slds-text-body_regular">The survey links and invitations have been regenerated.</p>
+					</div>
+				</template>
+
+				<!-- Error Message -->
+				<template lwc:if={showErrorMessage}>
+					<div class="slds-box slds-theme_error slds-m-bottom_medium">
+						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Regeneration Completed with Errors</h3>
+						<p class="slds-text-body_regular">Some survey links could not be regenerated.</p>
+					</div>
+				</template>
+
+				<!-- Summary Statistics -->
+				<div class="slds-box slds-theme_default">
+					<h3 class="slds-text-heading_small slds-m-bottom_small">Summary</h3>
+					<dl class="slds-dl_horizontal">
+						<dt class="slds-dl_horizontal__label">Training Requests Processed:</dt>
+						<dd class="slds-dl_horizontal__detail">{totalProcessed}</dd>
+						<dt class="slds-dl_horizontal__label">Successful:</dt>
+						<dd class="slds-dl_horizontal__detail">{totalSuccess}</dd>
+						<dt class="slds-dl_horizontal__label">Failed:</dt>
+						<dd class="slds-dl_horizontal__detail">{totalFailed}</dd>
+						<dt class="slds-dl_horizontal__label">Participant Links Generated:</dt>
+						<dd class="slds-dl_horizontal__detail">{participantLinksGenerated}</dd>
+						<dt class="slds-dl_horizontal__label">Customer Links Generated:</dt>
+						<dd class="slds-dl_horizontal__detail">{customerLinksGenerated}</dd>
+						<dt class="slds-dl_horizontal__label">Trainer Links Generated:</dt>
+						<dd class="slds-dl_horizontal__detail">{trainerLinksGenerated}</dd>
+					</dl>
+					<p class="slds-text-body_regular slds-m-top_small">{message}</p>
+				</div>
+
+				<!-- Error Details -->
+				<template lwc:if={errorDetails}>
+					<div class="slds-box slds-theme_shade slds-m-top_medium">
+						<h3 class="slds-text-heading_small slds-m-bottom_small">Error Details</h3>
+						<p class="slds-text-body_regular">{errorDetails}</p>
+					</div>
+				</template>
+
+				<!-- Next Steps -->
+				<div class="slds-box slds-theme_info slds-m-top_medium">
+					<h3 class="slds-text-heading_small slds-m-bottom_small">Next Steps</h3>
+					<ul class="slds-list_dotted">
+						<li>Review the updated Training Request records</li>
+						<li>Distribute new survey links to participants</li>
+						<li>Previous survey links are no longer valid</li>
+					</ul>
+				</div>
+
+				<!-- Actions -->
+				<div class="slds-m-top_medium">
+					<lightning-button variant="brand" label="Regenerate More" onclick={handleReset}></lightning-button>
+				</div>
+			</div>
+		</template>
+	</lightning-card>
+</template>
