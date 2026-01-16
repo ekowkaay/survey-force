@@ -35,14 +35,83 @@
         <isOutput>false</isOutput>
     </variables>
     
-    <!-- Variable to store regeneration result -->
+    <!-- Variables to store regeneration results -->
     <variables>
-        <name>var_RegenerationResult</name>
-        <dataType>SObject</dataType>
+        <name>var_Success</name>
+        <dataType>Boolean</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
-        <objectType>SurveyRegenerationController.RegenerationResult</objectType>
+    </variables>
+    
+    <variables>
+        <name>var_Message</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <variables>
+        <name>var_TotalProcessed</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_TotalSuccess</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_TotalFailed</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_ParticipantLinksGenerated</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_CustomerLinksGenerated</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_TrainerLinksGenerated</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
+    
+    <variables>
+        <name>var_ErrorDetails</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
     </variables>
     
     <!-- Screen 1: Introduction and Selection -->
@@ -179,8 +248,40 @@
             </value>
         </inputParameters>
         <outputParameters>
-            <assignToReference>var_RegenerationResult</assignToReference>
-            <name>outputVariable</name>
+            <assignToReference>var_Success</assignToReference>
+            <name>success</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_Message</assignToReference>
+            <name>message</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_TotalProcessed</assignToReference>
+            <name>totalProcessed</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_TotalSuccess</assignToReference>
+            <name>totalSuccess</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_TotalFailed</assignToReference>
+            <name>totalFailed</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_ParticipantLinksGenerated</assignToReference>
+            <name>participantLinksGenerated</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_CustomerLinksGenerated</assignToReference>
+            <name>customerLinksGenerated</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_TrainerLinksGenerated</assignToReference>
+            <name>trainerLinksGenerated</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>var_ErrorDetails</assignToReference>
+            <name>errorDetails</name>
         </outputParameters>
     </actionCalls>
     
@@ -195,12 +296,12 @@
         <allowPause>false</allowPause>
         <fields>
             <name>Display_Results_Success</name>
-            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(4, 132, 75);&quot;&gt;✓ Survey Links Regenerated Successfully&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;The survey links and invitations have been regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_RegenerationResult.totalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_RegenerationResult.totalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_RegenerationResult.totalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_RegenerationResult.participantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_RegenerationResult.customerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_RegenerationResult.trainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.message}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(4, 132, 75);&quot;&gt;✓ Survey Links Regenerated Successfully&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;The survey links and invitations have been regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_TotalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_TotalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_TotalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_ParticipantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_CustomerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_TrainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_Message}&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
             <visibilityRule>
                 <conditionLogic>and</conditionLogic>
                 <conditions>
-                    <leftValueReference>var_RegenerationResult.success</leftValueReference>
+                    <leftValueReference>var_Success</leftValueReference>
                     <operator>EqualTo</operator>
                     <rightValue>
                         <booleanValue>true</booleanValue>
@@ -210,12 +311,12 @@
         </fields>
         <fields>
             <name>Display_Results_Error</name>
-            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(194, 57, 52);&quot;&gt;⚠️ Regeneration Completed with Errors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Some survey links could not be regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_RegenerationResult.totalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_RegenerationResult.totalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_RegenerationResult.totalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_RegenerationResult.participantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_RegenerationResult.customerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_RegenerationResult.trainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.message}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Error Details:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;{!var_RegenerationResult.errorDetails}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px; color: rgb(194, 57, 52);&quot;&gt;⚠️ Regeneration Completed with Errors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Some survey links could not be regenerated.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Summary:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Training Requests Processed: {!var_TotalProcessed}&lt;/li&gt;&lt;li&gt;Successful: {!var_TotalSuccess}&lt;/li&gt;&lt;li&gt;Failed: {!var_TotalFailed}&lt;/li&gt;&lt;li&gt;Participant Links: {!var_ParticipantLinksGenerated}&lt;/li&gt;&lt;li&gt;Customer Links: {!var_CustomerLinksGenerated}&lt;/li&gt;&lt;li&gt;Trainer Links: {!var_TrainerLinksGenerated}&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!var_Message}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Error Details:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;{!var_ErrorDetails}&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
             <visibilityRule>
                 <conditionLogic>and</conditionLogic>
                 <conditions>
-                    <leftValueReference>var_RegenerationResult.success</leftValueReference>
+                    <leftValueReference>var_Success</leftValueReference>
                     <operator>EqualTo</operator>
                     <rightValue>
                         <booleanValue>false</booleanValue>

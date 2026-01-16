@@ -310,8 +310,10 @@ private class SurveyRegenerationController_Test {
 	 */
 	@isTest
 	static void testInvalidTrainingRequestId() {
-		// Create a fake ID (this will not exist in the database)
-		Id fakeId = SurveyForceUtil.generateFakeId(Training_Request__c.SObjectType);
+		// Create a fake ID using string manipulation
+		// Training_Request__c has a key prefix, so we construct an ID that won't exist
+		String fakeIdStr = String.valueOf(Training_Request__c.SObjectType.getDescribe().getKeyPrefix()) + '0'.repeat(15);
+		Id fakeId = (Id) fakeIdStr;
 
 		SurveyRegenerationController.RegenerationRequest request = new SurveyRegenerationController.RegenerationRequest();
 		request.trainingRequestIds = new List<Id>{ fakeId };

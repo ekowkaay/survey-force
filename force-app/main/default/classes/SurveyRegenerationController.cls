@@ -134,27 +134,25 @@ public with sharing class SurveyRegenerationController {
 			Map<Id, Id> customerSurveyMap = new Map<Id, Id>();
 			Map<Id, Id> trainerSurveyMap = new Map<Id, Id>();
 
-			for (Id trId : trainingRequestMap.keySet()) {
-				Training_Request__c tr = trainingRequestMap.get(trId);
-
+			for (Training_Request__c tr : trainingRequestMap.values()) {
 				if (regenParticipant && String.isNotBlank(tr.Participant_Survey__c)) {
 					Id surveyId = extractSurveyIdFromUrl(tr.Participant_Survey__c);
 					if (surveyId != null) {
-						participantSurveyMap.put(trId, surveyId);
+						participantSurveyMap.put(tr.Id, surveyId);
 					}
 				}
 
 				if (regenCustomer && String.isNotBlank(tr.Customer_Survey__c)) {
 					Id surveyId = extractSurveyIdFromUrl(tr.Customer_Survey__c);
 					if (surveyId != null) {
-						customerSurveyMap.put(trId, surveyId);
+						customerSurveyMap.put(tr.Id, surveyId);
 					}
 				}
 
 				if (regenTrainer && String.isNotBlank(tr.Trainer_Survey__c)) {
 					Id surveyId = extractSurveyIdFromUrl(tr.Trainer_Survey__c);
 					if (surveyId != null) {
-						trainerSurveyMap.put(trId, surveyId);
+						trainerSurveyMap.put(tr.Id, surveyId);
 					}
 				}
 			}
@@ -269,7 +267,7 @@ public with sharing class SurveyRegenerationController {
 				return 0;
 			}
 
-			// Group participants by training request
+			// Regenerate customer or trainer survey links for multiple training requests
 			Map<Id, List<Participants__c>> trToParticipantsMap = new Map<Id, List<Participants__c>>();
 			for (Participants__c p : participants) {
 				if (!trToParticipantsMap.containsKey(p.Training_Request__c)) {
