@@ -11,9 +11,11 @@
 		<template if:true={error}>
 			<div class="error-shell">
 				<section class="card">
+					<div class="questionTitle">{errorTitle}</div>
+					<div class="questionHelp">{errorHelp}</div>
 					<div class="error-content">
 						<lightning-icon icon-name="utility:error" size="large" class="error-icon" alternative-text="Error"></lightning-icon>
-						<lightning-formatted-rich-text value={error}></lightning-formatted-rich-text>
+						<p>{error}</p>
 					</div>
 				</section>
 			</div>
@@ -23,9 +25,11 @@
 		<template if:true={isSubmitted}>
 			<div class="submitted-shell">
 				<section class="card">
+					<div class="questionTitle">Thank you!</div>
+					<div class="questionHelp">Your response has been recorded.</div>
 					<div class="submitted-content">
 						<lightning-icon icon-name="utility:success" size="large" class="submitted-icon" alternative-text="Success"></lightning-icon>
-						<lightning-formatted-rich-text value={thankYouText}></lightning-formatted-rich-text>
+						<p>{thankYouText}</p>
 					</div>
 				</section>
 			</div>
