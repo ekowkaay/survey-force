@@ -171,6 +171,16 @@
         <field>Survey__c.Thank_You_Text__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey__c.Survey_Expiration_Message__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey__c.Already_Submitted_Message__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Survey Force - SuperAdmin</label>
     <objectPermissions>

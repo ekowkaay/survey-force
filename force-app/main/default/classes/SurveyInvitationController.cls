@@ -316,8 +316,28 @@ public with sharing class SurveyInvitationController {
 			result.eventDate = invitation.EventDate__c;
 			result.eventTopic = invitation.EventTopic__c;
 
+			// Get survey messages for customizable responses
+			Survey__c survey = ViewSurveyControllerWithoutSharing.getSurveyMessagesForGuestUser(invitation.Survey__c);
+			
+			// Define default messages
+			String defaultAlreadySubmittedMessage = 'This survey has already been completed';
+			String defaultExpirationMessage = 'This survey has expired';
+			
+			// Use custom messages if survey is available, otherwise use defaults
+			String alreadySubmittedMessage = defaultAlreadySubmittedMessage;
+			String expirationMessage = defaultExpirationMessage;
+			
+			if (survey != null) {
+				if (String.isNotBlank(survey.Already_Submitted_Message__c)) {
+					alreadySubmittedMessage = survey.Already_Submitted_Message__c;
+				}
+				if (String.isNotBlank(survey.Survey_Expiration_Message__c)) {
+					expirationMessage = survey.Survey_Expiration_Message__c;
+				}
+			}
+
 			if (invitation.Status__c == STATUS_COMPLETED) {
-				result.message = 'This survey has already been completed';
+				result.message = alreadySubmittedMessage;
 				return result;
 			}
 
@@ -328,12 +348,12 @@ public with sharing class SurveyInvitationController {
 					updateInvitationStatus(invitation.Id, STATUS_EXPIRED, null);
 					result.status = STATUS_EXPIRED;
 				}
-				result.message = 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
+				result.message = expirationMessage;
 				return result;
 			}
 
 			if (invitation.Status__c == STATUS_EXPIRED) {
-				result.message = 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
+				result.message = expirationMessage;
 				return result;
 			}
 

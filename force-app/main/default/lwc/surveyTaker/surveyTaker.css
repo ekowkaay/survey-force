@@ -428,7 +428,34 @@ lightning-radio-group {
 	color: #334155;
 }
 
+.submitted-content p {
+	margin: 0;
+	line-height: 1.6;
+	white-space: pre-line;
+}
+
 .submitted-icon {
+	margin-bottom: 1rem;
+}
+
+/* Error */
+.error-shell {
+	padding: 2rem 1rem 4rem;
+}
+
+.error-content {
+	margin-top: 1.5rem;
+	text-align: center;
+	color: #334155;
+}
+
+.error-content p {
+	margin: 0;
+	line-height: 1.6;
+	white-space: pre-line;
+}
+
+.error-icon {
 	margin-bottom: 1rem;
 }
 

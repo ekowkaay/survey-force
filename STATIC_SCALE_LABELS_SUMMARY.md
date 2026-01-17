@@ -8,7 +8,8 @@ Per user feedback, this implementation uses **static scale label fields** instea
 
 ### 1. New Custom Fields
 
-**Scale_Start_Label__c** and **Scale_End_Label__c** added to `Survey_Question__c`:
+**Scale_Start_Label\_\_c** and **Scale_End_Label\_\_c** added to `Survey_Question__c`:
+
 - Type: Text (255 characters)
 - Purpose: Display static labels at scale endpoints
 - Examples: "Very Difficult" / "Very Easy"
@@ -16,6 +17,7 @@ Per user feedback, this implementation uses **static scale label fields** instea
 ### 2. Code Updates
 
 **Modified Files:**
+
 - `SurveyTakerController.cls` - Fetch and populate static label fields
 - `ViewSurveyControllerWithoutSharing.cls` - Include fields in guest queries
 - `surveyTaker.js` - Use static fields instead of deriving from choices
@@ -28,6 +30,7 @@ Per user feedback, this implementation uses **static scale label fields** instea
 ## Architecture
 
 ### New Approach (Implemented)
+
 ```
 Scale_Start_Label__c: "Very Difficult"
 Scale_End_Label__c: "Very Easy"
@@ -35,6 +38,7 @@ Choices__c: "1\n2\n3\n4\n5"
 ```
 
 **Display:**
+
 ```
 Very Difficult ◄─────────────────► Very Easy
 [1] [2] [3] [4] [5]

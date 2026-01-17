@@ -114,6 +114,8 @@ export default class SurveyTaker extends LightningElement {
 	@track invitationHeader = '';
 	@track showSurveyName = true;
 	@track thankYouText = '';
+	@track expirationMessage = '';
+	@track alreadySubmittedMessage = '';
 	@track eventTopic = '';
 	@track eventDate = '';
 	@track questions = [];
@@ -380,6 +382,8 @@ export default class SurveyTaker extends LightningElement {
 					this.eventDate = result.eventDate || '';
 					this.showSurveyName = !result.survey.Hide_Survey_Name__c;
 					this.thankYouText = result.survey.Thank_You_Text__c || 'Your survey response has been recorded. Thank you!';
+					this.expirationMessage = result.expirationMessage || 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed.';
+					this.alreadySubmittedMessage = result.alreadySubmittedMessage || 'This survey has already been completed.';
 					this.questions = result.questions || [];
 					this.isInternal = result.isInternal;
 					this.anonymousOption = result.anonymousOption;

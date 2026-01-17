@@ -7,6 +7,6 @@
     <label>Thank You Text</label>
     <length>32768</length>
     <trackTrending>false</trackTrending>
-    <type>Html</type>
+    <type>LongTextArea</type>
     <visibleLines>10</visibleLines>
 </CustomField>
