@@ -517,6 +517,10 @@ public with sharing class SurveyUtilities {
 	 * @description Generate a unique token for survey invitation
 	 * @return String UUID-style token
 	 */
+	public static String generateUniqueTokenForRegeneration() {
+		return generateUniqueToken();
+	}
+
 	private static String generateUniqueToken() {
 		return TokenGeneratorService.generateToken();
 	}
@@ -528,6 +532,10 @@ public with sharing class SurveyUtilities {
 	 * @param trainingType Optional training type to get specific site URL from metadata
 	 * @return String Complete survey URL
 	 */
+	public static String buildSurveyUrlWithTokenForRegeneration(String token, String trainingType) {
+		return buildSurveyUrlWithToken(token, trainingType);
+	}
+
 	private static String buildSurveyUrlWithToken(String token, String trainingType) {
 		String baseUrl = '';
 

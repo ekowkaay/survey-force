@@ -101,8 +101,8 @@ private class SurveyRegenerationController_Test {
 			surveyIndex += 3;
 
 			trToUpdate.Participant_Survey__c = '/TakeSurvey?id=' + participantSurvey.Id;
-			trToUpdate.Customer_Survey__c = '/survey?token=old-customer-token-' + tr.Id;
-			trToUpdate.Trainer_Survey__c = '/survey?token=old-trainer-token-' + tr.Id;
+			trToUpdate.Customer_Survey__c = '/TakeSurvey?id=' + customerSurvey.Id;
+			trToUpdate.Trainer_Survey__c = '/TakeSurvey?id=' + trainerSurvey.Id;
 			requestsToUpdate.add(trToUpdate);
 
 			// Create old customer invitation
@@ -197,6 +197,14 @@ private class SurveyRegenerationController_Test {
 			System.assert(String.isNotBlank(p.Participant_Survey__c), 'Participant should have survey URL');
 			System.assert(!p.Participant_Survey__c.contains('old-'), 'Should have new survey URL');
 		}
+
+		Training_Request__c updatedRequest = [
+			SELECT Customer_Survey__c, Trainer_Survey__c
+			FROM Training_Request__c
+			WHERE Id = :tr.Id
+		];
+		System.assert(updatedRequest.Customer_Survey__c.contains('id='), 'Customer survey URL should include survey id');
+		System.assert(updatedRequest.Trainer_Survey__c.contains('id='), 'Trainer survey URL should include survey id');
 	}
 
 	/**
