@@ -7,6 +7,12 @@ export default class SurveyRegeneration extends LightningElement {
 	@track regenerateParticipant = true;
 	@track regenerateCustomer = true;
 	@track regenerateTrainer = true;
+	@track useCustomSettings = false;
+	@track relatedRecordObjectApiName = 'Training_Request__c';
+	@track participantSurveyFieldApiName = 'Participant_Survey__c';
+	@track customerSurveyFieldApiName = 'Customer_Survey__c';
+	@track trainerSurveyFieldApiName = 'Trainer_Survey__c';
+	@track trainingTypeFieldApiName = 'Training_Type__c';
 
 	// UI State
 	@track isLoading = false;
@@ -28,6 +34,22 @@ export default class SurveyRegeneration extends LightningElement {
 		return this.trainingRequestIds && this.trainingRequestIds.trim().length > 0;
 	}
 
+	get hasObjectApiName() {
+		return !this.useCustomSettings || (this.relatedRecordObjectApiName && this.relatedRecordObjectApiName.trim().length > 0);
+	}
+
+	get hasRequiredFieldConfig() {
+		if (!this.useCustomSettings) {
+			return true;
+		}
+
+		const hasParticipantField = !this.regenerateParticipant || (this.participantSurveyFieldApiName && this.participantSurveyFieldApiName.trim().length > 0);
+		const hasCustomerField = !this.regenerateCustomer || (this.customerSurveyFieldApiName && this.customerSurveyFieldApiName.trim().length > 0);
+		const hasTrainerField = !this.regenerateTrainer || (this.trainerSurveyFieldApiName && this.trainerSurveyFieldApiName.trim().length > 0);
+
+		return hasParticipantField && hasCustomerField && hasTrainerField;
+	}
+
 	get hasResults() {
 		return this.showResults;
 	}
@@ -45,11 +67,22 @@ export default class SurveyRegeneration extends LightningElement {
 	}
 
 	get canProceed() {
-		return this.isInputValid && this.hasAtLeastOneSurveyTypeSelected && !this.isLoading;
+		return this.isInputValid && this.hasAtLeastOneSurveyTypeSelected && this.hasObjectApiName && this.hasRequiredFieldConfig && !this.isLoading;
 	}
 
 	get isNextDisabled() {
 		return !this.canProceed;
+	}
+
+	get isTrainingRequestObject() {
+		if (!this.useCustomSettings) {
+			return true;
+		}
+		return this.relatedRecordObjectApiName && this.relatedRecordObjectApiName.trim() === 'Training_Request__c';
+	}
+
+	get isParticipantDisabled() {
+		return !this.isTrainingRequestObject;
 	}
 
 	handleTrainingRequestIdsChange(event) {
@@ -68,9 +101,46 @@ export default class SurveyRegeneration extends LightningElement {
 		this.regenerateTrainer = event.target.checked;
 	}
 
+	handleCustomSettingsToggle(event) {
+		this.useCustomSettings = event.target.checked;
+		if (!this.useCustomSettings) {
+			this.relatedRecordObjectApiName = 'Training_Request__c';
+			this.participantSurveyFieldApiName = 'Participant_Survey__c';
+			this.customerSurveyFieldApiName = 'Customer_Survey__c';
+			this.trainerSurveyFieldApiName = 'Trainer_Survey__c';
+			this.trainingTypeFieldApiName = 'Training_Type__c';
+			this.regenerateParticipant = true;
+		} else if (!this.isTrainingRequestObject) {
+			this.regenerateParticipant = false;
+		}
+	}
+
+	handleObjectApiNameChange(event) {
+		this.relatedRecordObjectApiName = event.target.value;
+		if (!this.isTrainingRequestObject) {
+			this.regenerateParticipant = false;
+		}
+	}
+
+	handleParticipantFieldChange(event) {
+		this.participantSurveyFieldApiName = event.target.value;
+	}
+
+	handleCustomerFieldChange(event) {
+		this.customerSurveyFieldApiName = event.target.value;
+	}
+
+	handleTrainerFieldChange(event) {
+		this.trainerSurveyFieldApiName = event.target.value;
+	}
+
+	handleTrainingTypeFieldChange(event) {
+		this.trainingTypeFieldApiName = event.target.value;
+	}
+
 	handleNext() {
 		if (!this.canProceed) {
-			this.showToast('Error', 'Please enter Training Request IDs and select at least one survey type', 'error');
+			this.showToast('Error', 'Please enter record IDs, select at least one survey type, and complete the required configuration.', 'error');
 			return;
 		}
 		this.showConfirmation = true;
@@ -89,6 +159,12 @@ export default class SurveyRegeneration extends LightningElement {
 		this.regenerateParticipant = true;
 		this.regenerateCustomer = true;
 		this.regenerateTrainer = true;
+		this.useCustomSettings = false;
+		this.relatedRecordObjectApiName = 'Training_Request__c';
+		this.participantSurveyFieldApiName = 'Participant_Survey__c';
+		this.customerSurveyFieldApiName = 'Customer_Survey__c';
+		this.trainerSurveyFieldApiName = 'Trainer_Survey__c';
+		this.trainingTypeFieldApiName = 'Training_Type__c';
 		this.showConfirmation = false;
 		this.showResults = false;
 		this.success = false;
@@ -109,7 +185,12 @@ export default class SurveyRegeneration extends LightningElement {
 			trainingRequestIds: idsArray,
 			regenerateParticipant: this.regenerateParticipant,
 			regenerateCustomer: this.regenerateCustomer,
-			regenerateTrainer: this.regenerateTrainer
+			regenerateTrainer: this.regenerateTrainer,
+			relatedRecordObjectApiName: this.useCustomSettings ? this.relatedRecordObjectApiName : null,
+			participantSurveyFieldApiName: this.useCustomSettings ? this.participantSurveyFieldApiName : null,
+			customerSurveyFieldApiName: this.useCustomSettings ? this.customerSurveyFieldApiName : null,
+			trainerSurveyFieldApiName: this.useCustomSettings ? this.trainerSurveyFieldApiName : null,
+			trainingTypeFieldApiName: this.useCustomSettings ? this.trainingTypeFieldApiName : null
 		};
 
 		regenerateSurveyLinks({ requests: [request] })

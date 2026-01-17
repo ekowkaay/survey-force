@@ -1,4 +1,19 @@
 /**
+
+		@AuraEnabled
+		public String relatedRecordObjectApiName;
+
+		@AuraEnabled
+		public String participantSurveyFieldApiName;
+
+		@AuraEnabled
+		public String customerSurveyFieldApiName;
+
+		@AuraEnabled
+		public String trainerSurveyFieldApiName;
+
+		@AuraEnabled
+		public String trainingTypeFieldApiName;
  * @description Invocable controller for regenerating survey links and invitations.
  * Designed to be called from flows to support bulk regeneration of surveys
  * when survey templates or questions are updated.
@@ -114,19 +129,53 @@ public with sharing class SurveyRegenerationController {
 
 			result.totalProcessed = request.trainingRequestIds.size();
 
-			// Query Training Requests with survey URL fields
-			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>(
-				[
-					SELECT Id, Name, Training_Type__c, Participant_Survey__c, Customer_Survey__c, Trainer_Survey__c
-					FROM Training_Request__c
-					WHERE Id IN :request.trainingRequestIds
-					WITH USER_MODE
-				]
-			);
-
-			if (trainingRequestMap.isEmpty()) {
-				result.message = 'No Training Requests found';
+			RegenerationConfig config = resolveRegenerationConfig(request, regenParticipant, regenCustomer, regenTrainer, errors);
+			if (config == null) {
+				result.message = 'Unable to validate regeneration configuration.';
+				result.errorDetails = String.join(errors, '\n');
 				return result;
+			}
+
+			regenParticipant = config.allowParticipant;
+			regenCustomer = config.allowCustomer;
+			regenTrainer = config.allowTrainer;
+
+			if (!regenParticipant && !regenCustomer && !regenTrainer) {
+				result.message = 'No valid survey types selected after validation.';
+				result.errorDetails = String.join(errors, '\n');
+				return result;
+			}
+
+			List<String> fieldsToQuery = new List<String>{ 'Id' };
+			if (regenParticipant && String.isNotBlank(config.participantSurveyField)) {
+				fieldsToQuery.add(config.participantSurveyField);
+			}
+			if (regenCustomer && String.isNotBlank(config.customerSurveyField)) {
+				fieldsToQuery.add(config.customerSurveyField);
+			}
+			if (regenTrainer && String.isNotBlank(config.trainerSurveyField)) {
+				fieldsToQuery.add(config.trainerSurveyField);
+			}
+			if (String.isNotBlank(config.trainingTypeField) && (regenCustomer || regenTrainer)) {
+				fieldsToQuery.add(config.trainingTypeField);
+			}
+
+			String soql = 'SELECT ' + String.join(fieldsToQuery, ', ') + ' FROM ' + config.objectApiName + ' WHERE Id IN :request.trainingRequestIds WITH USER_MODE';
+			List<SObject> relatedRecords = Database.query(soql);
+			Map<Id, SObject> relatedRecordMap = new Map<Id, SObject>(relatedRecords);
+
+			if (relatedRecordMap.isEmpty()) {
+				result.message = config.isTrainingRequest ? 'No Training Requests found' : 'No records found for ' + config.recordLabelPlural;
+				result.errorDetails = String.join(errors, '\n');
+				return result;
+			}
+
+			Map<Id, Training_Request__c> trainingRequestMap = new Map<Id, Training_Request__c>();
+			if (config.isTrainingRequest) {
+				for (SObject record : relatedRecords) {
+					Training_Request__c tr = (Training_Request__c)record;
+					trainingRequestMap.put(tr.Id, tr);
+				}
 			}
 
 			// Extract survey IDs from URLs
@@ -134,25 +183,25 @@ public with sharing class SurveyRegenerationController {
 			Map<Id, Id> customerSurveyMap = new Map<Id, Id>();
 			Map<Id, Id> trainerSurveyMap = new Map<Id, Id>();
 
-			for (Training_Request__c tr : trainingRequestMap.values()) {
-				if (regenParticipant && String.isNotBlank(tr.Participant_Survey__c)) {
-					Id surveyId = extractSurveyIdFromUrl(tr.Participant_Survey__c);
+			for (SObject record : relatedRecordMap.values()) {
+				if (regenParticipant && String.isNotBlank(config.participantSurveyField)) {
+					Id surveyId = extractSurveyIdFromField(record, config.participantSurveyField);
 					if (surveyId != null) {
-						participantSurveyMap.put(tr.Id, surveyId);
+						participantSurveyMap.put((Id)record.get('Id'), surveyId);
 					}
 				}
 
-				if (regenCustomer && String.isNotBlank(tr.Customer_Survey__c)) {
-					Id surveyId = extractSurveyIdFromUrl(tr.Customer_Survey__c);
+				if (regenCustomer && String.isNotBlank(config.customerSurveyField)) {
+					Id surveyId = extractSurveyIdFromField(record, config.customerSurveyField);
 					if (surveyId != null) {
-						customerSurveyMap.put(tr.Id, surveyId);
+						customerSurveyMap.put((Id)record.get('Id'), surveyId);
 					}
 				}
 
-				if (regenTrainer && String.isNotBlank(tr.Trainer_Survey__c)) {
-					Id surveyId = extractSurveyIdFromUrl(tr.Trainer_Survey__c);
+				if (regenTrainer && String.isNotBlank(config.trainerSurveyField)) {
+					Id surveyId = extractSurveyIdFromField(record, config.trainerSurveyField);
 					if (surveyId != null) {
-						trainerSurveyMap.put(tr.Id, surveyId);
+						trainerSurveyMap.put((Id)record.get('Id'), surveyId);
 					}
 				}
 			}
@@ -178,26 +227,45 @@ public with sharing class SurveyRegenerationController {
 			}
 
 			// Regenerate participant survey links
-			if (!participantSurveyMap.isEmpty()) {
+			if (regenParticipant && !participantSurveyMap.isEmpty()) {
 				Integer count = regenerateParticipantSurveys(participantSurveyMap, trainingRequestMap, errors);
 				result.participantLinksGenerated = count;
+			} else if (regenParticipant && participantSurveyMap.isEmpty()) {
+				errors.add('No participant survey IDs found for regeneration.');
 			}
 
 			// Regenerate customer survey links
-			if (!customerSurveyMap.isEmpty()) {
+			if (regenCustomer && !customerSurveyMap.isEmpty()) {
 				Integer count = regenerateCustomerTrainerSurveys(
 					customerSurveyMap,
-					trainingRequestMap,
+					relatedRecordMap,
+					config.objectApiName,
+					config.trainingTypeField,
+					config.customerSurveyField,
+					config.recordLabel,
 					SurveyForceConstants.SURVEY_TYPE_CUSTOMER,
 					errors
 				);
 				result.customerLinksGenerated = count;
+			} else if (regenCustomer && customerSurveyMap.isEmpty()) {
+				errors.add('No customer survey IDs found for regeneration.');
 			}
 
 			// Regenerate trainer survey links
-			if (!trainerSurveyMap.isEmpty()) {
-				Integer count = regenerateCustomerTrainerSurveys(trainerSurveyMap, trainingRequestMap, SurveyForceConstants.SURVEY_TYPE_TRAINER, errors);
+			if (regenTrainer && !trainerSurveyMap.isEmpty()) {
+				Integer count = regenerateCustomerTrainerSurveys(
+					trainerSurveyMap,
+					relatedRecordMap,
+					config.objectApiName,
+					config.trainingTypeField,
+					config.trainerSurveyField,
+					config.recordLabel,
+					SurveyForceConstants.SURVEY_TYPE_TRAINER,
+					errors
+				);
 				result.trainerLinksGenerated = count;
+			} else if (regenTrainer && trainerSurveyMap.isEmpty()) {
+				errors.add('No trainer survey IDs found for regeneration.');
 			}
 
 			// Calculate success/failure
@@ -207,26 +275,53 @@ public with sharing class SurveyRegenerationController {
 
 			// Build message
 			if (result.success) {
-				result.message = String.format(
-					'Successfully regenerated surveys for {0} Training Request(s). Participant: {1}, Customer: {2}, Trainer: {3} links generated.',
-					new List<String>{
-						String.valueOf(result.totalSuccess),
-						String.valueOf(result.participantLinksGenerated),
-						String.valueOf(result.customerLinksGenerated),
-						String.valueOf(result.trainerLinksGenerated)
-					}
-				);
+				if (config.isTrainingRequest) {
+					result.message = String.format(
+						'Successfully regenerated surveys for {0} Training Request(s). Participant: {1}, Customer: {2}, Trainer: {3} links generated.',
+						new List<String>{
+							String.valueOf(result.totalSuccess),
+							String.valueOf(result.participantLinksGenerated),
+							String.valueOf(result.customerLinksGenerated),
+							String.valueOf(result.trainerLinksGenerated)
+						}
+					);
+				} else {
+					result.message = String.format(
+						'Successfully regenerated surveys for {0} {1}. Participant: {2}, Customer: {3}, Trainer: {4} links generated.',
+						new List<String>{
+							String.valueOf(result.totalSuccess),
+							config.recordLabelPlural,
+							String.valueOf(result.participantLinksGenerated),
+							String.valueOf(result.customerLinksGenerated),
+							String.valueOf(result.trainerLinksGenerated)
+						}
+					);
+				}
 			} else {
-				result.message = String.format(
-					'Regenerated surveys for {0} Training Request(s) with {1} error(s). Participant: {2}, Customer: {3}, Trainer: {4} links generated.',
-					new List<String>{
-						String.valueOf(result.totalSuccess),
-						String.valueOf(result.totalFailed),
-						String.valueOf(result.participantLinksGenerated),
-						String.valueOf(result.customerLinksGenerated),
-						String.valueOf(result.trainerLinksGenerated)
-					}
-				);
+				if (config.isTrainingRequest) {
+					result.message = String.format(
+						'Regenerated surveys for {0} Training Request(s) with {1} error(s). Participant: {2}, Customer: {3}, Trainer: {4} links generated.',
+						new List<String>{
+							String.valueOf(result.totalSuccess),
+							String.valueOf(result.totalFailed),
+							String.valueOf(result.participantLinksGenerated),
+							String.valueOf(result.customerLinksGenerated),
+							String.valueOf(result.trainerLinksGenerated)
+						}
+					);
+				} else {
+					result.message = String.format(
+						'Regenerated surveys for {0} {1} with {2} error(s). Participant: {3}, Customer: {4}, Trainer: {5} links generated.',
+						new List<String>{
+							String.valueOf(result.totalSuccess),
+							config.recordLabelPlural,
+							String.valueOf(result.totalFailed),
+							String.valueOf(result.participantLinksGenerated),
+							String.valueOf(result.customerLinksGenerated),
+							String.valueOf(result.trainerLinksGenerated)
+						}
+					);
+				}
 				result.errorDetails = String.join(errors, '\n');
 			}
 
@@ -332,25 +427,38 @@ public with sharing class SurveyRegenerationController {
 	 */
 	private static Integer regenerateCustomerTrainerSurveys(
 		Map<Id, Id> surveyMap,
-		Map<Id, Training_Request__c> trainingRequestMap,
+		Map<Id, SObject> relatedRecordMap,
+		String relatedRecordObjectApiName,
+		String trainingTypeFieldApiName,
+		String surveyFieldApiName,
+		String recordLabel,
 		String surveyType,
 		List<String> errors
 	) {
 		Integer linksGenerated = 0;
 
 		try {
+			if (String.isBlank(surveyFieldApiName)) {
+				errors.add('Missing survey field configuration for ' + surveyType + ' on ' + recordLabel + '.');
+				return linksGenerated;
+			}
+
 			// Build invitation requests for bulk generation
 			List<SurveyUtilities.InvitationRequest> invitationRequests = new List<SurveyUtilities.InvitationRequest>();
 
 			for (Id trId : surveyMap.keySet()) {
 				Id surveyId = surveyMap.get(trId);
-				Training_Request__c tr = trainingRequestMap.get(trId);
+				SObject record = relatedRecordMap.get(trId);
+				String trainingType = null;
+				if (record != null && String.isNotBlank(trainingTypeFieldApiName)) {
+					trainingType = (String)record.get(trainingTypeFieldApiName);
+				}
 
 				SurveyUtilities.InvitationRequest invReq = new SurveyUtilities.InvitationRequest();
 				invReq.surveyId = surveyId;
 				invReq.relatedRecordId = trId;
 				invReq.surveyType = surveyType;
-				invReq.trainingType = tr.Training_Type__c;
+				invReq.trainingType = trainingType;
 
 				invitationRequests.add(invReq);
 			}
@@ -359,31 +467,27 @@ public with sharing class SurveyRegenerationController {
 			if (!invitationRequests.isEmpty()) {
 				Map<String, String> surveyTokenUrls = SurveyUtilities.generateSurveyInvitationsInBulk(invitationRequests);
 
-				// Update training requests with new survey URLs
-				List<Training_Request__c> requestsToUpdate = new List<Training_Request__c>();
+				// Update related records with new survey URLs
+				List<SObject> requestsToUpdate = new List<SObject>();
+				Schema.SObjectType objectType = Schema.getGlobalDescribe().get(relatedRecordObjectApiName);
 
 				for (Id trId : surveyMap.keySet()) {
 					String key = trId + '_' + surveyType;
 					String surveyUrl = surveyTokenUrls.get(key);
+					Id surveyId = surveyMap.get(trId);
 
 					if (String.isNotBlank(surveyUrl)) {
-						Training_Request__c trToUpdate = new Training_Request__c();
-						trToUpdate.Id = trId;
+						SObject recordToUpdate = objectType.newSObject(trId);
 
-						if (surveyType == SurveyForceConstants.SURVEY_TYPE_CUSTOMER) {
-							trToUpdate.Customer_Survey__c = surveyUrl;
-						} else if (surveyType == SurveyForceConstants.SURVEY_TYPE_TRAINER) {
-							trToUpdate.Trainer_Survey__c = surveyUrl;
-						}
-
-						requestsToUpdate.add(trToUpdate);
+						recordToUpdate.put(surveyFieldApiName, surveyUrlWithId);
+						requestsToUpdate.add(recordToUpdate);
 						linksGenerated++;
 					} else {
-						errors.add('Failed to generate ' + surveyType + ' survey for Training Request ' + trId);
+						errors.add('Failed to generate ' + surveyType + ' survey for ' + recordLabel + ' ' + trId);
 					}
 				}
 
-				// Update training requests
+				// Update related records
 				if (!requestsToUpdate.isEmpty()) {
 					Database.update(requestsToUpdate, AccessLevel.USER_MODE);
 				}
@@ -395,6 +499,113 @@ public with sharing class SurveyRegenerationController {
 			errors.add('Error regenerating ' + surveyType + ' surveys: ' + e.getMessage());
 			return linksGenerated;
 		}
+	}
+
+	/**
+	 * @description Configuration details for regeneration
+	 */
+	private class RegenerationConfig {
+		public String objectApiName;
+		public String recordLabel;
+		public String recordLabelPlural;
+		public String participantSurveyField;
+		public String customerSurveyField;
+		public String trainerSurveyField;
+		public String trainingTypeField;
+		public Boolean isTrainingRequest;
+		public Boolean allowParticipant;
+		public Boolean allowCustomer;
+		public Boolean allowTrainer;
+		public Schema.SObjectType objectType;
+	}
+
+	/**
+	 * @description Resolve regeneration configuration and validate field access
+	 */
+	private static RegenerationConfig resolveRegenerationConfig(
+		RegenerationRequest request,
+		Boolean regenParticipant,
+		Boolean regenCustomer,
+		Boolean regenTrainer,
+		List<String> errors
+	) {
+		String objectApiName = String.isNotBlank(request.relatedRecordObjectApiName)
+			? request.relatedRecordObjectApiName
+			: 'Training_Request__c';
+
+		Schema.SObjectType objectType = Schema.getGlobalDescribe().get(objectApiName);
+		if (objectType == null) {
+			errors.add('Unknown object API name: ' + objectApiName);
+			return null;
+		}
+
+		Boolean isTrainingRequest = objectApiName == 'Training_Request__c';
+		Schema.DescribeSObjectResult describe = objectType.getDescribe();
+		RegenerationConfig config = new RegenerationConfig();
+		config.objectApiName = objectApiName;
+		config.recordLabel = describe.getLabel();
+		config.recordLabelPlural = describe.getLabelPlural();
+		config.objectType = objectType;
+		config.isTrainingRequest = isTrainingRequest;
+		config.participantSurveyField = String.isNotBlank(request.participantSurveyFieldApiName)
+			? request.participantSurveyFieldApiName
+			: (isTrainingRequest ? 'Participant_Survey__c' : null);
+		config.customerSurveyField = String.isNotBlank(request.customerSurveyFieldApiName)
+			? request.customerSurveyFieldApiName
+			: (isTrainingRequest ? 'Customer_Survey__c' : null);
+		config.trainerSurveyField = String.isNotBlank(request.trainerSurveyFieldApiName)
+			? request.trainerSurveyFieldApiName
+			: (isTrainingRequest ? 'Trainer_Survey__c' : null);
+		config.trainingTypeField = String.isNotBlank(request.trainingTypeFieldApiName)
+			? request.trainingTypeFieldApiName
+			: (isTrainingRequest ? 'Training_Type__c' : null);
+
+		Map<String, Schema.SObjectField> fieldMap = describe.fields.getMap();
+		config.allowParticipant = regenParticipant;
+		config.allowCustomer = regenCustomer;
+		config.allowTrainer = regenTrainer;
+
+		if (regenParticipant) {
+			if (!isTrainingRequest) {
+				errors.add('Participant regeneration is only supported for Training_Request__c records.');
+				config.allowParticipant = false;
+			} else if (String.isBlank(config.participantSurveyField) || !fieldMap.containsKey(config.participantSurveyField)) {
+				errors.add('Participant survey field not found on ' + config.recordLabel + ': ' + config.participantSurveyField);
+				config.allowParticipant = false;
+			}
+		}
+
+		if (regenCustomer) {
+			if (String.isBlank(config.customerSurveyField) || !fieldMap.containsKey(config.customerSurveyField)) {
+				errors.add('Customer survey field not found on ' + config.recordLabel + ': ' + config.customerSurveyField);
+				config.allowCustomer = false;
+			}
+		}
+
+		if (regenTrainer) {
+			if (String.isBlank(config.trainerSurveyField) || !fieldMap.containsKey(config.trainerSurveyField)) {
+				errors.add('Trainer survey field not found on ' + config.recordLabel + ': ' + config.trainerSurveyField);
+				config.allowTrainer = false;
+			}
+		}
+
+		if (String.isNotBlank(config.trainingTypeField) && !fieldMap.containsKey(config.trainingTypeField)) {
+			errors.add('Training type field not found on ' + config.recordLabel + ': ' + config.trainingTypeField);
+			config.trainingTypeField = null;
+		}
+
+		return config;
+	}
+
+	/**
+	 * @description Extract survey ID from a field on a related record
+	 */
+	private static Id extractSurveyIdFromField(SObject record, String fieldApiName) {
+		if (record == null || String.isBlank(fieldApiName)) {
+			return null;
+		}
+
+		return extractSurveyIdFromUrl((String)record.get(fieldApiName));
 	}
 
 	/**

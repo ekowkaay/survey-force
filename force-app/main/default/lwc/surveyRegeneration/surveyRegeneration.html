@@ -15,7 +15,7 @@
 					<div class="slds-box slds-theme_default slds-m-bottom_medium">
 						<h3 class="slds-text-heading_small slds-m-bottom_small">Regenerate Survey Links</h3>
 						<p class="slds-text-body_regular slds-m-bottom_small">
-							This tool will regenerate survey links and invitations for the selected Training Request records.
+							This tool will regenerate survey links and invitations for the selected records. Use the default Training Request settings or supply custom object and field mappings.
 						</p>
 						<div class="slds-box slds-theme_warning slds-m-top_small">
 							<p class="slds-text-heading_small slds-m-bottom_xx-small">⚠️ Important:</p>
@@ -32,16 +32,69 @@
 					<div class="slds-grid slds-wrap slds-gutters">
 						<div class="slds-col slds-size_1-of-1">
 							<lightning-textarea
-								label="Training Request IDs (comma-separated)"
+								label="Record IDs (comma-separated)"
 								value={trainingRequestIds}
 								onchange={handleTrainingRequestIdsChange}
-								placeholder="Enter Training Request IDs separated by commas"
+								placeholder="Enter record IDs separated by commas"
 								required
-								message-when-value-missing="Please enter at least one Training Request ID"></lightning-textarea>
+								message-when-value-missing="Please enter at least one record ID"></lightning-textarea>
 							<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
-								Enter the Training Request record IDs separated by commas. You can select multiple records from a list view and paste the IDs here.
+								Enter record IDs separated by commas. You can select multiple records from a list view and paste the IDs here.
 							</p>
 						</div>
+					</div>
+
+					<!-- Advanced Settings -->
+					<div class="slds-m-top_medium slds-box slds-theme_shade">
+						<lightning-input
+							type="toggle"
+							label="Use custom object settings"
+							checked={useCustomSettings}
+							onchange={handleCustomSettingsToggle}></lightning-input>
+						<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+							Leave this off to use the Training_Request__c defaults. Turn it on to target another object and map its survey fields.
+						</p>
+
+						<template lwc:if={useCustomSettings}>
+							<div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+								<div class="slds-col slds-size_1-of-1">
+									<lightning-input
+										label="Related Record Object API Name"
+										value={relatedRecordObjectApiName}
+										onchange={handleObjectApiNameChange}
+										placeholder="e.g., Custom_Object__c"
+										required></lightning-input>
+								</div>
+								<div class="slds-col slds-size_1-of-2">
+									<lightning-input
+										label="Customer Survey Field API Name"
+										value={customerSurveyFieldApiName}
+										onchange={handleCustomerFieldChange}
+										placeholder="e.g., Customer_Survey__c"></lightning-input>
+								</div>
+								<div class="slds-col slds-size_1-of-2">
+									<lightning-input
+										label="Trainer Survey Field API Name"
+										value={trainerSurveyFieldApiName}
+										onchange={handleTrainerFieldChange}
+										placeholder="e.g., Trainer_Survey__c"></lightning-input>
+								</div>
+								<div class="slds-col slds-size_1-of-2">
+									<lightning-input
+										label="Participant Survey Field API Name (Training_Request__c only)"
+										value={participantSurveyFieldApiName}
+										onchange={handleParticipantFieldChange}
+										placeholder="e.g., Participant_Survey__c"></lightning-input>
+								</div>
+								<div class="slds-col slds-size_1-of-2">
+									<lightning-input
+										label="Training Type Field API Name (optional)"
+										value={trainingTypeFieldApiName}
+										onchange={handleTrainingTypeFieldChange}
+										placeholder="e.g., Training_Type__c"></lightning-input>
+								</div>
+							</div>
+						</template>
 					</div>
 
 					<!-- Survey Type Selection -->
@@ -49,10 +102,20 @@
 						<fieldset class="slds-form-element">
 							<legend class="slds-form-element__legend slds-form-element__label">Survey Types to Regenerate</legend>
 							<div class="slds-form-element__control">
-								<lightning-input type="checkbox" label="Regenerate Participant Survey Links" checked={regenerateParticipant} onchange={handleParticipantChange}></lightning-input>
+								<lightning-input
+									type="checkbox"
+									label="Regenerate Participant Survey Links"
+									checked={regenerateParticipant}
+									disabled={isParticipantDisabled}
+									onchange={handleParticipantChange}></lightning-input>
 								<lightning-input type="checkbox" label="Regenerate Customer Survey Links" checked={regenerateCustomer} onchange={handleCustomerChange}></lightning-input>
 								<lightning-input type="checkbox" label="Regenerate Trainer Survey Links" checked={regenerateTrainer} onchange={handleTrainerChange}></lightning-input>
 							</div>
+							<template lwc:if={isParticipantDisabled}>
+								<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+									Participant survey regeneration is only available for Training_Request__c records.
+								</p>
+							</template>
 						</fieldset>
 					</div>
 
@@ -63,6 +126,7 @@
 							<li>Survey template questions have been updated</li>
 							<li>Survey needs to be redistributed with new content</li>
 							<li>Links need to be refreshed for security reasons</li>
+							<li>Custom objects need refreshed survey invitations</li>
 						</ul>
 					</div>
 
@@ -79,12 +143,12 @@
 			<div class="slds-p-around_medium">
 				<div class="slds-box slds-theme_error">
 					<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Final Confirmation</h3>
-					<p class="slds-text-body_regular slds-m-bottom_small">You are about to regenerate survey links for the selected Training Request records.</p>
+					<p class="slds-text-body_regular slds-m-bottom_small">You are about to regenerate survey links for the selected records.</p>
 					<p class="slds-text-heading_small slds-m-bottom_xx-small">This action will:</p>
 					<ul class="slds-list_dotted">
 						<li>Delete all existing survey invitations</li>
 						<li>Generate new survey links with new tokens</li>
-						<li>Update Training Request and Participant records</li>
+						<li>Update related records and participants (when applicable)</li>
 						<li>Invalidate all previous survey links</li>
 					</ul>
 					<p class="slds-text-body_regular slds-m-top_small" style="color: #c23934; font-weight: bold;">This action cannot be undone.</p>
@@ -121,7 +185,7 @@
 				<div class="slds-box slds-theme_default">
 					<h3 class="slds-text-heading_small slds-m-bottom_small">Summary</h3>
 					<dl class="slds-dl_horizontal">
-						<dt class="slds-dl_horizontal__label">Training Requests Processed:</dt>
+						<dt class="slds-dl_horizontal__label">Records Processed:</dt>
 						<dd class="slds-dl_horizontal__detail">{totalProcessed}</dd>
 						<dt class="slds-dl_horizontal__label">Successful:</dt>
 						<dd class="slds-dl_horizontal__detail">{totalSuccess}</dd>
@@ -148,11 +212,11 @@
 				<!-- Next Steps -->
 				<div class="slds-box slds-theme_info slds-m-top_medium">
 					<h3 class="slds-text-heading_small slds-m-bottom_small">Next Steps</h3>
-					<ul class="slds-list_dotted">
-						<li>Review the updated Training Request records</li>
-						<li>Distribute new survey links to participants</li>
-						<li>Previous survey links are no longer valid</li>
-					</ul>
+						<ul class="slds-list_dotted">
+							<li>Review the updated records</li>
+							<li>Distribute new survey links to participants (when applicable)</li>
+							<li>Previous survey links are no longer valid</li>
+						</ul>
 				</div>
 
 				<!-- Actions -->
