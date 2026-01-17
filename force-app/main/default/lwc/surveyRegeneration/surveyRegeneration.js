@@ -13,6 +13,8 @@ export default class SurveyRegeneration extends LightningElement {
 	@track regenerateCustomer = true;
 	@track regenerateTrainer = true;
 	@track useCustomSettings = false;
+	@track showClearConfirmation = false;
+	@track pendingCustomSettingsValue = false;
 	@track relatedRecordObjectApiName = 'Training_Request__c';
 	@track participantSurveyFieldApiName = 'Participant_Survey__c';
 	@track participantSurveyLinkFieldApiName = 'Participant_Survey__c';
@@ -291,13 +293,28 @@ export default class SurveyRegeneration extends LightningElement {
 
 		// Show confirmation if toggling and records are selected
 		if (newValue !== this.useCustomSettings && this.selectedRecords.length > 0) {
-			if (!confirm('Changing this setting will clear your selected records. Continue?')) {
-				// Revert the toggle
-				event.target.checked = this.useCustomSettings;
-				return;
-			}
+			// Store pending value and show confirmation modal
+			this.pendingCustomSettingsValue = newValue;
+			this.showClearConfirmation = true;
+			// Revert the toggle temporarily
+			event.target.checked = this.useCustomSettings;
+			return;
 		}
 
+		this.applyCustomSettingsToggle(newValue);
+	}
+
+	handleConfirmClear() {
+		this.showClearConfirmation = false;
+		this.applyCustomSettingsToggle(this.pendingCustomSettingsValue);
+	}
+
+	handleCancelClear() {
+		this.showClearConfirmation = false;
+		this.pendingCustomSettingsValue = this.useCustomSettings;
+	}
+
+	applyCustomSettingsToggle(newValue) {
 		this.useCustomSettings = newValue;
 		if (!this.useCustomSettings) {
 			this.relatedRecordObjectApiName = 'Training_Request__c';

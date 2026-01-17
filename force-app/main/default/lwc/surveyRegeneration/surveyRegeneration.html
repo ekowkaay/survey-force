@@ -1,5 +1,24 @@
 <template>
 	<lightning-card title="Regenerate Survey Links" icon-name="standard:link">
+		<!-- Clear Confirmation Modal -->
+		<template lwc:if={showClearConfirmation}>
+			<section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="clear-confirmation-title" class="slds-modal slds-fade-in-open">
+				<div class="slds-modal__container">
+					<header class="slds-modal__header">
+						<h2 id="clear-confirmation-title" class="slds-text-heading_medium">Confirm Clear Selected Records</h2>
+					</header>
+					<div class="slds-modal__content slds-p-around_medium">
+						<p>Changing this setting will clear your selected records. Do you want to continue?</p>
+					</div>
+					<footer class="slds-modal__footer">
+						<lightning-button label="Cancel" onclick={handleCancelClear}></lightning-button>
+						<lightning-button variant="brand" label="Continue" onclick={handleConfirmClear}></lightning-button>
+					</footer>
+				</div>
+			</section>
+			<div class="slds-backdrop slds-backdrop_open"></div>
+		</template>
+
 		<!-- Loading Spinner with Progress -->
 		<template lwc:if={isLoading}>
 			<div class="slds-is-relative loading-container" role="status" aria-live="polite" aria-atomic="true">
@@ -267,7 +286,7 @@
 				</div>
 
 				<div class="slds-box slds-theme_error" role="alert" aria-labelledby="confirmation-title">
-					<h3 id="confirmation-title" class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Final Confirmation</h3>
+					<h3 id="confirmation-title" class="slds-text-heading_small slds-m-bottom_small error-heading">⚠️ Final Confirmation</h3>
 					<p class="slds-text-body_regular slds-m-bottom_small">You are about to regenerate survey links for the selected records.</p>
 					<p class="slds-text-heading_small slds-m-bottom_xx-small">This action will:</p>
 					<ul class="slds-list_dotted">
@@ -276,7 +295,7 @@
 						<li>Update related records and participants (when applicable)</li>
 						<li>Invalidate all previous survey links</li>
 					</ul>
-					<p class="slds-text-body_regular slds-m-top_small" style="color: #c23934; font-weight: bold">This action cannot be undone.</p>
+					<p class="slds-text-body_regular slds-m-top_small warning-heading">This action cannot be undone.</p>
 				</div>
 
 				<!-- Actions -->
@@ -293,7 +312,7 @@
 				<!-- Success Message -->
 				<template lwc:if={showSuccessMessage}>
 					<div class="slds-box slds-theme_success slds-m-bottom_medium" role="status" aria-live="polite">
-						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #027e46">✓ Survey Links Regenerated Successfully</h3>
+						<h3 class="slds-text-heading_small slds-m-bottom_small success-heading">✓ Survey Links Regenerated Successfully</h3>
 						<p class="slds-text-body_regular">The survey links and invitations have been regenerated.</p>
 					</div>
 				</template>
@@ -301,7 +320,7 @@
 				<!-- Error Message -->
 				<template lwc:if={showErrorMessage}>
 					<div class="slds-box slds-theme_error slds-m-bottom_medium" role="alert" aria-live="assertive">
-						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Regeneration Completed with Errors</h3>
+						<h3 class="slds-text-heading_small slds-m-bottom_small error-heading">⚠️ Regeneration Completed with Errors</h3>
 						<p class="slds-text-body_regular">Some survey links could not be regenerated.</p>
 					</div>
 				</template>
