@@ -36,26 +36,52 @@ The regeneration process:
 1. **Navigate to Survey Regeneration**
    - Go to the "Survey Regeneration" tab in the Survey Force app
    - OR click on "Regenerate Survey Links" quick action on a Training Request record page
+   - OR launch with URL parameters: `?c__ids=id1,id2,id3` to pre-populate records
 
-2. **Enter Training Request IDs**
-   - Copy the IDs of the Training Request records you want to regenerate
-   - Paste them in the input field (comma-separated for multiple records)
+2. **Select Records**
+   - **Option A: Search and Add** (Default)
+     - Use the record picker to search for records by name
+     - Click "Add Record" to add each selected record to the list
+   - **Option B: Bulk ID Input** (Faster for multiple records)
+     - Toggle "Use bulk ID input" to ON
+     - Paste comma, semicolon, or newline-separated record IDs or names
+     - Click "Parse and Add Records" to add them to the list
+   - Selected records appear in a table below with the option to remove individual records or clear all
 
-3. **Select Survey Types**
+3. **Configure Advanced Settings (Optional)**
+   - Leave "Use custom object settings" OFF for Training_Request__c defaults
+   - Turn it ON to regenerate surveys for custom objects:
+     - **Related Record Configuration**: Specify object API name and training type field
+     - **Customer & Trainer Survey Fields**: Map survey URL fields on parent record
+     - **Participant Configuration**: Map participant object and field relationships
+
+4. **Select Survey Types**
    - Check the boxes for which survey types to regenerate:
      - ☑ Regenerate Participant Survey Links
      - ☑ Regenerate Customer Survey Links
      - ☑ Regenerate Trainer Survey Links
    - Default: All survey types are selected
 
-4. **Review and Confirm**
-   - Click "Next" to proceed to confirmation screen
-   - Review the warning message about irreversible action
-   - Click "Confirm & Regenerate" to execute
+5. **Review Your Selection**
+   - Click "Next" to proceed to the confirmation screen
+   - Review the summary:
+     - Count of selected records
+     - Object type being processed
+     - Survey types enabled
+     - Preview of selected records (for lists up to 20 records)
+   - Review the warning about the irreversible action
 
-5. **View Results**
-   - Review the results summary with statistics
-   - Check for any errors in the error details section
+6. **Confirm & Execute**
+   - Click "Confirm & Regenerate" to execute
+   - Watch the progress indicator showing processing steps
+   - Wait for the operation to complete (typically 5-30 seconds depending on volume)
+
+7. **View Results**
+   - Review the results summary with detailed statistics:
+     - Records processed, successful, and failed
+     - Participant, customer, and trainer links generated
+   - Check error details if any issues occurred
+   - Review next steps guidance
    - Click "Regenerate More" to start a new regeneration
 
 ### Method 2: Using Apex (Advanced)
@@ -177,6 +203,26 @@ Users must have the following permission set assigned:
 **Problem**: "No participants found"
 - **Solution**: This is expected if the Training Request has no participants. Customer and Trainer surveys will still be regenerated.
 
+**Problem**: Bulk ID input not parsing correctly
+- **Solution**: 
+  - Ensure IDs are valid 15 or 18-character Salesforce IDs
+  - Separate IDs with commas, semicolons, or new lines
+  - Remove any extra spaces or special characters
+  - Try adding records one at a time to identify invalid IDs
+
+**Problem**: Custom object settings not working
+- **Solution**:
+  - Verify all field API names are correct (case-sensitive)
+  - Check that you have access to the custom object and fields
+  - Use field-level help icons for guidance on each field
+  - Test with a single record first before bulk operations
+
+**Problem**: Selected records cleared accidentally
+- **Solution**: 
+  - The system now confirms before clearing when toggling custom settings
+  - Re-add records using bulk input or record picker
+  - Consider using URL parameters to pre-populate: `?c__ids=id1,id2,id3`
+
 ### Error Recovery
 
 If regeneration fails for some records:
@@ -208,6 +254,51 @@ If regeneration fails for some records:
   - Training_Request__c.Participant_Survey__c
   - Training_Request__c.Customer_Survey__c
   - Training_Request__c.Trainer_Survey__c
+
+## User Experience Improvements (January 2026)
+
+The Lightning Web Component has been enhanced with several UX improvements for a better user experience:
+
+### Bulk Input Options
+- **Toggle Between Input Methods**: Switch between record picker (search) and bulk ID input
+- **Paste Multiple IDs**: Enter comma, semicolon, or newline-separated record IDs or names
+- **Instant Parsing**: One-click parsing and validation of bulk entries
+- **Record Preview**: View selected records in a table with individual remove options
+
+### Enhanced Confirmation
+- **Selection Summary**: See count, object type, and survey types before confirming
+- **Record Preview**: View the first 10-20 selected records in badge format
+- **Clear Warnings**: Better visual hierarchy for irreversible action warnings
+- **Easy Navigation**: Back button to return and modify selections
+
+### Better Loading Feedback
+- **Progress Messages**: Dynamic loading messages showing processing status
+- **Step Breakdown**: Visual list of processing steps being performed
+- **Processing Count**: Know how many records are being processed
+- **Estimated Context**: Understand what's happening during execution
+
+### Improved Advanced Settings
+- **Field Grouping**: Logical sections for Related Record, Customer/Trainer, and Participant settings
+- **Contextual Help**: Field-level help text explains each configuration option
+- **Visual Hierarchy**: Icons and headings make sections easy to scan
+- **Responsive Layout**: Better mobile and tablet support with breakpoints
+
+### Enhanced Error Handling
+- **Structured Errors**: Better formatting with monospace font for technical details
+- **Actionable Guidance**: "What to do next" section with recovery steps
+- **Visual Emphasis**: Warning theme with accent border for visibility
+- **Scrollable Details**: Long error messages scroll independently
+
+### Accessibility Enhancements
+- **ARIA Labels**: Screen reader support throughout the component
+- **Live Regions**: Status updates announced to assistive technologies
+- **Semantic HTML**: Proper heading hierarchy and landmark roles
+- **Keyboard Navigation**: Full keyboard support for all interactions
+
+### Safety Features
+- **Confirmation Dialog**: Warns before clearing selected records when toggling settings
+- **Data Loss Prevention**: Protects against accidental record list clearing
+- **URL Parameter Support**: Direct linking with pre-populated record IDs
 
 ## Extension for Other Objects
 
