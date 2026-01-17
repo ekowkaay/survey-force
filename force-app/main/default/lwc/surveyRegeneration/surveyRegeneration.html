@@ -31,17 +31,44 @@
 					<!-- Input Fields -->
 					<div class="slds-grid slds-wrap slds-gutters">
 						<div class="slds-col slds-size_1-of-1">
-							<lightning-textarea
-								label="Record IDs (comma-separated)"
-								value={trainingRequestIds}
-								onchange={handleTrainingRequestIdsChange}
-								placeholder="Enter record IDs separated by commas"
-								required
-								message-when-value-missing="Please enter at least one record ID"></lightning-textarea>
+							<lightning-record-picker
+								label="Search Records"
+								placeholder="Search by name"
+								value={recordPickerValue}
+								object-api-name={recordPickerObjectApiName}
+								onchange={handleRecordPickerChange}
+								required></lightning-record-picker>
+							<div class="slds-m-top_x-small">
+								<lightning-button
+									variant="neutral"
+									label="Add Record"
+									onclick={handleAddRecord}
+									disabled={isAddRecordDisabled}></lightning-button>
+							</div>
 							<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
-								Enter record IDs separated by commas. You can select multiple records from a list view and paste the IDs here.
+								Search for records and add them to the list below. This avoids manual ID entry.
 							</p>
 						</div>
+					</div>
+
+					<div class="slds-m-top_small">
+						<template lwc:if={hasSelectedRecords}>
+							<lightning-datatable
+								key-field="id"
+								data={selectedRecords}
+								columns={recordColumns}
+								onrowaction={handleRowAction}
+								hide-checkbox-column></lightning-datatable>
+							<div class="slds-m-top_x-small">
+								<lightning-button
+									variant="destructive-text"
+									label="Clear All"
+									onclick={handleClearAll}></lightning-button>
+							</div>
+						</template>
+						<template lwc:else>
+							<p class="slds-text-body_small slds-text-color_weak">No records selected yet.</p>
+						</template>
 					</div>
 
 					<!-- Advanced Settings -->

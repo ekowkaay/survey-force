@@ -3,7 +3,9 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import regenerateSurveyLinks from '@salesforce/apex/SurveyRegenerationController.regenerateSurveyLinks';
 
 export default class SurveyRegeneration extends LightningElement {
-	@track trainingRequestIds = '';
+	@track selectedRecords = [];
+	@track pendingRecord = null;
+	@track recordPickerValue = null;
 	@track regenerateParticipant = true;
 	@track regenerateCustomer = true;
 	@track regenerateTrainer = true;
@@ -30,8 +32,24 @@ export default class SurveyRegeneration extends LightningElement {
 	@track trainerLinksGenerated = 0;
 	@track errorDetails = '';
 
+	recordColumns = [
+		{ label: 'Record', fieldName: 'name' },
+		{ label: 'Record Id', fieldName: 'id' },
+		{
+			type: 'button-icon',
+			fixedWidth: 50,
+			typeAttributes: {
+				iconName: 'utility:close',
+				name: 'remove',
+				title: 'Remove',
+				variant: 'bare',
+				alternativeText: 'Remove'
+			}
+		}
+	];
+
 	get isInputValid() {
-		return this.trainingRequestIds && this.trainingRequestIds.trim().length > 0;
+		return this.selectedRecords.length > 0;
 	}
 
 	get hasObjectApiName() {
@@ -85,8 +103,64 @@ export default class SurveyRegeneration extends LightningElement {
 		return !this.isTrainingRequestObject;
 	}
 
-	handleTrainingRequestIdsChange(event) {
-		this.trainingRequestIds = event.target.value;
+	get recordPickerObjectApiName() {
+		if (!this.useCustomSettings) {
+			return 'Training_Request__c';
+		}
+		return this.relatedRecordObjectApiName && this.relatedRecordObjectApiName.trim().length > 0 ? this.relatedRecordObjectApiName.trim() : 'Training_Request__c';
+	}
+
+	get isAddRecordDisabled() {
+		return !this.pendingRecord;
+	}
+
+	get hasSelectedRecords() {
+		return this.selectedRecords.length > 0;
+	}
+
+	handleRecordPickerChange(event) {
+		const { recordId, recordName } = event.detail;
+		if (recordId) {
+			this.pendingRecord = {
+				id: recordId,
+				name: recordName || recordId
+			};
+			this.recordPickerValue = recordId;
+		} else {
+			this.pendingRecord = null;
+			this.recordPickerValue = null;
+		}
+	}
+
+	handleAddRecord() {
+		if (!this.pendingRecord) {
+			return;
+		}
+
+		const exists = this.selectedRecords.some((record) => record.id === this.pendingRecord.id);
+		if (exists) {
+			this.showToast('Info', 'That record is already in the list.', 'info');
+			return;
+		}
+
+		this.selectedRecords = [...this.selectedRecords, this.pendingRecord];
+		this.pendingRecord = null;
+		this.recordPickerValue = null;
+	}
+
+	handleRowAction(event) {
+		if (event.detail.action.name !== 'remove') {
+			return;
+		}
+
+		const recordId = event.detail.row.id;
+		this.selectedRecords = this.selectedRecords.filter((record) => record.id !== recordId);
+	}
+
+	handleClearAll() {
+		this.selectedRecords = [];
+		this.pendingRecord = null;
+		this.recordPickerValue = null;
 	}
 
 	handleParticipantChange(event) {
@@ -110,6 +184,7 @@ export default class SurveyRegeneration extends LightningElement {
 			this.trainerSurveyFieldApiName = 'Trainer_Survey__c';
 			this.trainingTypeFieldApiName = 'Training_Type__c';
 			this.regenerateParticipant = true;
+			this.handleClearAll();
 		} else if (!this.isTrainingRequestObject) {
 			this.regenerateParticipant = false;
 		}
@@ -120,6 +195,7 @@ export default class SurveyRegeneration extends LightningElement {
 		if (!this.isTrainingRequestObject) {
 			this.regenerateParticipant = false;
 		}
+		this.handleClearAll();
 	}
 
 	handleParticipantFieldChange(event) {
@@ -140,7 +216,7 @@ export default class SurveyRegeneration extends LightningElement {
 
 	handleNext() {
 		if (!this.canProceed) {
-			this.showToast('Error', 'Please enter record IDs, select at least one survey type, and complete the required configuration.', 'error');
+			this.showToast('Error', 'Please select records, choose at least one survey type, and complete the required configuration.', 'error');
 			return;
 		}
 		this.showConfirmation = true;
@@ -155,7 +231,9 @@ export default class SurveyRegeneration extends LightningElement {
 	}
 
 	handleReset() {
-		this.trainingRequestIds = '';
+		this.selectedRecords = [];
+		this.pendingRecord = null;
+		this.recordPickerValue = null;
 		this.regenerateParticipant = true;
 		this.regenerateCustomer = true;
 		this.regenerateTrainer = true;
@@ -175,11 +253,7 @@ export default class SurveyRegeneration extends LightningElement {
 	executeRegeneration() {
 		this.isLoading = true;
 
-		// Parse Training Request IDs
-		const idsArray = this.trainingRequestIds
-			.split(',')
-			.map((id) => id.trim())
-			.filter((id) => id.length > 0);
+		const idsArray = this.selectedRecords.map((record) => record.id);
 
 		const request = {
 			trainingRequestIds: idsArray,
