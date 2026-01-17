@@ -174,7 +174,12 @@ export default class SurveyRegeneration extends LightningElement {
 		this.addSelectedRecordsFromIds(ids);
 	}
 
-	parsePrefillIds(idsParam) {
+	/**
+	 * Parses a string of IDs separated by various delimiters
+	 * @param {string} idsParam - String containing IDs
+	 * @returns {Array} - Array of trimmed, non-empty entries
+	 */
+	parseEntries(idsParam) {
 		if (!idsParam) {
 			return [];
 		}
@@ -182,7 +187,12 @@ export default class SurveyRegeneration extends LightningElement {
 		return idsParam
 			.split(/[,\s;]+/)
 			.map((value) => value.trim())
-			.filter((value) => value && this.isValidSalesforceId(value));
+			.filter((value) => value);
+	}
+
+	parsePrefillIds(idsParam) {
+		const entries = this.parseEntries(idsParam);
+		return entries.filter((entry) => this.isValidSalesforceId(entry));
 	}
 
 	/**
@@ -284,11 +294,8 @@ export default class SurveyRegeneration extends LightningElement {
 			return;
 		}
 
-		// Parse all entries
-		const allEntries = this.bulkInputValue
-			.split(/[,\s;]+/)
-			.map((value) => value.trim())
-			.filter((value) => value);
+		// Parse all entries using shared method
+		const allEntries = this.parseEntries(this.bulkInputValue);
 
 		if (allEntries.length === 0) {
 			this.showToast('Error', 'No entries found in the input.', 'error');
