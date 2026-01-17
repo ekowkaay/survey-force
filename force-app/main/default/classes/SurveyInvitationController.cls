@@ -321,7 +321,7 @@ public with sharing class SurveyInvitationController {
 			
 			// Define default messages
 			String defaultAlreadySubmittedMessage = 'This survey has already been completed';
-			String defaultExpirationMessage = 'Thank you so much for your interest in sharing feedback. The survey window for this training has now closed. We really appreciate your willingness to help us improve and hope you\'ll share your thoughts in future opportunities.';
+			String defaultExpirationMessage = 'This survey has expired';
 			
 			// Use custom messages if survey is available, otherwise use defaults
 			String alreadySubmittedMessage = defaultAlreadySubmittedMessage;
