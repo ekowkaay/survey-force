@@ -2,13 +2,13 @@
 	<lightning-card title="Regenerate Survey Links" icon-name="standard:link">
 		<!-- Loading Spinner with Progress -->
 		<template lwc:if={isLoading}>
-			<div class="slds-is-relative loading-container">
+			<div class="slds-is-relative loading-container" role="status" aria-live="polite" aria-atomic="true">
 				<div class="slds-align_absolute-center">
 					<div class="slds-text-align_center">
-						<lightning-spinner alternative-text="Processing..." size="medium"></lightning-spinner>
-						<p class="slds-text-heading_small slds-m-top_medium">Processing Survey Regeneration</p>
-						<p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">{loadingMessage}</p>
-						<div class="slds-m-top_small">
+						<lightning-spinner alternative-text="Processing survey regeneration" size="medium"></lightning-spinner>
+						<p class="slds-text-heading_small slds-m-top_medium" id="loading-title">Processing Survey Regeneration</p>
+						<p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small" id="loading-message">{loadingMessage}</p>
+						<div class="slds-m-top_small" aria-labelledby="loading-title loading-message">
 							<p class="slds-text-body_small">Please wait while we:</p>
 							<ul class="slds-list_dotted slds-m-top_xx-small">
 								<li>Delete existing survey invitations</li>
@@ -101,76 +101,108 @@
 
 						<template lwc:if={useCustomSettings}>
 							<div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+								<!-- Related Record Settings -->
 								<div class="slds-col slds-size_1-of-1">
-									<lightning-input
-										label="Related Record Object API Name"
-										value={relatedRecordObjectApiName}
-										onchange={handleObjectApiNameChange}
-										placeholder="e.g., Custom_Object__c"
-										required></lightning-input>
+									<div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small">
+										<h4 class="slds-text-heading_small slds-m-bottom_x-small">📋 Related Record Configuration</h4>
+										<lightning-input
+											label="Related Record Object API Name"
+											value={relatedRecordObjectApiName}
+											onchange={handleObjectApiNameChange}
+											placeholder="e.g., Custom_Object__c"
+											field-level-help="The API name of the object containing the survey URL fields"
+											required></lightning-input>
+										<lightning-input
+											label="Training Type Field API Name (optional)"
+											value={trainingTypeFieldApiName}
+											onchange={handleTrainingTypeFieldChange}
+											placeholder="e.g., Training_Type__c"
+											field-level-help="Field used to determine survey type routing"
+											class="slds-m-top_x-small"></lightning-input>
+									</div>
 								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Customer Survey Field API Name (on related record)"
-										value={customerSurveyFieldApiName}
-										onchange={handleCustomerFieldChange}
-										placeholder="e.g., Customer_Survey__c"></lightning-input>
+
+								<!-- Customer & Trainer Survey Settings -->
+								<div class="slds-col slds-size_1-of-1">
+									<div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small">
+										<h4 class="slds-text-heading_small slds-m-bottom_x-small">🎯 Customer & Trainer Survey Fields</h4>
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Customer Survey Field API Name"
+													value={customerSurveyFieldApiName}
+													onchange={handleCustomerFieldChange}
+													placeholder="e.g., Customer_Survey__c"
+													field-level-help="Field on the related record storing customer survey URL"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Trainer Survey Field API Name"
+													value={trainerSurveyFieldApiName}
+													onchange={handleTrainerFieldChange}
+													placeholder="e.g., Trainer_Survey__c"
+													field-level-help="Field on the related record storing trainer survey URL"></lightning-input>
+											</div>
+										</div>
+									</div>
 								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Trainer Survey Field API Name (on related record)"
-										value={trainerSurveyFieldApiName}
-										onchange={handleTrainerFieldChange}
-										placeholder="e.g., Trainer_Survey__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Survey Field API Name (on related record)"
-										value={participantSurveyFieldApiName}
-										onchange={handleParticipantFieldChange}
-										placeholder="e.g., Participant_Survey__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Survey Link Field API Name (on participant record)"
-										value={participantSurveyLinkFieldApiName}
-										onchange={handleParticipantLinkFieldChange}
-										placeholder="e.g., Participant_Survey__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Object API Name"
-										value={participantObjectApiName}
-										onchange={handleParticipantObjectChange}
-										placeholder="e.g., Participants__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Lookup Field API Name"
-										value={participantLookupFieldApiName}
-										onchange={handleParticipantLookupChange}
-										placeholder="e.g., Training_Request__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Name Field API Name"
-										value={participantNameFieldApiName}
-										onchange={handleParticipantNameChange}
-										placeholder="e.g., Participant_Name__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Participant Email Field API Name"
-										value={participantEmailFieldApiName}
-										onchange={handleParticipantEmailChange}
-										placeholder="e.g., Email__c"></lightning-input>
-								</div>
-								<div class="slds-col slds-size_1-of-2">
-									<lightning-input
-										label="Training Type Field API Name (optional)"
-										value={trainingTypeFieldApiName}
-										onchange={handleTrainingTypeFieldChange}
-										placeholder="e.g., Training_Type__c"></lightning-input>
+
+								<!-- Participant Configuration -->
+								<div class="slds-col slds-size_1-of-1">
+									<div class="slds-box slds-box_x-small slds-theme_default">
+										<h4 class="slds-text-heading_small slds-m-bottom_x-small">👥 Participant Configuration</h4>
+										<p class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">Configure participant object and field mappings</p>
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Object API Name"
+													value={participantObjectApiName}
+													onchange={handleParticipantObjectChange}
+													placeholder="e.g., Participants__c"
+													field-level-help="The participant/child object API name"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Lookup Field"
+													value={participantLookupFieldApiName}
+													onchange={handleParticipantLookupChange}
+													placeholder="e.g., Training_Request__c"
+													field-level-help="Lookup field from participant to parent record"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Survey Field (on parent)"
+													value={participantSurveyFieldApiName}
+													onchange={handleParticipantFieldChange}
+													placeholder="e.g., Participant_Survey__c"
+													field-level-help="Field on parent record storing survey ID"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Survey Link Field (on participant)"
+													value={participantSurveyLinkFieldApiName}
+													onchange={handleParticipantLinkFieldChange}
+													placeholder="e.g., Participant_Survey__c"
+													field-level-help="Field on participant record storing survey URL"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Name Field"
+													value={participantNameFieldApiName}
+													onchange={handleParticipantNameChange}
+													placeholder="e.g., Participant_Name__c"
+													field-level-help="Field containing participant's name"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+												<lightning-input
+													label="Participant Email Field"
+													value={participantEmailFieldApiName}
+													onchange={handleParticipantEmailChange}
+													placeholder="e.g., Email__c"
+													field-level-help="Field containing participant's email"></lightning-input>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</template>
@@ -234,8 +266,8 @@
 					</template>
 				</div>
 
-				<div class="slds-box slds-theme_error">
-					<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Final Confirmation</h3>
+				<div class="slds-box slds-theme_error" role="alert" aria-labelledby="confirmation-title">
+					<h3 id="confirmation-title" class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Final Confirmation</h3>
 					<p class="slds-text-body_regular slds-m-bottom_small">You are about to regenerate survey links for the selected records.</p>
 					<p class="slds-text-heading_small slds-m-bottom_xx-small">This action will:</p>
 					<ul class="slds-list_dotted">
@@ -257,10 +289,10 @@
 
 		<!-- Step 3: Results -->
 		<template lwc:if={showResults}>
-			<div class="slds-p-around_medium">
+			<div class="slds-p-around_medium" role="region" aria-label="Regeneration results">
 				<!-- Success Message -->
 				<template lwc:if={showSuccessMessage}>
-					<div class="slds-box slds-theme_success slds-m-bottom_medium">
+					<div class="slds-box slds-theme_success slds-m-bottom_medium" role="status" aria-live="polite">
 						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #027e46">✓ Survey Links Regenerated Successfully</h3>
 						<p class="slds-text-body_regular">The survey links and invitations have been regenerated.</p>
 					</div>
@@ -268,7 +300,7 @@
 
 				<!-- Error Message -->
 				<template lwc:if={showErrorMessage}>
-					<div class="slds-box slds-theme_error slds-m-bottom_medium">
+					<div class="slds-box slds-theme_error slds-m-bottom_medium" role="alert" aria-live="assertive">
 						<h3 class="slds-text-heading_small slds-m-bottom_small" style="color: #c23934">⚠️ Regeneration Completed with Errors</h3>
 						<p class="slds-text-body_regular">Some survey links could not be regenerated.</p>
 					</div>
@@ -296,9 +328,16 @@
 
 				<!-- Error Details -->
 				<template lwc:if={errorDetails}>
-					<div class="slds-box slds-theme_shade slds-m-top_medium">
-						<h3 class="slds-text-heading_small slds-m-bottom_small">Error Details</h3>
-						<p class="slds-text-body_regular">{errorDetails}</p>
+					<div class="slds-box slds-theme_warning slds-m-top_medium">
+						<h3 class="slds-text-heading_small slds-m-bottom_small">⚠️ Issues Encountered</h3>
+						<div class="error-details-container">
+							<p class="slds-text-body_regular">{errorDetails}</p>
+						</div>
+						<div class="slds-m-top_small">
+							<p class="slds-text-body_small slds-text-color_weak">
+								<strong>What to do next:</strong> Review the errors above, fix any configuration issues, and try regenerating the failed records again.
+							</p>
+						</div>
 					</div>
 				</template>
 

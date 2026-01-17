@@ -21,3 +21,14 @@
 	background-color: #f3f3f3;
 	border-radius: 0.25rem;
 }
+
+.error-details-container {
+	white-space: pre-wrap;
+	font-family: 'Courier New', monospace;
+	font-size: 0.875rem;
+	padding: 0.5rem;
+	background-color: #fef5e7;
+	border-left: 3px solid #ff6b35;
+	max-height: 200px;
+	overflow-y: auto;
+}
