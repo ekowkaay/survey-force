@@ -69,8 +69,8 @@
 
 							<template lwc:if={useBulkInput}>
 								<lightning-textarea
-									label="Record IDs or Names (comma-separated)"
-									placeholder="Enter IDs or names separated by commas, semicolons, or new lines&#10;Example: a0X000000001, Training Request 1, a0X000000002"
+									label="Record IDs (comma-separated)"
+									placeholder="Enter Salesforce record IDs separated by commas, semicolons, or new lines&#10;Example: a0X000000001ABC, a0X000000002XYZ, a0X000000003DEF"
 									value={bulkInputValue}
 									onchange={handleBulkInputChange}
 									rows="4"
@@ -81,7 +81,7 @@
 									onclick={handleParseBulkInput}
 									disabled={isBulkInputEmpty}
 									class="slds-m-bottom_x-small"></lightning-button>
-								<p class="slds-text-body_small slds-text-color_weak">Tip: Paste multiple record IDs or names at once. Invalid IDs will be highlighted.</p>
+								<p class="slds-text-body_small slds-text-color_weak">Tip: Paste multiple 15 or 18-character record IDs at once. Invalid IDs will be highlighted.</p>
 							</template>
 							<template lwc:else>
 								<lightning-record-picker

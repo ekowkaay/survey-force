@@ -44,8 +44,10 @@ The regeneration process:
      - Click "Add Record" to add each selected record to the list
    - **Option B: Bulk ID Input** (Faster for multiple records)
      - Toggle "Use bulk ID input" to ON
-     - Paste comma, semicolon, or newline-separated record IDs or names
-     - Click "Parse and Add Records" to add them to the list
+     - Paste comma, semicolon, or newline-separated Salesforce record IDs (15 or 18 characters)
+     - Click "Parse and Add Records" to validate and add them to the list
+     - Invalid IDs are automatically skipped with a warning message
+     - **Note**: Only valid Salesforce IDs are accepted, not record names
    - Selected records appear in a table below with the option to remove individual records or clear all
 
 3. **Configure Advanced Settings (Optional)**
@@ -205,10 +207,20 @@ Users must have the following permission set assigned:
 
 **Problem**: Bulk ID input not parsing correctly
 - **Solution**: 
-  - Ensure IDs are valid 15 or 18-character Salesforce IDs
+  - **IDs must be valid Salesforce IDs**: Only 15 or 18-character alphanumeric Salesforce record IDs are accepted
+  - **Record names are NOT supported**: Use the record picker (Option A) if you want to search by name
+  - The system will automatically skip invalid entries and show which ones were rejected
   - Separate IDs with commas, semicolons, or new lines
   - Remove any extra spaces or special characters
-  - Try adding records one at a time to identify invalid IDs
+  - Example valid IDs: `a0X000000001ABC`, `a0X000000002XYZ123`
+  - Invalid examples: `Training Request 1`, `TR-001`, `123` (too short)
+
+**Problem**: "Invalid id" error during regeneration
+- **Solution**:
+  - This occurs when non-ID values (like record names or short codes) are added to the list
+  - Clear the list and re-add using validated IDs only
+  - Use bulk input which now validates all IDs before adding them
+  - Or use the record picker to search by name and add individual records
 
 **Problem**: Custom object settings not working
 - **Solution**:

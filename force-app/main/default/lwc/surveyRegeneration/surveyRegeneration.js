@@ -182,7 +182,26 @@ export default class SurveyRegeneration extends LightningElement {
 		return idsParam
 			.split(/[,\s;]+/)
 			.map((value) => value.trim())
-			.filter((value) => value);
+			.filter((value) => value && this.isValidSalesforceId(value));
+	}
+
+	/**
+	 * Validates if a string is a valid Salesforce ID (15 or 18 characters)
+	 * @param {string} id - The ID to validate
+	 * @returns {boolean} - True if valid Salesforce ID format
+	 */
+	isValidSalesforceId(id) {
+		if (!id || typeof id !== 'string') {
+			return false;
+		}
+
+		// Salesforce IDs are either 15 or 18 characters long
+		// and contain only alphanumeric characters
+		const trimmedId = id.trim();
+		const validLength = trimmedId.length === 15 || trimmedId.length === 18;
+		const validFormat = /^[a-zA-Z0-9]+$/.test(trimmedId);
+
+		return validLength && validFormat;
 	}
 
 	addSelectedRecordsFromIds(ids) {
@@ -261,18 +280,50 @@ export default class SurveyRegeneration extends LightningElement {
 
 	handleParseBulkInput() {
 		if (this.isBulkInputEmpty) {
-			this.showToast('Error', 'Please enter at least one record ID or name.', 'error');
+			this.showToast('Error', 'Please enter at least one record ID.', 'error');
 			return;
 		}
 
-		const ids = this.parsePrefillIds(this.bulkInputValue);
-		if (ids.length === 0) {
-			this.showToast('Error', 'No valid record IDs found in the input.', 'error');
+		// Parse all entries
+		const allEntries = this.bulkInputValue
+			.split(/[,\s;]+/)
+			.map((value) => value.trim())
+			.filter((value) => value);
+
+		if (allEntries.length === 0) {
+			this.showToast('Error', 'No entries found in the input.', 'error');
 			return;
 		}
 
-		this.addSelectedRecordsFromIds(ids);
-		this.showToast('Success', `Added ${ids.length} record(s) to the list.`, 'success');
+		// Separate valid IDs from invalid entries
+		const validIds = [];
+		const invalidEntries = [];
+
+		allEntries.forEach((entry) => {
+			if (this.isValidSalesforceId(entry)) {
+				validIds.push(entry);
+			} else {
+				invalidEntries.push(entry);
+			}
+		});
+
+		// Show warning if there are invalid entries
+		if (invalidEntries.length > 0) {
+			const invalidCount = invalidEntries.length;
+			const invalidSample = invalidEntries.slice(0, 3).join(', ');
+			const moreSuffix = invalidEntries.length > 3 ? `, and ${invalidEntries.length - 3} more` : '';
+
+			this.showToast('Warning', `Skipped ${invalidCount} invalid ID(s): ${invalidSample}${moreSuffix}. IDs must be 15 or 18 alphanumeric characters.`, 'warning');
+		}
+
+		// Add valid IDs if any
+		if (validIds.length === 0) {
+			this.showToast('Error', 'No valid Salesforce IDs found. IDs must be 15 or 18 alphanumeric characters.', 'error');
+			return;
+		}
+
+		this.addSelectedRecordsFromIds(validIds);
+		this.showToast('Success', `Added ${validIds.length} valid record ID(s) to the list.`, 'success');
 		this.bulkInputValue = '';
 	}
 
