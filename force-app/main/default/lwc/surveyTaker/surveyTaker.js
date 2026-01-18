@@ -404,7 +404,23 @@ export default class SurveyTaker extends LightningElement {
 				this.isLoading = false;
 			})
 			.catch((err) => {
-				this.error = err.body?.message || err.message || 'Error loading survey';
+				// Enhanced error handling with user-friendly messages
+				const errorMessage = err.body?.message || err.message || 'Unknown error';
+				
+				// Parse specific error types and provide actionable guidance
+				if (errorMessage.toLowerCase().includes('survey not found')) {
+					this.error = 'Survey not found. The survey may have been deleted or the link is incorrect. Please contact the survey administrator for a valid link.';
+				} else if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('access')) {
+					this.error = 'You don\'t have permission to access this survey. If you believe this is an error, please contact your administrator.';
+				} else if (errorMessage.toLowerCase().includes('expired')) {
+					this.error = 'This survey link has expired. Please request a new survey link from the survey administrator.';
+				} else if (errorMessage.toLowerCase().includes('already submitted') || errorMessage.toLowerCase().includes('already completed')) {
+					this.error = 'You have already submitted this survey. Each survey link can only be used once. Thank you for your response!';
+				} else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
+					this.error = 'Network connection error. Please check your internet connection and try refreshing the page.';
+				} else {
+					this.error = `Unable to load survey: ${errorMessage}. Please try refreshing the page or contact support if the problem persists.`;
+				}
 				this.isLoading = false;
 			});
 	}
@@ -602,14 +618,34 @@ export default class SurveyTaker extends LightningElement {
 				if (result.success) {
 					this.thankYouText = result.thankYouText || this.thankYouText;
 					this.isSubmitted = true;
-					this.showToast('Success', 'Survey submitted successfully!', 'success');
+					this.showToast('Success', 'Thank you! Your survey has been submitted successfully.', 'success');
 				} else {
-					this.showToast('Error', result.message || 'Error submitting survey', 'error');
+					// Provide specific error message from server
+					const errorMsg = result.message || 'Unable to submit survey';
+					this.showToast('Submission Error', errorMsg + '. Please try again or contact support if the problem continues.', 'error');
 				}
 				this.isSubmitting = false;
 			})
 			.catch((err) => {
-				this.showToast('Error', err.body?.message || 'Error submitting survey', 'error');
+				// Enhanced error handling for submission failures
+				const errorMessage = err.body?.message || err.message || 'Unknown error';
+				
+				let userMessage = '';
+				if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already submitted')) {
+					userMessage = 'This survey has already been submitted. Each survey link can only be used once.';
+				} else if (errorMessage.toLowerCase().includes('expired')) {
+					userMessage = 'This survey link has expired. Please request a new link from the survey administrator.';
+				} else if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('access')) {
+					userMessage = 'You don\'t have permission to submit this survey. Please contact your administrator.';
+				} else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
+					userMessage = 'Network connection error. Your responses have not been saved. Please check your connection and try again.';
+				} else if (errorMessage.toLowerCase().includes('timeout')) {
+					userMessage = 'The request timed out. Your responses may not have been saved. Please try submitting again.';
+				} else {
+					userMessage = `Unable to submit survey: ${errorMessage}. Your responses have not been saved. Please try again.`;
+				}
+				
+				this.showToast('Submission Failed', userMessage, 'error');
 				this.isSubmitting = false;
 			});
 	}

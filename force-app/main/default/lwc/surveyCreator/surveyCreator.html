@@ -201,13 +201,19 @@
 													class="slds-m-bottom_small"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-												<lightning-input
-													label="Survey Header"
-													value={surveyHeader}
-													onchange={handleHeaderChange}
-													disabled={isCreating}
-													placeholder="Enter header text"
-													class="slds-m-bottom_small"></lightning-input>
+												<div class="slds-form-element__label-wrapper">
+													<lightning-input
+														label="Survey Header"
+														value={surveyHeader}
+														onchange={handleHeaderChange}
+														disabled={isCreating}
+														placeholder="Enter header text"
+														class="slds-m-bottom_small"></lightning-input>
+													<lightning-helptext
+														content="The main heading displayed at the top of your survey. Use this to welcome respondents or explain the survey's purpose."
+														icon-name="utility:info">
+													</lightning-helptext>
+												</div>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
 												<lightning-input
@@ -219,40 +225,64 @@
 													class="slds-m-bottom_small"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-												<lightning-textarea
-													label="Thank You Message"
-													value={thankYouText}
-													onchange={handleThankYouTextChange}
-													disabled={isCreating}
-													placeholder="Enter thank you message"
-													class="slds-m-bottom_small"></lightning-textarea>
+												<div class="slds-form-element__label-wrapper">
+													<lightning-textarea
+														label="Thank You Message"
+														value={thankYouText}
+														onchange={handleThankYouTextChange}
+														disabled={isCreating}
+														placeholder="Enter thank you message"
+														class="slds-m-bottom_small"></lightning-textarea>
+													<lightning-helptext
+														content="Customize the message shown to respondents after they complete your survey. This is your opportunity to thank them and provide next steps."
+														icon-name="utility:info">
+													</lightning-helptext>
+												</div>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-												<lightning-input
-													label="Thank You Link"
-													value={thankYouLink}
-													onchange={handleThankYouLinkChange}
-													disabled={isCreating}
-													placeholder="https://example.com"
-													class="slds-m-bottom_small"></lightning-input>
+												<div class="slds-form-element__label-wrapper">
+													<lightning-input
+														label="Thank You Link"
+														value={thankYouLink}
+														onchange={handleThankYouLinkChange}
+														disabled={isCreating}
+														placeholder="https://example.com"
+														class="slds-m-bottom_small"></lightning-input>
+													<lightning-helptext
+														content="Optional: Provide a URL where respondents can learn more or take additional action after completing the survey."
+														icon-name="utility:info">
+													</lightning-helptext>
+												</div>
 											</div>
 											<div class="slds-col slds-size_1-of-1">
 												<div class="slds-grid slds-wrap">
 													<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-														<lightning-input
-															type="checkbox"
-															label="Hide Survey Name"
-															checked={hideSurveyName}
-															onchange={handleHideSurveyNameChange}
-															disabled={isCreating}></lightning-input>
+														<div class="slds-form-element">
+															<lightning-input
+																type="checkbox"
+																label="Hide Survey Name"
+																checked={hideSurveyName}
+																onchange={handleHideSurveyNameChange}
+																disabled={isCreating}></lightning-input>
+															<lightning-helptext
+																content="Check this box to hide the survey name from respondents. The survey header will be displayed instead."
+																icon-name="utility:info">
+															</lightning-helptext>
+														</div>
 													</div>
 													<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-														<lightning-input
-															type="checkbox"
-															label="All Responses Anonymous"
-															checked={allResponsesAnonymous}
-															onchange={handleAllResponsesAnonymousChange}
-															disabled={isCreating}></lightning-input>
+														<div class="slds-form-element">
+															<lightning-input
+																type="checkbox"
+																label="All Responses Anonymous"
+																checked={allResponsesAnonymous}
+																onchange={handleAllResponsesAnonymousChange}
+																disabled={isCreating}></lightning-input>
+															<lightning-helptext
+																content="Enable this to collect all responses anonymously. Respondents' names and user information will not be recorded."
+																icon-name="utility:info">
+															</lightning-helptext>
+														</div>
 													</div>
 												</div>
 											</div>
@@ -323,10 +353,27 @@
 										</ul>
 									</template>
 									<template lwc:else>
-										<div class="slds-illustration slds-illustration_small empty-state slds-p-around_large">
+										<div class="slds-illustration slds-illustration_small empty-state slds-p-around_large slds-text-align_center">
+											<div class="slds-m-bottom_medium">
+												<lightning-icon
+													icon-name="utility:questions_and_answers"
+													size="large"
+													alternative-text="No questions">
+												</lightning-icon>
+											</div>
 											<div class="slds-text-longform">
-												<h3 class="slds-text-heading_medium">No Questions Yet</h3>
-												<p class="slds-text-body_regular">Click "Add Question" to start building your survey.</p>
+												<h3 class="slds-text-heading_medium slds-m-bottom_small">No questions added yet</h3>
+												<p class="slds-text-body_regular slds-m-bottom_medium slds-text-color_weak">
+													Add questions to start building your survey. You can choose from multiple question types:<br/>
+													free text, single select, multi-select, and rating scales.
+												</p>
+												<lightning-button
+													label="Add Your First Question"
+													icon-name="utility:add"
+													variant="brand"
+													onclick={handleAddQuestion}
+													disabled={isCreating}>
+												</lightning-button>
 											</div>
 										</div>
 									</template>
@@ -372,10 +419,27 @@
 										</div>
 									</template>
 									<template lwc:else>
-										<div class="slds-illustration slds-illustration_small slds-p-around_large">
+										<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+											<div class="slds-m-bottom_medium">
+												<lightning-icon
+													icon-name="utility:save"
+													size="large"
+													alternative-text="Save survey first">
+												</lightning-icon>
+											</div>
 											<div class="slds-text-longform">
-												<h3 class="slds-text-heading_medium">Save Your Survey First</h3>
-												<p class="slds-text-body_regular">Create and save your survey to get a shareable link.</p>
+												<h3 class="slds-text-heading_medium slds-m-bottom_small">Save Your Survey First</h3>
+												<p class="slds-text-body_regular slds-m-bottom_medium slds-text-color_weak">
+													Create and save your survey to generate a shareable link.<br/>
+													You'll be able to share via email, social media, or copy the direct link.
+												</p>
+												<lightning-button
+													label="Save Survey Now"
+													icon-name="utility:save"
+													variant="brand"
+													onclick={handleCreateSurvey}
+													disabled={isCreating}>
+												</lightning-button>
 											</div>
 										</div>
 									</template>
@@ -548,53 +612,92 @@
 					<h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{questionModalTitle}</h2>
 				</header>
 				<div class="slds-modal__content slds-p-around_medium">
-					<lightning-textarea
-						label="Question"
-						value={currentQuestion.question}
-						onchange={handleQuestionChange}
-						required
-						placeholder="Enter your question"
-						class="slds-m-bottom_medium"></lightning-textarea>
+					<div class="slds-form-element__label-wrapper">
+						<lightning-textarea
+							label="Question"
+							value={currentQuestion.question}
+							onchange={handleQuestionChange}
+							required
+							placeholder="Enter your question"
+							class="slds-m-bottom_medium"></lightning-textarea>
+						<lightning-helptext
+							content="Write a clear, concise question. Good questions are specific and easy to understand."
+							icon-name="utility:info">
+						</lightning-helptext>
+					</div>
 
-					<lightning-combobox
-						label="Question Type"
-						value={currentQuestion.questionType}
-						options={questionTypeOptions}
-						onchange={handleQuestionTypeChange}
-						required
-						class="slds-m-bottom_medium"></lightning-combobox>
+					<div class="slds-form-element__label-wrapper">
+						<lightning-combobox
+							label="Question Type"
+							value={currentQuestion.questionType}
+							options={questionTypeOptions}
+							onchange={handleQuestionTypeChange}
+							required
+							class="slds-m-bottom_medium"></lightning-combobox>
+						<lightning-helptext
+							content="Choose how respondents will answer: Free Text (open-ended), Single Select (choose one), or Multi-Select (choose many)."
+							icon-name="utility:info">
+						</lightning-helptext>
+					</div>
 
-					<lightning-input type="checkbox" label="Required" checked={currentQuestion.required} onchange={handleRequiredChange} class="slds-m-bottom_medium"></lightning-input>
+					<div class="slds-form-element__label-wrapper">
+						<lightning-input type="checkbox" label="Required" checked={currentQuestion.required} onchange={handleRequiredChange} class="slds-m-bottom_medium"></lightning-input>
+						<lightning-helptext
+							content="Mark this question as required if respondents must answer it before submitting the survey."
+							icon-name="utility:info">
+						</lightning-helptext>
+					</div>
 
 					<template lwc:if={showChoices}>
-						<lightning-textarea
-							label="Choices (One per line)"
-							value={currentQuestion.choicesText}
-							onchange={handleChoicesChange}
-							placeholder="Choice 1&#10;Choice 2&#10;Choice 3"
-							class="slds-m-bottom_medium"></lightning-textarea>
+						<div class="slds-form-element__label-wrapper">
+							<lightning-textarea
+								label="Choices (One per line)"
+								value={currentQuestion.choicesText}
+								onchange={handleChoicesChange}
+								placeholder="Choice 1&#10;Choice 2&#10;Choice 3"
+								class="slds-m-bottom_medium"></lightning-textarea>
+							<lightning-helptext
+								content="Enter each choice on a new line. For horizontal scales, use numbers (1, 2, 3, 4, 5) to create a rating scale."
+								icon-name="utility:info">
+							</lightning-helptext>
+						</div>
 					</template>
 
 					<template lwc:if={showScaleLabels}>
-						<div class="slds-grid slds-gutters slds-m-bottom_medium">
+						<div class="slds-grid slds-gutters slds-m-bottom_small">
 							<div class="slds-col slds-size_1-of-2">
-								<lightning-combobox
-									label="Scale Start Label"
-									value={currentQuestion.scaleStartLabel}
-									options={scaleStartLabelOptions}
-									onchange={handleScaleStartLabelChange}
-									placeholder="Select a label"></lightning-combobox>
+								<div class="slds-form-element__label-wrapper">
+									<lightning-combobox
+										label="Scale Start Label"
+										value={currentQuestion.scaleStartLabel}
+										options={scaleStartLabelOptions}
+										onchange={handleScaleStartLabelChange}
+										placeholder="Select a label"></lightning-combobox>
+									<lightning-helptext
+										content="Label for the low end of your scale (e.g., 'Very Difficult', 'Strongly Disagree')."
+										icon-name="utility:info">
+									</lightning-helptext>
+								</div>
 							</div>
 							<div class="slds-col slds-size_1-of-2">
-								<lightning-combobox
-									label="Scale End Label"
-									value={currentQuestion.scaleEndLabel}
-									options={scaleEndLabelOptions}
-									onchange={handleScaleEndLabelChange}
-									placeholder="Select a label"></lightning-combobox>
+								<div class="slds-form-element__label-wrapper">
+									<lightning-combobox
+										label="Scale End Label"
+										value={currentQuestion.scaleEndLabel}
+										options={scaleEndLabelOptions}
+										onchange={handleScaleEndLabelChange}
+										placeholder="Select a label"></lightning-combobox>
+									<lightning-helptext
+										content="Label for the high end of your scale (e.g., 'Very Easy', 'Strongly Agree')."
+										icon-name="utility:info">
+									</lightning-helptext>
+								</div>
 							</div>
 						</div>
-						<div class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">These labels will appear at the ends of the horizontal scale to guide respondents.</div>
+						<div class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+							<lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+							These labels help respondents understand what each number on your scale represents.
+						</div>
 					</template>
 				</div>
 				<footer class="slds-modal__footer">
