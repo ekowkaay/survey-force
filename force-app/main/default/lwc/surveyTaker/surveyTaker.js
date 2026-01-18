@@ -238,6 +238,10 @@ export default class SurveyTaker extends LightningElement {
 		return Math.round((this.currentQuestionNumber / this.totalQuestions) * 100);
 	}
 
+	get progressAriaLabel() {
+		return `Survey progress: Question ${this.currentQuestionNumber} of ${this.totalQuestions}`;
+	}
+
 	get isFirstQuestion() {
 		return this.currentQuestionIndex === 0;
 	}
@@ -345,6 +349,51 @@ export default class SurveyTaker extends LightningElement {
 		// If recordId comes from URL state via wire adapter, it will load there instead
 		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
+		}
+
+		// Add keyboard event listener for accessibility
+		window.addEventListener('keydown', this.handleKeyDown.bind(this));
+	}
+
+	disconnectedCallback() {
+		// Clean up event listener
+		window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+	}
+
+	/**
+	 * Handle keyboard shortcuts for better accessibility
+	 * @param {KeyboardEvent} event - The keyboard event
+	 */
+	handleKeyDown(event) {
+		// Don't handle keyboard events if in preview mode or survey is submitted/loading
+		if (this.isPreviewMode || this.isSubmitted || this.isLoading || this.isSubmitting) {
+			return;
+		}
+
+		// Don't interfere with typing in text inputs
+		const target = event.target;
+		if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && target.type === 'text')) {
+			return;
+		}
+
+		// Arrow key navigation
+		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			event.preventDefault();
+			if (!this.isLastQuestion && !this.showAnonymousSelection) {
+				this.handleNext();
+			}
+		} else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (!this.isFirstQuestion || this.showAnonymousSelection) {
+				this.handlePrevious();
+			}
+		}
+		// Ctrl/Cmd + Enter to submit
+		else if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+			event.preventDefault();
+			if (this.isLastQuestion || this.showAnonymousSelection) {
+				this.handleSubmit();
+			}
 		}
 	}
 
@@ -521,11 +570,15 @@ export default class SurveyTaker extends LightningElement {
 			// Show anonymous selection if applicable, otherwise submit
 			if (this.canChooseAnonymous) {
 				this.showAnonymousSelection = true;
+				// Focus on anonymous selection after render
+				this.focusOnElement('#anonymous-heading');
 			} else {
 				this.handleSubmit();
 			}
 		} else {
 			this.currentQuestionIndex++;
+			// Focus on the question title after navigation for accessibility
+			this.focusOnElement('#question-title');
 		}
 	}
 
@@ -533,7 +586,24 @@ export default class SurveyTaker extends LightningElement {
 		if (this.currentQuestionIndex > 0) {
 			this.currentQuestionIndex--;
 			this.showAnonymousSelection = false;
+			// Focus on the question title after navigation for accessibility
+			this.focusOnElement('#question-title');
 		}
+	}
+
+	/**
+	 * Helper method to set focus on an element after DOM updates
+	 * @param {string} selector - CSS selector for the element to focus
+	 */
+	focusOnElement(selector) {
+		// Use setTimeout to wait for DOM update
+		// eslint-disable-next-line @lwc/lwc/no-async-operation
+		setTimeout(() => {
+			const element = this.template.querySelector(selector);
+			if (element) {
+				element.focus();
+			}
+		}, 100);
 	}
 
 	handleBackToLastQuestion() {
