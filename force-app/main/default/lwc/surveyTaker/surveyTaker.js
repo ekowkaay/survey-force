@@ -343,6 +343,9 @@ export default class SurveyTaker extends LightningElement {
 		];
 	}
 
+	// Bound function reference for event listener cleanup
+	boundHandleKeyDown = this.handleKeyDown.bind(this);
+
 	connectedCallback() {
 		// Only load survey data if recordId or token is available and not already loaded
 		// Also check if not currently loading to prevent race conditions
@@ -352,12 +355,12 @@ export default class SurveyTaker extends LightningElement {
 		}
 
 		// Add keyboard event listener for accessibility
-		window.addEventListener('keydown', this.handleKeyDown.bind(this));
+		window.addEventListener('keydown', this.boundHandleKeyDown);
 	}
 
 	disconnectedCallback() {
-		// Clean up event listener
-		window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+		// Clean up event listener using the same bound reference
+		window.removeEventListener('keydown', this.boundHandleKeyDown);
 	}
 
 	/**
@@ -596,14 +599,13 @@ export default class SurveyTaker extends LightningElement {
 	 * @param {string} selector - CSS selector for the element to focus
 	 */
 	focusOnElement(selector) {
-		// Use setTimeout to wait for DOM update
-		// eslint-disable-next-line @lwc/lwc/no-async-operation
-		setTimeout(() => {
+		// Use requestAnimationFrame to ensure DOM has been updated before focusing
+		requestAnimationFrame(() => {
 			const element = this.template.querySelector(selector);
-			if (element) {
+			if (element && typeof element.focus === 'function') {
 				element.focus();
 			}
-		}, 100);
+		});
 	}
 
 	handleBackToLastQuestion() {
