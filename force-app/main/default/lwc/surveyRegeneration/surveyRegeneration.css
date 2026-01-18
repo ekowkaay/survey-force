@@ -28,7 +28,7 @@
 	font-size: 0.875rem;
 	padding: 0.5rem;
 	background-color: var(--lwc-colorBackgroundWarning, #fef5e7);
-	border-left: 3px solid var(--lwc-colorBorderWarning, #fe9339);
+	border-left: 3px solid var(--lwc-colorBorderWarning, #ff6b35);
 	max-height: 200px;
 	overflow-y: auto;
 }
