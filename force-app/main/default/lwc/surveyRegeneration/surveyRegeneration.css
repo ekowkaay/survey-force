@@ -18,7 +18,7 @@
 	max-height: 150px;
 	overflow-y: auto;
 	padding: 0.5rem;
-	background-color: #f3f3f3;
+	background-color: var(--lwc-colorBackgroundAlt, #f3f3f3);
 	border-radius: 0.25rem;
 }
 
@@ -27,21 +27,21 @@
 	font-family: 'Courier New', monospace;
 	font-size: 0.875rem;
 	padding: 0.5rem;
-	background-color: #fef5e7;
-	border-left: 3px solid #ff6b35;
+	background-color: var(--lwc-colorBackgroundWarning, #fef5e7);
+	border-left: 3px solid var(--lwc-colorBorderWarning, #fe9339);
 	max-height: 200px;
 	overflow-y: auto;
 }
 
 .success-heading {
-	color: #027e46;
+	color: var(--lwc-colorTextSuccess, #027e46);
 }
 
 .error-heading {
-	color: #c23934;
+	color: var(--lwc-colorTextError, #c23934);
 }
 
 .warning-heading {
-	color: #c23934;
+	color: var(--lwc-colorTextError, #c23934);
 	font-weight: bold;
 }

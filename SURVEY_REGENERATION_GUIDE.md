@@ -273,7 +273,7 @@ The Lightning Web Component has been enhanced with several UX improvements for a
 
 ### Bulk Input Options
 - **Toggle Between Input Methods**: Switch between record picker (search) and bulk ID input
-- **Paste Multiple IDs**: Enter comma, semicolon, or newline-separated record IDs or names
+- **Paste Multiple IDs**: Enter comma, semicolon, or newline-separated Salesforce record IDs (15- or 18-character IDs)
 - **Instant Parsing**: One-click parsing and validation of bulk entries
 - **Record Preview**: View selected records in a table with individual remove options
 

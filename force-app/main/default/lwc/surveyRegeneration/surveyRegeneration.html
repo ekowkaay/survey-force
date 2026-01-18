@@ -5,6 +5,10 @@
 			<section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="clear-confirmation-title" class="slds-modal slds-fade-in-open">
 				<div class="slds-modal__container">
 					<header class="slds-modal__header">
+						<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" type="button" onclick={handleCancelClear}>
+							<lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+							<span class="slds-assistive-text">Close</span>
+						</button>
 						<h2 id="clear-confirmation-title" class="slds-text-heading_medium">Confirm Clear Selected Records</h2>
 					</header>
 					<div class="slds-modal__content slds-p-around_medium">
@@ -12,7 +16,7 @@
 					</div>
 					<footer class="slds-modal__footer">
 						<lightning-button label="Cancel" onclick={handleCancelClear}></lightning-button>
-						<lightning-button variant="brand" label="Continue" onclick={handleConfirmClear}></lightning-button>
+						<lightning-button variant="destructive" label="Continue" onclick={handleConfirmClear}></lightning-button>
 					</footer>
 				</div>
 			</section>
@@ -24,10 +28,10 @@
 			<div class="slds-is-relative loading-container" role="status" aria-live="polite" aria-atomic="true">
 				<div class="slds-align_absolute-center">
 					<div class="slds-text-align_center">
-						<lightning-spinner alternative-text="Processing survey regeneration" size="medium"></lightning-spinner>
+						<lightning-spinner alternative-text={loadingMessage} size="medium"></lightning-spinner>
 						<p class="slds-text-heading_small slds-m-top_medium" id="loading-title">Processing Survey Regeneration</p>
 						<p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small" id="loading-message">{loadingMessage}</p>
-						<div class="slds-m-top_small" aria-labelledby="loading-title loading-message">
+						<div class="slds-m-top_small">
 							<p class="slds-text-body_small">Please wait while we:</p>
 							<ul class="slds-list_dotted slds-m-top_xx-small">
 								<li>Delete existing survey invitations</li>
@@ -70,7 +74,7 @@
 							<template lwc:if={useBulkInput}>
 								<lightning-textarea
 									label="Record IDs (comma-separated)"
-									placeholder="Enter Salesforce record IDs separated by commas, semicolons, or new lines&#10;Example: a0X000000001ABC, a0X000000002XYZ, a0X000000003DEF"
+									placeholder="Enter Salesforce record IDs separated by commas, semicolons, or new lines (e.g., a0X000000001ABC, a0X000000002XYZ, a0X000000003DEF)"
 									value={bulkInputValue}
 									onchange={handleBulkInputChange}
 									rows="4"
