@@ -13,3 +13,35 @@
 .slds-dl_horizontal__detail {
 	margin-bottom: 0.5rem;
 }
+
+.record-preview-container {
+	max-height: 150px;
+	overflow-y: auto;
+	padding: 0.5rem;
+	background-color: var(--lwc-colorBackgroundAlt, #f3f3f3);
+	border-radius: 0.25rem;
+}
+
+.error-details-container {
+	white-space: pre-wrap;
+	font-family: 'Courier New', monospace;
+	font-size: 0.875rem;
+	padding: 0.5rem;
+	background-color: var(--lwc-colorBackgroundWarning, #fef5e7);
+	border-left: 3px solid var(--lwc-colorBorderWarning, #ff6b35);
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.success-heading {
+	color: var(--lwc-colorTextSuccess, #027e46);
+}
+
+.error-heading {
+	color: var(--lwc-colorTextError, #c23934);
+}
+
+.warning-heading {
+	color: var(--lwc-colorTextError, #c23934);
+	font-weight: bold;
+}

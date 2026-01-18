@@ -7,10 +7,14 @@ export default class SurveyRegeneration extends LightningElement {
 	@track selectedRecords = [];
 	@track pendingRecord = null;
 	@track recordPickerValue = null;
+	@track useBulkInput = false;
+	@track bulkInputValue = '';
 	@track regenerateParticipant = true;
 	@track regenerateCustomer = true;
 	@track regenerateTrainer = true;
 	@track useCustomSettings = false;
+	@track showClearConfirmation = false;
+	@track pendingCustomSettingsValue = false;
 	@track relatedRecordObjectApiName = 'Training_Request__c';
 	@track participantSurveyFieldApiName = 'Participant_Survey__c';
 	@track participantSurveyLinkFieldApiName = 'Participant_Survey__c';
@@ -25,6 +29,7 @@ export default class SurveyRegeneration extends LightningElement {
 
 	// UI State
 	@track isLoading = false;
+	@track loadingMessage = 'Preparing to regenerate surveys...';
 	@track showConfirmation = false;
 	@track showResults = false;
 
@@ -59,6 +64,10 @@ export default class SurveyRegeneration extends LightningElement {
 		return this.selectedRecords.length > 0;
 	}
 
+	get isBulkInputEmpty() {
+		return !this.bulkInputValue || this.bulkInputValue.trim().length === 0;
+	}
+
 	get hasObjectApiName() {
 		return !this.useCustomSettings || (this.relatedRecordObjectApiName && this.relatedRecordObjectApiName.trim().length > 0);
 	}
@@ -69,16 +78,11 @@ export default class SurveyRegeneration extends LightningElement {
 		}
 
 		const hasParticipantField = !this.regenerateParticipant || (this.participantSurveyFieldApiName && this.participantSurveyFieldApiName.trim().length > 0);
-		const hasParticipantLinkField =
-			!this.regenerateParticipant || (this.participantSurveyLinkFieldApiName && this.participantSurveyLinkFieldApiName.trim().length > 0);
-		const hasParticipantObject =
-			!this.regenerateParticipant || (this.participantObjectApiName && this.participantObjectApiName.trim().length > 0);
-		const hasParticipantLookup =
-			!this.regenerateParticipant || (this.participantLookupFieldApiName && this.participantLookupFieldApiName.trim().length > 0);
-		const hasParticipantName =
-			!this.regenerateParticipant || (this.participantNameFieldApiName && this.participantNameFieldApiName.trim().length > 0);
-		const hasParticipantEmail =
-			!this.regenerateParticipant || (this.participantEmailFieldApiName && this.participantEmailFieldApiName.trim().length > 0);
+		const hasParticipantLinkField = !this.regenerateParticipant || (this.participantSurveyLinkFieldApiName && this.participantSurveyLinkFieldApiName.trim().length > 0);
+		const hasParticipantObject = !this.regenerateParticipant || (this.participantObjectApiName && this.participantObjectApiName.trim().length > 0);
+		const hasParticipantLookup = !this.regenerateParticipant || (this.participantLookupFieldApiName && this.participantLookupFieldApiName.trim().length > 0);
+		const hasParticipantName = !this.regenerateParticipant || (this.participantNameFieldApiName && this.participantNameFieldApiName.trim().length > 0);
+		const hasParticipantEmail = !this.regenerateParticipant || (this.participantEmailFieldApiName && this.participantEmailFieldApiName.trim().length > 0);
 		const hasCustomerField = !this.regenerateCustomer || (this.customerSurveyFieldApiName && this.customerSurveyFieldApiName.trim().length > 0);
 		const hasTrainerField = !this.regenerateTrainer || (this.trainerSurveyFieldApiName && this.trainerSurveyFieldApiName.trim().length > 0);
 
@@ -133,6 +137,27 @@ export default class SurveyRegeneration extends LightningElement {
 		return this.selectedRecords.length > 0;
 	}
 
+	get selectedRecordCount() {
+		return this.selectedRecords.length;
+	}
+
+	get selectedSurveyTypesText() {
+		const types = [];
+		if (this.regenerateParticipant) types.push('Participant');
+		if (this.regenerateCustomer) types.push('Customer');
+		if (this.regenerateTrainer) types.push('Trainer');
+		return types.length > 0 ? types.join(', ') : 'None';
+	}
+
+	get selectedRecordsPreview() {
+		// Show max 10 records in preview
+		return this.selectedRecords.slice(0, 10);
+	}
+
+	get showSelectedRecordsList() {
+		return this.selectedRecords.length > 0 && this.selectedRecords.length <= 20;
+	}
+
 	@wire(CurrentPageReference)
 	handlePageReference(pageReference) {
 		if (!pageReference || !pageReference.state) {
@@ -149,7 +174,12 @@ export default class SurveyRegeneration extends LightningElement {
 		this.addSelectedRecordsFromIds(ids);
 	}
 
-	parsePrefillIds(idsParam) {
+	/**
+	 * Parses a string of IDs separated by various delimiters
+	 * @param {string} idsParam - String containing IDs
+	 * @returns {Array} - Array of trimmed, non-empty entries
+	 */
+	parseEntries(idsParam) {
 		if (!idsParam) {
 			return [];
 		}
@@ -158,6 +188,30 @@ export default class SurveyRegeneration extends LightningElement {
 			.split(/[,\s;]+/)
 			.map((value) => value.trim())
 			.filter((value) => value);
+	}
+
+	parsePrefillIds(idsParam) {
+		const entries = this.parseEntries(idsParam);
+		return entries.filter((entry) => this.isValidSalesforceId(entry));
+	}
+
+	/**
+	 * Validates if a string is a valid Salesforce ID (15 or 18 characters)
+	 * @param {string} id - The ID to validate
+	 * @returns {boolean} - True if valid Salesforce ID format
+	 */
+	isValidSalesforceId(id) {
+		if (!id || typeof id !== 'string') {
+			return false;
+		}
+
+		// Salesforce IDs are either 15 or 18 characters long
+		// and contain only alphanumeric characters
+		const trimmedId = id.trim();
+		const validLength = trimmedId.length === 15 || trimmedId.length === 18;
+		const validFormat = /^[a-zA-Z0-9]+$/.test(trimmedId);
+
+		return validLength && validFormat;
 	}
 
 	addSelectedRecordsFromIds(ids) {
@@ -223,6 +277,61 @@ export default class SurveyRegeneration extends LightningElement {
 		this.selectedRecords = [];
 		this.pendingRecord = null;
 		this.recordPickerValue = null;
+		this.bulkInputValue = '';
+	}
+
+	handleBulkInputToggle(event) {
+		this.useBulkInput = event.target.checked;
+	}
+
+	handleBulkInputChange(event) {
+		this.bulkInputValue = event.target.value;
+	}
+
+	handleParseBulkInput() {
+		if (this.isBulkInputEmpty) {
+			this.showToast('Error', 'Please enter at least one record ID.', 'error');
+			return;
+		}
+
+		// Parse all entries using shared method
+		const allEntries = this.parseEntries(this.bulkInputValue);
+
+		if (allEntries.length === 0) {
+			this.showToast('Error', 'No entries found in the input.', 'error');
+			return;
+		}
+
+		// Separate valid IDs from invalid entries
+		const validIds = [];
+		const invalidEntries = [];
+
+		allEntries.forEach((entry) => {
+			if (this.isValidSalesforceId(entry)) {
+				validIds.push(entry);
+			} else {
+				invalidEntries.push(entry);
+			}
+		});
+
+		// Show warning if there are invalid entries
+		if (invalidEntries.length > 0) {
+			const invalidCount = invalidEntries.length;
+			const invalidSample = invalidEntries.slice(0, 3).join(', ');
+			const moreSuffix = invalidEntries.length > 3 ? `, and ${invalidEntries.length - 3} more` : '';
+
+			this.showToast('Warning', `Skipped ${invalidCount} invalid ID(s): ${invalidSample}${moreSuffix}. IDs must be 15 or 18 alphanumeric characters.`, 'warning');
+		}
+
+		// Add valid IDs if any
+		if (validIds.length === 0) {
+			this.showToast('Error', 'No valid Salesforce IDs found. IDs must be 15 or 18 alphanumeric characters.', 'error');
+			return;
+		}
+
+		this.addSelectedRecordsFromIds(validIds);
+		this.showToast('Success', `Added ${validIds.length} valid record ID(s) to the list.`, 'success');
+		this.bulkInputValue = '';
 	}
 
 	handleParticipantChange(event) {
@@ -238,7 +347,33 @@ export default class SurveyRegeneration extends LightningElement {
 	}
 
 	handleCustomSettingsToggle(event) {
-		this.useCustomSettings = event.target.checked;
+		const newValue = event.target.checked;
+
+		// Show confirmation if toggling and records are selected
+		if (newValue !== this.useCustomSettings && this.selectedRecords.length > 0) {
+			// Store pending value and show confirmation modal
+			this.pendingCustomSettingsValue = newValue;
+			this.showClearConfirmation = true;
+			// Revert the toggle temporarily
+			event.target.checked = this.useCustomSettings;
+			return;
+		}
+
+		this.applyCustomSettingsToggle(newValue);
+	}
+
+	handleConfirmClear() {
+		this.showClearConfirmation = false;
+		this.applyCustomSettingsToggle(this.pendingCustomSettingsValue);
+	}
+
+	handleCancelClear() {
+		this.showClearConfirmation = false;
+		this.pendingCustomSettingsValue = this.useCustomSettings;
+	}
+
+	applyCustomSettingsToggle(newValue) {
+		this.useCustomSettings = newValue;
 		if (!this.useCustomSettings) {
 			this.relatedRecordObjectApiName = 'Training_Request__c';
 			this.participantSurveyFieldApiName = 'Participant_Survey__c';
@@ -316,6 +451,8 @@ export default class SurveyRegeneration extends LightningElement {
 		this.selectedRecords = [];
 		this.pendingRecord = null;
 		this.recordPickerValue = null;
+		this.useBulkInput = false;
+		this.bulkInputValue = '';
 		this.regenerateParticipant = true;
 		this.regenerateCustomer = true;
 		this.regenerateTrainer = true;
@@ -339,6 +476,7 @@ export default class SurveyRegeneration extends LightningElement {
 
 	executeRegeneration() {
 		this.isLoading = true;
+		this.loadingMessage = `Processing ${this.selectedRecords.length} record(s)...`;
 
 		const idsArray = this.selectedRecords.map((record) => record.id);
 
