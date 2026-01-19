@@ -35,58 +35,69 @@
 		<template if:false={isLoading}>
 			<template if:false={error}>
 				<template if:false={isSubmitted}>
-					<header class="header">
+					<header class="header" role="banner">
 						<div class="brand">
-							<div class="brandIcon">📊</div>
+							<div class="brandIcon" aria-hidden="true">📊</div>
 							<span>{headerTitle}</span>
 						</div>
 						<template if:true={isPreviewMode}>
-							<div class="slds-badge slds-badge_inverse slds-m-left_small">
+							<div class="slds-badge slds-badge_inverse slds-m-left_small" role="status" aria-live="polite">
 								<lightning-icon icon-name="utility:preview" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
 								Preview Mode
 							</div>
 						</template>
 						<template if:true={hasQuestions}>
-							<div class="pill">Question {currentQuestionNumber} of {totalQuestions}</div>
+							<div class="pill" role="status" aria-live="polite" aria-label={progressAriaLabel}>
+								Question {currentQuestionNumber} of {totalQuestions}
+							</div>
 						</template>
 					</header>
 
-					<section class="intro">
+					<section class="intro" role="contentinfo">
 						<div class="introInner">
 							<div>
-								<h1>{introHeading}</h1>
-								<p class="subhead">{introSubheading}</p>
+								<h1 id="survey-title">{introHeading}</h1>
+								<p class="subhead" id="survey-description">{introSubheading}</p>
 							</div>
 						</div>
 					</section>
 
 					<template if:true={hasQuestions}>
-						<div class="progressWrap">
+						<div class="progressWrap" role="progressbar" aria-valuenow={progressPercentage} aria-valuemin="0" aria-valuemax="100" aria-label={progressAriaLabel}>
 							<div class="progressTrack">
 								<div class="progressFill" style={progressBarStyle}></div>
 							</div>
 						</div>
 					</template>
 
-					<section class="card">
+					<section class="card" role="main" aria-labelledby="survey-title" aria-describedby="survey-description">
 						<template if:true={showAnonymousSelection}>
-							<div class="questionTitle">Choose how to submit</div>
-							<div class="questionHelp">Select whether to include your name with this response.</div>
-							<div class="answer-container">
-								<lightning-radio-group
-									name="anonymousChoice"
-									options={anonymousOptions}
-									value={anonymousValue}
-									type="radio"
-									onchange={handleAnonymousChange}
-									class="radio-vertical">
-								</lightning-radio-group>
+							<div role="radiogroup" aria-labelledby="anonymous-heading" aria-describedby="anonymous-help">
+								<div id="anonymous-heading" class="questionTitle">Choose how to submit</div>
+								<div id="anonymous-help" class="questionHelp">Select whether to include your name with this response.</div>
+								<div class="answer-container">
+									<lightning-radio-group
+										name="anonymousChoice"
+										options={anonymousOptions}
+										value={anonymousValue}
+										type="radio"
+										onchange={handleAnonymousChange}
+										class="radio-vertical">
+									</lightning-radio-group>
+								</div>
 							</div>
 						</template>
 
 						<template if:false={showAnonymousSelection}>
 							<template if:true={currentQuestion}>
-								<div class="questionTitle" id="question-title">{currentQuestionNumber}. {currentQuestion.question}</div>
+								<!-- Screen reader announcement for current question -->
+								<div class="slds-assistive-text" role="status" aria-live="polite" aria-atomic="true">
+									Question {currentQuestionNumber} of {totalQuestions}: {currentQuestion.question}
+								</div>
+								
+								<div class="questionTitle" id="question-title" role="heading" aria-level="2">
+									{currentQuestionNumber}. {currentQuestion.question}
+								</div>
 								<div class="questionHelp" id="question-help">{questionHelpText}</div>
 
 								<div class="answer-container">
@@ -97,6 +108,7 @@
 											value={currentResponse}
 											rows={currentQuestion.rowsForTextArea}
 											onchange={handleCurrentResponseChange}
+											required={currentQuestion.required}
 											class="text-input">
 										</lightning-textarea>
 									</template>
@@ -161,23 +173,51 @@
 						</template>
 					</section>
 
-					<div class="actions">
-						<button class="btn btnNeutral" onclick={handlePrevious} disabled={isFirstQuestion}>Back</button>
+					<div class="actions" role="navigation" aria-label="Survey navigation">
+						<button 
+							class="btn btnNeutral" 
+							onclick={handlePrevious} 
+							disabled={isFirstQuestion}
+							aria-label="Go to previous question">
+							Back
+						</button>
 						<template if:false={showAnonymousSelection}>
 							<template if:false={isLastQuestion}>
-								<button class="btn btnPrimary" onclick={handleNext}>Next</button>
+								<button 
+									class="btn btnPrimary" 
+									onclick={handleNext}
+									aria-label="Go to next question">
+									Next
+								</button>
 							</template>
 							<template if:true={isLastQuestion}>
 								<template if:true={canChooseAnonymous}>
-									<button class="btn btnPrimary" onclick={handleNext}>Continue</button>
+									<button 
+										class="btn btnPrimary" 
+										onclick={handleNext}
+										aria-label="Continue to submission options">
+										Continue
+									</button>
 								</template>
 								<template if:false={canChooseAnonymous}>
-									<button class="btn btnPrimary" onclick={handleSubmit} disabled={isSubmitting}>Submit</button>
+									<button 
+										class="btn btnPrimary" 
+										onclick={handleSubmit} 
+										disabled={isSubmitting}
+										aria-label="Submit survey responses">
+										Submit
+									</button>
 								</template>
 							</template>
 						</template>
 						<template if:true={showAnonymousSelection}>
-							<button class="btn btnPrimary" onclick={handleSubmit} disabled={isSubmitting}>Submit</button>
+							<button 
+								class="btn btnPrimary" 
+								onclick={handleSubmit} 
+								disabled={isSubmitting}
+								aria-label="Submit survey responses">
+								Submit
+							</button>
 						</template>
 					</div>
 

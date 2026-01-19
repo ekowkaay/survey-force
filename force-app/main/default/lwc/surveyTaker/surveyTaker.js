@@ -238,6 +238,10 @@ export default class SurveyTaker extends LightningElement {
 		return Math.round((this.currentQuestionNumber / this.totalQuestions) * 100);
 	}
 
+	get progressAriaLabel() {
+		return `Survey progress: Question ${this.currentQuestionNumber} of ${this.totalQuestions}`;
+	}
+
 	get isFirstQuestion() {
 		return this.currentQuestionIndex === 0;
 	}
@@ -339,12 +343,60 @@ export default class SurveyTaker extends LightningElement {
 		];
 	}
 
+	// Bound function reference for event listener cleanup
+	boundHandleKeyDown = this.handleKeyDown.bind(this);
+
 	connectedCallback() {
 		// Only load survey data if recordId or token is available and not already loaded
 		// Also check if not currently loading to prevent race conditions
 		// If recordId comes from URL state via wire adapter, it will load there instead
 		if (this.shouldLoadSurveyData()) {
 			this.loadSurveyData();
+		}
+
+		// Add keyboard event listener for accessibility
+		window.addEventListener('keydown', this.boundHandleKeyDown);
+	}
+
+	disconnectedCallback() {
+		// Clean up event listener using the same bound reference
+		window.removeEventListener('keydown', this.boundHandleKeyDown);
+	}
+
+	/**
+	 * Handle keyboard shortcuts for better accessibility
+	 * @param {KeyboardEvent} event - The keyboard event
+	 */
+	handleKeyDown(event) {
+		// Don't handle keyboard events if in preview mode or survey is submitted/loading
+		if (this.isPreviewMode || this.isSubmitted || this.isLoading || this.isSubmitting) {
+			return;
+		}
+
+		// Don't interfere with typing in text inputs
+		const target = event.target;
+		if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && target.type === 'text')) {
+			return;
+		}
+
+		// Arrow key navigation
+		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			event.preventDefault();
+			if (!this.isLastQuestion && !this.showAnonymousSelection) {
+				this.handleNext();
+			}
+		} else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (!this.isFirstQuestion || this.showAnonymousSelection) {
+				this.handlePrevious();
+			}
+		}
+		// Ctrl/Cmd + Enter to submit
+		else if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+			event.preventDefault();
+			if (this.isLastQuestion || this.showAnonymousSelection) {
+				this.handleSubmit();
+			}
 		}
 	}
 
@@ -404,7 +456,23 @@ export default class SurveyTaker extends LightningElement {
 				this.isLoading = false;
 			})
 			.catch((err) => {
-				this.error = err.body?.message || err.message || 'Error loading survey';
+				// Enhanced error handling with user-friendly messages
+				const errorMessage = err.body?.message || err.message || 'Unknown error';
+				
+				// Parse specific error types and provide actionable guidance
+				if (errorMessage.toLowerCase().includes('survey not found')) {
+					this.error = 'Survey not found. The survey may have been deleted or the link is incorrect. Please contact the survey administrator for a valid link.';
+				} else if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('access')) {
+					this.error = 'You don\'t have permission to access this survey. If you believe this is an error, please contact your administrator.';
+				} else if (errorMessage.toLowerCase().includes('expired')) {
+					this.error = 'This survey link has expired. Please request a new survey link from the survey administrator.';
+				} else if (errorMessage.toLowerCase().includes('already submitted') || errorMessage.toLowerCase().includes('already completed')) {
+					this.error = 'You have already submitted this survey. Each survey link can only be used once. Thank you for your response!';
+				} else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
+					this.error = 'Network connection error. Please check your internet connection and try refreshing the page.';
+				} else {
+					this.error = `Unable to load survey: ${errorMessage}. Please try refreshing the page or contact support if the problem persists.`;
+				}
 				this.isLoading = false;
 			});
 	}
@@ -505,11 +573,15 @@ export default class SurveyTaker extends LightningElement {
 			// Show anonymous selection if applicable, otherwise submit
 			if (this.canChooseAnonymous) {
 				this.showAnonymousSelection = true;
+				// Focus on anonymous selection after render
+				this.focusOnElement('#anonymous-heading');
 			} else {
 				this.handleSubmit();
 			}
 		} else {
 			this.currentQuestionIndex++;
+			// Focus on the question title after navigation for accessibility
+			this.focusOnElement('#question-title');
 		}
 	}
 
@@ -517,7 +589,23 @@ export default class SurveyTaker extends LightningElement {
 		if (this.currentQuestionIndex > 0) {
 			this.currentQuestionIndex--;
 			this.showAnonymousSelection = false;
+			// Focus on the question title after navigation for accessibility
+			this.focusOnElement('#question-title');
 		}
+	}
+
+	/**
+	 * Helper method to set focus on an element after DOM updates
+	 * @param {string} selector - CSS selector for the element to focus
+	 */
+	focusOnElement(selector) {
+		// Use requestAnimationFrame to ensure DOM has been updated before focusing
+		requestAnimationFrame(() => {
+			const element = this.template.querySelector(selector);
+			if (element && typeof element.focus === 'function') {
+				element.focus();
+			}
+		});
 	}
 
 	handleBackToLastQuestion() {
@@ -602,14 +690,34 @@ export default class SurveyTaker extends LightningElement {
 				if (result.success) {
 					this.thankYouText = result.thankYouText || this.thankYouText;
 					this.isSubmitted = true;
-					this.showToast('Success', 'Survey submitted successfully!', 'success');
+					this.showToast('Success', 'Thank you! Your survey has been submitted successfully.', 'success');
 				} else {
-					this.showToast('Error', result.message || 'Error submitting survey', 'error');
+					// Provide specific error message from server
+					const errorMsg = result.message || 'Unable to submit survey';
+					this.showToast('Submission Error', errorMsg + '. Please try again or contact support if the problem continues.', 'error');
 				}
 				this.isSubmitting = false;
 			})
 			.catch((err) => {
-				this.showToast('Error', err.body?.message || 'Error submitting survey', 'error');
+				// Enhanced error handling for submission failures
+				const errorMessage = err.body?.message || err.message || 'Unknown error';
+				
+				let userMessage = '';
+				if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already submitted')) {
+					userMessage = 'This survey has already been submitted. Each survey link can only be used once.';
+				} else if (errorMessage.toLowerCase().includes('expired')) {
+					userMessage = 'This survey link has expired. Please request a new link from the survey administrator.';
+				} else if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('access')) {
+					userMessage = 'You don\'t have permission to submit this survey. Please contact your administrator.';
+				} else if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('connection')) {
+					userMessage = 'Network connection error. Your responses have not been saved. Please check your connection and try again.';
+				} else if (errorMessage.toLowerCase().includes('timeout')) {
+					userMessage = 'The request timed out. Your responses may not have been saved. Please try submitting again.';
+				} else {
+					userMessage = `Unable to submit survey: ${errorMessage}. Your responses have not been saved. Please try again.`;
+				}
+				
+				this.showToast('Submission Failed', userMessage, 'error');
 				this.isSubmitting = false;
 			});
 	}
