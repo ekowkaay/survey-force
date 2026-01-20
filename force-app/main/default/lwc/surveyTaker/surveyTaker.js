@@ -181,7 +181,7 @@ export default class SurveyTaker extends LightningElement {
 
 	get introSubheading() {
 		const rawSubheading = this.surveySubheader || this.buildDefaultSubheading();
-		return this.applyHeaderTokens(rawSubheading);
+		return this.applyHeaderTokens(this.stripHtml(rawSubheading));
 	}
 
 	buildDefaultSubheading() {

@@ -10,15 +10,6 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 
 	workflows = [
 		{
-			id: 'create',
-			title: 'Create a Survey',
-			description: 'Build a new survey from scratch with our intuitive builder',
-			icon: 'utility:add',
-			iconBg: 'slds-icon-standard-survey',
-			steps: ['Design questions', 'Configure settings', 'Preview and publish'],
-			action: 'handleCreateSurvey'
-		},
-		{
 			id: 'templates',
 			title: 'Manage Survey Templates',
 			description: 'View, create, edit, and clone survey templates',
@@ -28,13 +19,13 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			action: 'handleManageTemplates'
 		},
 		{
-			id: 'generate',
-			title: 'Generate Survey Links',
-			description: 'Create unique invitation links to share with participants',
-			icon: 'utility:link',
-			iconBg: 'slds-icon-standard-link',
-			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
-			action: 'handleGenerateLinks'
+			id: 'create',
+			title: 'Create a Survey',
+			description: 'Build a new survey from scratch with our intuitive builder',
+			icon: 'utility:add',
+			iconBg: 'slds-icon-standard-survey',
+			steps: ['Design questions', 'Configure settings', 'Preview and publish'],
+			action: 'handleCreateSurvey'
 		},
 		{
 			id: 'manage',
@@ -44,6 +35,15 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			iconBg: 'slds-icon-standard-survey',
 			steps: ['View all surveys', 'Edit or clone', 'Review responses'],
 			action: 'handleManageSurveys'
+		},
+		{
+			id: 'generate',
+			title: 'Generate Survey Links',
+			description: 'Create unique invitation links to share with participants',
+			icon: 'utility:link',
+			iconBg: 'slds-icon-standard-link',
+			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
+			action: 'handleGenerateLinks'
 		},
 		{
 			id: 'analytics',

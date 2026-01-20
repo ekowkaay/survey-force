@@ -33,6 +33,7 @@ export default class SurveyInvitations extends LightningElement {
 	@track error = null;
 	@track invitations = [];
 	@track columns = COLUMNS;
+	@track selectedSurveyId = null;
 
 	// Generate modal
 	@track showGenerateModal = false;
@@ -43,8 +44,20 @@ export default class SurveyInvitations extends LightningElement {
 	@track showLinksModal = false;
 	@track generatedLinks = [];
 
+	get effectiveSurveyId() {
+		return this.recordId || this.selectedSurveyId;
+	}
+
+	get showSurveySelector() {
+		return !this.recordId;
+	}
+
 	get showContent() {
-		return !this.isLoading && !this.error;
+		return !this.isLoading && !this.error && this.effectiveSurveyId;
+	}
+
+	get showSelectSurveyPrompt() {
+		return !this.isLoading && !this.error && !this.effectiveSurveyId && this.showSurveySelector;
 	}
 
 	get hasInvitations() {
@@ -68,14 +81,30 @@ export default class SurveyInvitations extends LightningElement {
 	}
 
 	connectedCallback() {
-		this.loadInvitations();
+		if (this.effectiveSurveyId) {
+			this.loadInvitations();
+		} else {
+			this.isLoading = false;
+		}
+	}
+
+	handleSurveyChange(event) {
+		this.selectedSurveyId = event.detail.recordId;
+		if (this.selectedSurveyId) {
+			this.loadInvitations();
+		}
 	}
 
 	loadInvitations() {
+		if (!this.effectiveSurveyId) {
+			this.isLoading = false;
+			return;
+		}
+
 		this.isLoading = true;
 		this.error = null;
 
-		getInvitationsForSurvey({ surveyId: this.recordId })
+		getInvitationsForSurvey({ surveyId: this.effectiveSurveyId })
 			.then((result) => {
 				this.invitations = result.map((inv) => ({
 					...inv,
@@ -124,7 +153,7 @@ export default class SurveyInvitations extends LightningElement {
 
 		this.isGenerating = true;
 
-		createBulkInvitations({ surveyId: this.recordId, count: this.linkCount })
+		createBulkInvitations({ surveyId: this.effectiveSurveyId, count: this.linkCount })
 			.then((result) => {
 				if (result.success) {
 					this.generatedLinks = result.invitations;
