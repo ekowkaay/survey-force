@@ -210,6 +210,13 @@ export default class SurveyTaker extends LightningElement {
 			.replace(/{\s*SurveyName\s*}/gi, surveyName);
 	}
 
+	/**
+	 * Safely strips HTML tags from a string by extracting only text content
+	 * Note: This is safe because the temp element is never attached to the DOM,
+	 * and we only extract textContent. The input comes from trusted Salesforce field data.
+	 * @param {string} html - HTML string to strip tags from
+	 * @returns {string} Plain text without HTML tags
+	 */
 	stripHtml(html) {
 		if (!html) {
 			return '';
