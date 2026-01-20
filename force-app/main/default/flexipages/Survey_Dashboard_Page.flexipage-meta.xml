@@ -3,7 +3,7 @@
 	<flexiPageRegions>
 		<itemInstances>
 			<componentInstance>
-				<componentName>surveyAnalyticsDashboard</componentName>
+				<componentName>c:surveyAnalyticsDashboard</componentName>
 				<identifier>c_surveyAnalyticsDashboard</identifier>
 			</componentInstance>
 		</itemInstances>
