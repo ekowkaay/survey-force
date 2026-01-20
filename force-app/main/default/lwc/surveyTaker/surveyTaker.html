@@ -47,9 +47,7 @@
 							</div>
 						</template>
 						<template if:true={hasQuestions}>
-							<div class="pill" role="status" aria-live="polite" aria-label={progressAriaLabel}>
-								Question {currentQuestionNumber} of {totalQuestions}
-							</div>
+							<div class="pill" role="status" aria-live="polite" aria-label={progressAriaLabel}>Question {currentQuestionNumber} of {totalQuestions}</div>
 						</template>
 					</header>
 
@@ -94,10 +92,8 @@
 								<div class="slds-assistive-text" role="status" aria-live="polite" aria-atomic="true">
 									Question {currentQuestionNumber} of {totalQuestions}: {currentQuestion.question}
 								</div>
-								
-								<div class="questionTitle" id="question-title" role="heading" aria-level="2">
-									{currentQuestionNumber}. {currentQuestion.question}
-								</div>
+
+								<div class="questionTitle" id="question-title" role="heading" aria-level="2">{currentQuestionNumber}. {currentQuestion.question}</div>
 								<div class="questionHelp" id="question-help">{questionHelpText}</div>
 
 								<div class="answer-container">
@@ -174,50 +170,22 @@
 					</section>
 
 					<div class="actions" role="navigation" aria-label="Survey navigation">
-						<button 
-							class="btn btnNeutral" 
-							onclick={handlePrevious} 
-							disabled={isFirstQuestion}
-							aria-label="Go to previous question">
-							Back
-						</button>
+						<button class="btn btnNeutral" onclick={handlePrevious} disabled={isFirstQuestion} aria-label="Go to previous question">Back</button>
 						<template if:false={showAnonymousSelection}>
 							<template if:false={isLastQuestion}>
-								<button 
-									class="btn btnPrimary" 
-									onclick={handleNext}
-									aria-label="Go to next question">
-									Next
-								</button>
+								<button class="btn btnPrimary" onclick={handleNext} aria-label="Go to next question">Next</button>
 							</template>
 							<template if:true={isLastQuestion}>
 								<template if:true={canChooseAnonymous}>
-									<button 
-										class="btn btnPrimary" 
-										onclick={handleNext}
-										aria-label="Continue to submission options">
-										Continue
-									</button>
+									<button class="btn btnPrimary" onclick={handleNext} aria-label="Continue to submission options">Continue</button>
 								</template>
 								<template if:false={canChooseAnonymous}>
-									<button 
-										class="btn btnPrimary" 
-										onclick={handleSubmit} 
-										disabled={isSubmitting}
-										aria-label="Submit survey responses">
-										Submit
-									</button>
+									<button class="btn btnPrimary" onclick={handleSubmit} disabled={isSubmitting} aria-label="Submit survey responses">Submit</button>
 								</template>
 							</template>
 						</template>
 						<template if:true={showAnonymousSelection}>
-							<button 
-								class="btn btnPrimary" 
-								onclick={handleSubmit} 
-								disabled={isSubmitting}
-								aria-label="Submit survey responses">
-								Submit
-							</button>
+							<button class="btn btnPrimary" onclick={handleSubmit} disabled={isSubmitting} aria-label="Submit survey responses">Submit</button>
 						</template>
 					</div>
 

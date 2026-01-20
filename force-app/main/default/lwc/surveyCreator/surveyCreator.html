@@ -333,24 +333,15 @@
 									<template lwc:else>
 										<div class="slds-illustration slds-illustration_small empty-state slds-p-around_large slds-text-align_center">
 											<div class="slds-m-bottom_medium">
-												<lightning-icon
-													icon-name="utility:questions_and_answers"
-													size="large"
-													alternative-text="No questions">
-												</lightning-icon>
+												<lightning-icon icon-name="utility:questions_and_answers" size="large" alternative-text="No questions"> </lightning-icon>
 											</div>
 											<div class="slds-text-longform">
 												<h3 class="slds-text-heading_medium slds-m-bottom_small">No questions added yet</h3>
 												<p class="slds-text-body_regular slds-m-bottom_medium slds-text-color_weak">
-													Add questions to start building your survey. You can choose from multiple question types:<br/>
+													Add questions to start building your survey. You can choose from multiple question types:<br />
 													free text, single select, multi-select, and rating scales.
 												</p>
-												<lightning-button
-													label="Add Your First Question"
-													icon-name="utility:add"
-													variant="brand"
-													onclick={handleAddQuestion}
-													disabled={isCreating}>
+												<lightning-button label="Add Your First Question" icon-name="utility:add" variant="brand" onclick={handleAddQuestion} disabled={isCreating}>
 												</lightning-button>
 											</div>
 										</div>
@@ -399,25 +390,15 @@
 									<template lwc:else>
 										<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
 											<div class="slds-m-bottom_medium">
-												<lightning-icon
-													icon-name="utility:save"
-													size="large"
-													alternative-text="Save survey first">
-												</lightning-icon>
+												<lightning-icon icon-name="utility:save" size="large" alternative-text="Save survey first"> </lightning-icon>
 											</div>
 											<div class="slds-text-longform">
 												<h3 class="slds-text-heading_medium slds-m-bottom_small">Save Your Survey First</h3>
 												<p class="slds-text-body_regular slds-m-bottom_medium slds-text-color_weak">
-													Create and save your survey to generate a shareable link.<br/>
+													Create and save your survey to generate a shareable link.<br />
 													You'll be able to share via email, social media, or copy the direct link.
 												</p>
-												<lightning-button
-													label="Save Survey Now"
-													icon-name="utility:save"
-													variant="brand"
-													onclick={handleCreateSurvey}
-													disabled={isCreating}>
-												</lightning-button>
+												<lightning-button label="Save Survey Now" icon-name="utility:save" variant="brand" onclick={handleCreateSurvey} disabled={isCreating}> </lightning-button>
 											</div>
 										</div>
 									</template>
@@ -608,11 +589,11 @@
 						field-level-help="Choose how respondents will answer: Free Text (open-ended), Single Select (choose one), or Multi-Select (choose many)."
 						class="slds-m-bottom_medium"></lightning-combobox>
 
-					<lightning-input 
-						type="checkbox" 
-						label="Required" 
-						checked={currentQuestion.required} 
-						onchange={handleRequiredChange} 
+					<lightning-input
+						type="checkbox"
+						label="Required"
+						checked={currentQuestion.required}
+						onchange={handleRequiredChange}
 						field-level-help="Mark this question as required if respondents must answer it before submitting the survey."
 						class="slds-m-bottom_medium"></lightning-input>
 
