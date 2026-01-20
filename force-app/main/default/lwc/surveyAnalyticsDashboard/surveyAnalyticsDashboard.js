@@ -38,14 +38,6 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 			icon: 'utility:add',
 			steps: ['Design questions', 'Configure settings', 'Preview and publish'],
 			action: 'handleCreateSurvey'
-		},
-		{
-			id: 'analytics',
-			title: 'View Analytics',
-			description: 'Explore insights and performance metrics',
-			icon: 'utility:chart',
-			steps: ['Review metrics', 'Analyze responses', 'Export data'],
-			action: 'handleViewAnalytics'
 		}
 	];
 
@@ -175,15 +167,6 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 			type: 'standard__navItemPage',
 			attributes: {
 				apiName: 'Survey_Link_Generator'
-			}
-		});
-	}
-
-	handleViewAnalytics() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Analytics'
 			}
 		});
 	}

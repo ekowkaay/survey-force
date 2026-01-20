@@ -318,15 +318,15 @@ public with sharing class SurveyInvitationController {
 
 			// Get survey messages for customizable responses
 			Survey__c survey = ViewSurveyControllerWithoutSharing.getSurveyMessagesForGuestUser(invitation.Survey__c);
-			
+
 			// Define default messages
 			String defaultAlreadySubmittedMessage = 'This survey has already been completed';
 			String defaultExpirationMessage = 'This survey has expired';
-			
+
 			// Use custom messages if survey is available, otherwise use defaults
 			String alreadySubmittedMessage = defaultAlreadySubmittedMessage;
 			String expirationMessage = defaultExpirationMessage;
-			
+
 			if (survey != null) {
 				if (String.isNotBlank(survey.Already_Submitted_Message__c)) {
 					alreadySubmittedMessage = survey.Already_Submitted_Message__c;
