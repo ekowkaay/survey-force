@@ -3,8 +3,8 @@
 	<flexiPageRegions>
 		<itemInstances>
 			<componentInstance>
-				<componentName>surveyTemplateList</componentName>
-				<identifier>c_surveyTemplateList</identifier>
+				<componentName>surveyAnalyticsDashboard</componentName>
+				<identifier>c_surveyAnalyticsDashboard</identifier>
 			</componentInstance>
 		</itemInstances>
 		<name>main</name>

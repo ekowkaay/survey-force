@@ -44,15 +44,6 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			iconBg: 'slds-icon-standard-link',
 			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
 			action: 'handleGenerateLinks'
-		},
-		{
-			id: 'analytics',
-			title: 'View Analytics',
-			description: 'Explore insights and performance metrics',
-			icon: 'utility:chart',
-			iconBg: 'slds-icon-standard-metrics',
-			steps: ['Review metrics', 'Analyze responses', 'Export data'],
-			action: 'handleViewAnalytics'
 		}
 	];
 
@@ -125,15 +116,6 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			type: 'standard__navItemPage',
 			attributes: {
 				apiName: 'Survey_Dashboard'
-			}
-		});
-	}
-
-	handleViewAnalytics() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Analytics'
 			}
 		});
 	}
