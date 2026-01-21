@@ -1,0 +1,248 @@
+.regeneration-container {
+	background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+	min-height: 100vh;
+}
+
+/* Step Container Styling */
+.step-container {
+	animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Icon Animations */
+.step-icon {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+}
+
+.success-icon {
+	color: var(--slds-g-color-success-base-50, #2e844a);
+	animation: successPop 0.6s ease-out;
+}
+
+@keyframes successPop {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.error-icon {
+	color: var(--slds-g-color-error-base-50, #c23934);
+	animation: errorShake 0.5s ease-out;
+}
+
+@keyframes errorShake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-10px);
+	}
+	75% {
+		transform: translateX(10px);
+	}
+}
+
+.warning-icon {
+	color: var(--slds-g-color-warning-base-60, #fe9339);
+}
+
+/* Loading Container */
+.loading-container {
+	min-height: 200px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem 0;
+}
+
+/* Processing Overlay */
+.processing-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.9);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: fadeIn 0.3s ease-in;
+}
+
+/* Table Enhancements */
+.slds-table tbody tr {
+	transition: background-color 0.2s ease;
+}
+
+.slds-table tbody tr:hover {
+	background-color: var(--slds-g-color-neutral-base-95, #f4f6f9);
+}
+
+/* Box Enhancements */
+.slds-box {
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.slds-theme_success {
+	animation: successSlideIn 0.4s ease-out;
+}
+
+@keyframes successSlideIn {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+.slds-theme_warning {
+	border-left: 4px solid var(--slds-g-color-warning-base-60, #fe9339);
+}
+
+.slds-theme_error {
+	border-left: 4px solid var(--slds-g-color-error-base-50, #c23934);
+	animation: errorSlideIn 0.4s ease-out;
+}
+
+@keyframes errorSlideIn {
+	from {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* Progress Indicator Enhancement */
+lightning-progress-indicator {
+	margin-bottom: 2rem;
+}
+
+/* Button Animations */
+lightning-button {
+	transition: all 0.2s ease;
+}
+
+/* Checkbox Custom Styling */
+.slds-checkbox {
+	transition: all 0.2s ease;
+}
+
+.slds-checkbox:hover {
+	background-color: var(--slds-g-color-neutral-base-95, #f4f6f9);
+	padding: 0.5rem;
+	margin-left: -0.5rem;
+	border-radius: 4px;
+}
+
+/* Stats Cards Enhancement */
+.slds-col .slds-box {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5rem;
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.slds-col .slds-box:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.regeneration-container {
+		padding: 0.5rem;
+	}
+
+	.slds-grid.slds-wrap .slds-col {
+		width: 100%;
+	}
+
+	.step-container {
+		padding: 0.5rem;
+	}
+}
+
+/* File Upload Enhancement */
+lightning-file-upload {
+	transition: all 0.2s ease;
+}
+
+/* Textarea Enhancement */
+lightning-textarea {
+	transition: all 0.2s ease;
+}
+
+/* List Styling */
+.slds-list_dotted li {
+	margin-bottom: 0.5rem;
+	color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+/* Badge Styling */
+lightning-badge {
+	font-weight: 600;
+}
+
+/* Custom Scrollbar for Table */
+div[style*="overflow-y: auto"]::-webkit-scrollbar {
+	width: 8px;
+}
+
+div[style*="overflow-y: auto"]::-webkit-scrollbar-track {
+	background: var(--slds-g-color-neutral-base-95, #f4f6f9);
+	border-radius: 4px;
+}
+
+div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+	background: var(--slds-g-color-neutral-base-70, #706e6b);
+	border-radius: 4px;
+}
+
+div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+	background: var(--slds-g-color-neutral-base-60, #514f4d);
+}
