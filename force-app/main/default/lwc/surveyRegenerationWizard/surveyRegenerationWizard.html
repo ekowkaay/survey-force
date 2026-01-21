@@ -1,320 +1,304 @@
 <template>
-<div class="regeneration-container">
-<lightning-card title="Survey Regeneration Wizard" icon-name="standard:flow">
-<div class="slds-p-around_medium">
-<!-- Progress Indicator -->
-<lightning-progress-indicator current-step={currentStep} type="path" variant="base">
-<lightning-progress-step label="Upload IDs" value="upload"></lightning-progress-step>
-<lightning-progress-step label="Select Surveys" value="select"></lightning-progress-step>
-<lightning-progress-step label="Confirm" value="confirm"></lightning-progress-step>
-<lightning-progress-step label="Complete" value="complete"></lightning-progress-step>
-</lightning-progress-indicator>
+	<div class="regeneration-container">
+		<lightning-card title="Survey Regeneration Wizard" icon-name="standard:flow">
+			<div class="slds-p-around_medium">
+				<!-- Progress Indicator -->
+				<lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+					<lightning-progress-step label="Upload IDs" value="upload"></lightning-progress-step>
+					<lightning-progress-step label="Select Surveys" value="select"></lightning-progress-step>
+					<lightning-progress-step label="Confirm" value="confirm"></lightning-progress-step>
+					<lightning-progress-step label="Complete" value="complete"></lightning-progress-step>
+				</lightning-progress-indicator>
 
-<!-- Step 1: Upload Training Request IDs -->
-<template lwc:if={isUploadStep}>
-<div class="step-container">
-<div class="slds-text-align_center slds-m-bottom_medium">
-<lightning-icon icon-name="utility:upload" size="large" class="step-icon"></lightning-icon>
-<h2 class="slds-text-heading_medium slds-m-top_small">Upload Training Request IDs</h2>
-<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">
-Upload a file containing Training Request IDs (comma, space, or newline separated)
-</p>
-</div>
+				<!-- Step 1: Upload Training Request IDs -->
+				<template lwc:if={isUploadStep}>
+					<div class="step-container">
+						<div class="slds-text-align_center slds-m-bottom_medium">
+							<lightning-icon icon-name="utility:upload" size="large" class="step-icon"></lightning-icon>
+							<h2 class="slds-text-heading_medium slds-m-top_small">Upload Training Request IDs</h2>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">Upload a file containing Training Request IDs (comma, space, or newline separated)</p>
+						</div>
 
-<!-- File Upload -->
-<div class="slds-box slds-theme_default slds-m-bottom_medium">
-<lightning-file-upload
-label="Upload Training Request IDs"
-accept=".txt,.csv"
-onuploadfinished={handleFileUpload}
-disabled={isProcessing}
-multiple={false}></lightning-file-upload>
-<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Accepted formats: .txt, .csv</p>
-</div>
+						<!-- File Upload -->
+						<div class="slds-box slds-theme_default slds-m-bottom_medium">
+							<lightning-file-upload
+								label="Upload Training Request IDs"
+								accept=".txt,.csv"
+								onuploadfinished={handleFileUpload}
+								disabled={isProcessing}
+								multiple={false}></lightning-file-upload>
+							<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Accepted formats: .txt, .csv</p>
+						</div>
 
-<!-- Manual Input Option -->
-<div class="slds-box slds-theme_default">
-<lightning-textarea
-label="Or paste IDs manually"
-placeholder="Enter Training Request IDs separated by comma, space, or newline"
-value={manualIds}
-onchange={handleManualInput}
-disabled={isProcessing}
-rows="5"></lightning-textarea>
-</div>
+						<!-- Manual Input Option -->
+						<div class="slds-box slds-theme_default">
+							<lightning-textarea
+								label="Or paste IDs manually"
+								placeholder="Enter Training Request IDs separated by comma, space, or newline"
+								value={manualIds}
+								onchange={handleManualInput}
+								disabled={isProcessing}
+								rows="5"></lightning-textarea>
+						</div>
 
-<!-- Parsed IDs Preview -->
-<template lwc:if={hasParsedIds}>
-<div class="slds-box slds-theme_success slds-m-top_medium">
-<div class="slds-media slds-media_center">
-<div class="slds-media__figure">
-<lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
-</div>
-<div class="slds-media__body">
-<h3 class="slds-text-heading_small">{parsedIdsCount} Training Request IDs parsed successfully</h3>
-<p class="slds-text-body_small slds-m-top_x-small">Click "Next" to select survey types</p>
-</div>
-</div>
-</div>
-</template>
+						<!-- Parsed IDs Preview -->
+						<template lwc:if={hasParsedIds}>
+							<div class="slds-box slds-theme_success slds-m-top_medium">
+								<div class="slds-media slds-media_center">
+									<div class="slds-media__figure">
+										<lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
+									</div>
+									<div class="slds-media__body">
+										<h3 class="slds-text-heading_small">{parsedIdsCount} Training Request IDs parsed successfully</h3>
+										<p class="slds-text-body_small slds-m-top_x-small">Click "Next" to select survey types</p>
+									</div>
+								</div>
+							</div>
+						</template>
 
-<!-- Error Messages -->
-<template lwc:if={uploadError}>
-<div class="slds-box slds-theme_error slds-m-top_medium">
-<p>{uploadError}</p>
-</div>
-</template>
-</div>
-</template>
+						<!-- Error Messages -->
+						<template lwc:if={uploadError}>
+							<div class="slds-box slds-theme_error slds-m-top_medium">
+								<p>{uploadError}</p>
+							</div>
+						</template>
+					</div>
+				</template>
 
-<!-- Step 2: Select Survey Types -->
-<template lwc:if={isSelectStep}>
-<div class="step-container">
-<div class="slds-text-align_center slds-m-bottom_medium">
-<lightning-icon icon-name="standard:survey" size="large" class="step-icon"></lightning-icon>
-<h2 class="slds-text-heading_medium slds-m-top_small">Select Survey Types to Regenerate</h2>
-<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">
-Choose which survey types should have their invitations regenerated
-</p>
-</div>
+				<!-- Step 2: Select Survey Types -->
+				<template lwc:if={isSelectStep}>
+					<div class="step-container">
+						<div class="slds-text-align_center slds-m-bottom_medium">
+							<lightning-icon icon-name="standard:survey" size="large" class="step-icon"></lightning-icon>
+							<h2 class="slds-text-heading_medium slds-m-top_small">Select Survey Types to Regenerate</h2>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">Choose which survey types should have their invitations regenerated</p>
+						</div>
 
-<!-- Survey Type Selection -->
-<div class="slds-box slds-theme_default">
-<fieldset class="slds-form-element">
-<legend class="slds-form-element__legend slds-form-element__label">Survey Types</legend>
-<div class="slds-form-element__control">
-<div class="slds-checkbox slds-m-bottom_small">
-<input
-type="checkbox"
-id="checkbox-customer"
-value="Customer"
-onchange={handleSurveyTypeChange}
-checked={isCustomerSelected} />
-<label class="slds-checkbox__label" for="checkbox-customer">
-<span class="slds-checkbox_faux"></span>
-<span class="slds-form-element__label">
-<lightning-icon icon-name="standard:person_account" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-Customer Surveys
-</span>
-</label>
-</div>
-<div class="slds-checkbox slds-m-bottom_small">
-<input type="checkbox" id="checkbox-trainer" value="Trainer" onchange={handleSurveyTypeChange} checked={isTrainerSelected} />
-<label class="slds-checkbox__label" for="checkbox-trainer">
-<span class="slds-checkbox_faux"></span>
-<span class="slds-form-element__label">
-<lightning-icon icon-name="standard:user" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-Trainer Surveys
-</span>
-</label>
-</div>
-<div class="slds-checkbox">
-<input
-type="checkbox"
-id="checkbox-participant"
-value="Participant"
-onchange={handleSurveyTypeChange}
-checked={isParticipantSelected} />
-<label class="slds-checkbox__label" for="checkbox-participant">
-<span class="slds-checkbox_faux"></span>
-<span class="slds-form-element__label">
-<lightning-icon icon-name="standard:groups" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-Participant Surveys
-</span>
-</label>
-</div>
-</div>
-</fieldset>
+						<!-- Survey Type Selection -->
+						<div class="slds-box slds-theme_default">
+							<fieldset class="slds-form-element">
+								<legend class="slds-form-element__legend slds-form-element__label">Survey Types</legend>
+								<div class="slds-form-element__control">
+									<div class="slds-checkbox slds-m-bottom_small">
+										<input type="checkbox" id="checkbox-customer" value="Customer" onchange={handleSurveyTypeChange} checked={isCustomerSelected} />
+										<label class="slds-checkbox__label" for="checkbox-customer">
+											<span class="slds-checkbox_faux"></span>
+											<span class="slds-form-element__label">
+												<lightning-icon icon-name="standard:person_account" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+												Customer Surveys
+											</span>
+										</label>
+									</div>
+									<div class="slds-checkbox slds-m-bottom_small">
+										<input type="checkbox" id="checkbox-trainer" value="Trainer" onchange={handleSurveyTypeChange} checked={isTrainerSelected} />
+										<label class="slds-checkbox__label" for="checkbox-trainer">
+											<span class="slds-checkbox_faux"></span>
+											<span class="slds-form-element__label">
+												<lightning-icon icon-name="standard:user" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+												Trainer Surveys
+											</span>
+										</label>
+									</div>
+									<div class="slds-checkbox">
+										<input type="checkbox" id="checkbox-participant" value="Participant" onchange={handleSurveyTypeChange} checked={isParticipantSelected} />
+										<label class="slds-checkbox__label" for="checkbox-participant">
+											<span class="slds-checkbox_faux"></span>
+											<span class="slds-form-element__label">
+												<lightning-icon icon-name="standard:groups" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+												Participant Surveys
+											</span>
+										</label>
+									</div>
+								</div>
+							</fieldset>
 
-<template lwc:if={noSurveyTypesSelected}>
-<div class="slds-box slds-theme_warning slds-m-top_small">
-<p class="slds-text-body_small">Please select at least one survey type</p>
-</div>
-</template>
-</div>
+							<template lwc:if={noSurveyTypesSelected}>
+								<div class="slds-box slds-theme_warning slds-m-top_small">
+									<p class="slds-text-body_small">Please select at least one survey type</p>
+								</div>
+							</template>
+						</div>
 
-<!-- Loading State -->
-<template lwc:if={isLoadingSurveys}>
-<div class="slds-is-relative loading-container">
-<lightning-spinner alternative-text="Loading surveys..." size="medium"></lightning-spinner>
-</div>
-</template>
+						<!-- Loading State -->
+						<template lwc:if={isLoadingSurveys}>
+							<div class="slds-is-relative loading-container">
+								<lightning-spinner alternative-text="Loading surveys..." size="medium"></lightning-spinner>
+							</div>
+						</template>
 
-<!-- Survey Preview -->
-<template lwc:if={hasSurveysFound}>
-<div class="slds-box slds-theme_success slds-m-top_medium">
-<div class="slds-media slds-media_center">
-<div class="slds-media__figure">
-<lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
-</div>
-<div class="slds-media__body">
-<h3 class="slds-text-heading_small">{surveysFoundCount} surveys found for regeneration</h3>
-<p class="slds-text-body_small slds-m-top_x-small">Click "Next" to review and confirm</p>
-</div>
-</div>
-</div>
-</template>
-</div>
-</template>
+						<!-- Survey Preview -->
+						<template lwc:if={hasSurveysFound}>
+							<div class="slds-box slds-theme_success slds-m-top_medium">
+								<div class="slds-media slds-media_center">
+									<div class="slds-media__figure">
+										<lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
+									</div>
+									<div class="slds-media__body">
+										<h3 class="slds-text-heading_small">{surveysFoundCount} surveys found for regeneration</h3>
+										<p class="slds-text-body_small slds-m-top_x-small">Click "Next" to review and confirm</p>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+				</template>
 
-<!-- Step 3: Confirm Regeneration -->
-<template lwc:if={isConfirmStep}>
-<div class="step-container">
-<div class="slds-text-align_center slds-m-bottom_medium">
-<lightning-icon icon-name="utility:warning" size="large" class="step-icon warning-icon"></lightning-icon>
-<h2 class="slds-text-heading_medium slds-m-top_small">Confirm Regeneration</h2>
-<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">
-Review the surveys that will be regenerated. Existing pending invitations will be deleted.
-</p>
-</div>
+				<!-- Step 3: Confirm Regeneration -->
+				<template lwc:if={isConfirmStep}>
+					<div class="step-container">
+						<div class="slds-text-align_center slds-m-bottom_medium">
+							<lightning-icon icon-name="utility:warning" size="large" class="step-icon warning-icon"></lightning-icon>
+							<h2 class="slds-text-heading_medium slds-m-top_small">Confirm Regeneration</h2>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">Review the surveys that will be regenerated. Existing pending invitations will be deleted.</p>
+						</div>
 
-<!-- Summary Stats -->
-<div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
-<div class="slds-col slds-size_1-of-2">
-<div class="slds-box slds-theme_default slds-text-align_center">
-<p class="slds-text-heading_large" style="color: var(--slds-g-color-brand-base-60, #0176d3)">{surveysFoundCount}</p>
-<p class="slds-text-body_small slds-text-color_weak">Surveys to Regenerate</p>
-</div>
-</div>
-<div class="slds-col slds-size_1-of-2">
-<div class="slds-box slds-theme_default slds-text-align_center">
-<p class="slds-text-heading_large" style="color: var(--slds-g-color-brand-base-60, #0176d3)">{parsedIdsCount}</p>
-<p class="slds-text-body_small slds-text-color_weak">Training Requests</p>
-</div>
-</div>
-</div>
+						<!-- Summary Stats -->
+						<div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
+							<div class="slds-col slds-size_1-of-2">
+								<div class="slds-box slds-theme_default slds-text-align_center">
+									<p class="slds-text-heading_large" style="color: var(--slds-g-color-brand-base-60, #0176d3)">{surveysFoundCount}</p>
+									<p class="slds-text-body_small slds-text-color_weak">Surveys to Regenerate</p>
+								</div>
+							</div>
+							<div class="slds-col slds-size_1-of-2">
+								<div class="slds-box slds-theme_default slds-text-align_center">
+									<p class="slds-text-heading_large" style="color: var(--slds-g-color-brand-base-60, #0176d3)">{parsedIdsCount}</p>
+									<p class="slds-text-body_small slds-text-color_weak">Training Requests</p>
+								</div>
+							</div>
+						</div>
 
-<!-- Surveys Table -->
-<template lwc:if={hasSurveysFound}>
-<div class="slds-box slds-theme_default">
-<h3 class="slds-text-heading_small slds-m-bottom_small">Surveys to Regenerate</h3>
-<div style="max-height: 300px; overflow-y: auto">
-<table class="slds-table slds-table_bordered slds-table_cell-buffer">
-<thead>
-<tr class="slds-line-height_reset">
-<th scope="col">
-<div class="slds-truncate" title="Training Request">Training Request</div>
-</th>
-<th scope="col">
-<div class="slds-truncate" title="Survey">Survey</div>
-</th>
-<th scope="col">
-<div class="slds-truncate" title="Type">Type</div>
-</th>
-</tr>
-</thead>
-<tbody>
-<template for:each={surveysToRegenerate} for:item="survey">
-<tr key={survey.surveyId}>
-<td>
-<div class="slds-truncate" title={survey.trainingRequestName}>{survey.trainingRequestName}</div>
-</td>
-<td>
-<div class="slds-truncate" title={survey.surveyName}>{survey.surveyName}</div>
-</td>
-<td>
-<lightning-badge label={survey.surveyType}></lightning-badge>
-</td>
-</tr>
-</template>
-</tbody>
-</table>
-</div>
-</div>
-</template>
+						<!-- Surveys Table -->
+						<template lwc:if={hasSurveysFound}>
+							<div class="slds-box slds-theme_default">
+								<h3 class="slds-text-heading_small slds-m-bottom_small">Surveys to Regenerate</h3>
+								<div style="max-height: 300px; overflow-y: auto">
+									<table class="slds-table slds-table_bordered slds-table_cell-buffer">
+										<thead>
+											<tr class="slds-line-height_reset">
+												<th scope="col">
+													<div class="slds-truncate" title="Training Request">Training Request</div>
+												</th>
+												<th scope="col">
+													<div class="slds-truncate" title="Survey">Survey</div>
+												</th>
+												<th scope="col">
+													<div class="slds-truncate" title="Type">Type</div>
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<template for:each={surveysToRegenerate} for:item="survey">
+												<tr key={survey.surveyId}>
+													<td>
+														<div class="slds-truncate" title={survey.trainingRequestName}>{survey.trainingRequestName}</div>
+													</td>
+													<td>
+														<div class="slds-truncate" title={survey.surveyName}>{survey.surveyName}</div>
+													</td>
+													<td>
+														<lightning-badge label={survey.surveyType}></lightning-badge>
+													</td>
+												</tr>
+											</template>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</template>
 
-<!-- Warning Message -->
-<div class="slds-box slds-theme_warning slds-m-top_medium">
-<div class="slds-media">
-<div class="slds-media__figure">
-<lightning-icon icon-name="utility:warning" size="small" variant="warning"></lightning-icon>
-</div>
-<div class="slds-media__body">
-<h3 class="slds-text-heading_small">Warning</h3>
-<p class="slds-text-body_small slds-m-top_x-small">
-This action will delete all existing <strong>pending</strong> invitations for the selected surveys and create new ones. Completed invitations will not be affected.
-</p>
-</div>
-</div>
-</div>
-</div>
-</template>
+						<!-- Warning Message -->
+						<div class="slds-box slds-theme_warning slds-m-top_medium">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:warning" size="small" variant="warning"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<h3 class="slds-text-heading_small">Warning</h3>
+									<p class="slds-text-body_small slds-m-top_x-small">
+										This action will delete all existing <strong>pending</strong> invitations for the selected surveys and create new ones. Completed invitations will not be
+										affected.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</template>
 
-<!-- Step 4: Complete -->
-<template lwc:if={isCompleteStep}>
-<div class="step-container">
-<div class="slds-text-align_center">
-<template lwc:if={regenerationSuccess}>
-<lightning-icon icon-name="utility:success" size="large" class="step-icon success-icon"></lightning-icon>
-<h2 class="slds-text-heading_medium slds-m-top_small">Regeneration Complete!</h2>
-<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">{regenerationMessage}</p>
+				<!-- Step 4: Complete -->
+				<template lwc:if={isCompleteStep}>
+					<div class="step-container">
+						<div class="slds-text-align_center">
+							<template lwc:if={regenerationSuccess}>
+								<lightning-icon icon-name="utility:success" size="large" class="step-icon success-icon"></lightning-icon>
+								<h2 class="slds-text-heading_medium slds-m-top_small">Regeneration Complete!</h2>
+								<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">{regenerationMessage}</p>
 
-<!-- Success Stats -->
-<div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
-<div class="slds-col slds-size_1-of-2">
-<div class="slds-box slds-theme_success slds-text-align_center">
-<p class="slds-text-heading_large">{successCount}</p>
-<p class="slds-text-body_small">Successful</p>
-</div>
-</div>
-<div class="slds-col slds-size_1-of-2">
-<div class="slds-box slds-theme_error slds-text-align_center">
-<p class="slds-text-heading_large">{failureCount}</p>
-<p class="slds-text-body_small">Failed</p>
-</div>
-</div>
-</div>
-</template>
+								<!-- Success Stats -->
+								<div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-box slds-theme_success slds-text-align_center">
+											<p class="slds-text-heading_large">{successCount}</p>
+											<p class="slds-text-body_small">Successful</p>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-box slds-theme_error slds-text-align_center">
+											<p class="slds-text-heading_large">{failureCount}</p>
+											<p class="slds-text-body_small">Failed</p>
+										</div>
+									</div>
+								</div>
+							</template>
 
-<template lwc:else>
-<lightning-icon icon-name="utility:error" size="large" class="step-icon error-icon"></lightning-icon>
-<h2 class="slds-text-heading_medium slds-m-top_small">Regeneration Failed</h2>
-<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">{regenerationMessage}</p>
-</template>
+							<template lwc:else>
+								<lightning-icon icon-name="utility:error" size="large" class="step-icon error-icon"></lightning-icon>
+								<h2 class="slds-text-heading_medium slds-m-top_small">Regeneration Failed</h2>
+								<p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">{regenerationMessage}</p>
+							</template>
 
-<!-- Error Details -->
-<template lwc:if={hasErrors}>
-<div class="slds-box slds-theme_error slds-m-top_medium slds-text-align_left">
-<h3 class="slds-text-heading_small slds-m-bottom_small">Errors:</h3>
-<ul class="slds-list_dotted">
-<template for:each={errorMessages} for:item="error">
-<li key={error}>{error}</li>
-</template>
-</ul>
-</div>
-</template>
-</div>
-</div>
-</template>
+							<!-- Error Details -->
+							<template lwc:if={hasErrors}>
+								<div class="slds-box slds-theme_error slds-m-top_medium slds-text-align_left">
+									<h3 class="slds-text-heading_small slds-m-bottom_small">Errors:</h3>
+									<ul class="slds-list_dotted">
+										<template for:each={errorMessages} for:item="error">
+											<li key={error}>{error}</li>
+										</template>
+									</ul>
+								</div>
+							</template>
+						</div>
+					</div>
+				</template>
 
-<!-- Navigation Buttons -->
-<div class="slds-m-top_large slds-grid slds-grid_align-spread">
-<div>
-<template lwc:if={showBackButton}>
-<lightning-button label="Back" onclick={handleBack} disabled={isProcessing}></lightning-button>
-</template>
-</div>
-<div>
-<template lwc:if={showNextButton}>
-<lightning-button variant="brand" label="Next" onclick={handleNext} disabled={isNextDisabled}></lightning-button>
-</template>
-<template lwc:if={showRegenerateButton}>
-<lightning-button variant="destructive" label="Regenerate Invitations" onclick={handleRegenerate} disabled={isProcessing}>
-</lightning-button>
-</template>
-<template lwc:if={showFinishButton}>
-<lightning-button variant="brand" label="Start New Regeneration" onclick={handleReset}></lightning-button>
-</template>
-</div>
-</div>
+				<!-- Navigation Buttons -->
+				<div class="slds-m-top_large slds-grid slds-grid_align-spread">
+					<div>
+						<template lwc:if={showBackButton}>
+							<lightning-button label="Back" onclick={handleBack} disabled={isProcessing}></lightning-button>
+						</template>
+					</div>
+					<div>
+						<template lwc:if={showNextButton}>
+							<lightning-button variant="brand" label="Next" onclick={handleNext} disabled={isNextDisabled}></lightning-button>
+						</template>
+						<template lwc:if={showRegenerateButton}>
+							<lightning-button variant="destructive" label="Regenerate Invitations" onclick={handleRegenerate} disabled={isProcessing}> </lightning-button>
+						</template>
+						<template lwc:if={showFinishButton}>
+							<lightning-button variant="brand" label="Start New Regeneration" onclick={handleReset}></lightning-button>
+						</template>
+					</div>
+				</div>
 
-<!-- Processing Spinner -->
-<template lwc:if={isProcessing}>
-<div class="slds-is-relative processing-overlay">
-<lightning-spinner alternative-text="Processing..." size="large"></lightning-spinner>
-</div>
-</template>
-</div>
-</lightning-card>
-</div>
+				<!-- Processing Spinner -->
+				<template lwc:if={isProcessing}>
+					<div class="slds-is-relative processing-overlay">
+						<lightning-spinner alternative-text="Processing..." size="large"></lightning-spinner>
+					</div>
+				</template>
+			</div>
+		</lightning-card>
+	</div>
 </template>

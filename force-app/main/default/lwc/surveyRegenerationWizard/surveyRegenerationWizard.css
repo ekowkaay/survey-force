@@ -229,20 +229,20 @@ lightning-badge {
 }
 
 /* Custom Scrollbar for Table */
-div[style*="overflow-y: auto"]::-webkit-scrollbar {
+div[style*='overflow-y: auto']::-webkit-scrollbar {
 	width: 8px;
 }
 
-div[style*="overflow-y: auto"]::-webkit-scrollbar-track {
+div[style*='overflow-y: auto']::-webkit-scrollbar-track {
 	background: var(--slds-g-color-neutral-base-95, #f4f6f9);
 	border-radius: 4px;
 }
 
-div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+div[style*='overflow-y: auto']::-webkit-scrollbar-thumb {
 	background: var(--slds-g-color-neutral-base-70, #706e6b);
 	border-radius: 4px;
 }
 
-div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+div[style*='overflow-y: auto']::-webkit-scrollbar-thumb:hover {
 	background: var(--slds-g-color-neutral-base-60, #514f4d);
 }

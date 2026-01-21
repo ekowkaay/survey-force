@@ -91,17 +91,11 @@ private class SurveyRegenerationController_Test {
 		System.assert(result2.surveys.size() > 0, 'Should find surveys');
 
 		// Test with empty IDs
-		SurveyRegenerationController.RegenerationResult result3 = SurveyRegenerationController.getSurveysForRegeneration(
-			new List<String>(),
-			customerTypes
-		);
+		SurveyRegenerationController.RegenerationResult result3 = SurveyRegenerationController.getSurveysForRegeneration(new List<String>(), customerTypes);
 		System.assertEquals(false, result3.success, 'Should fail with empty IDs');
 
 		// Test with empty survey types
-		SurveyRegenerationController.RegenerationResult result4 = SurveyRegenerationController.getSurveysForRegeneration(
-			trIds,
-			new List<String>()
-		);
+		SurveyRegenerationController.RegenerationResult result4 = SurveyRegenerationController.getSurveysForRegeneration(trIds, new List<String>());
 		System.assertEquals(false, result4.success, 'Should fail with empty survey types');
 
 		Test.stopTest();
@@ -134,10 +128,7 @@ private class SurveyRegenerationController_Test {
 		List<String> surveyIds = new List<String>{ String.valueOf(surveyId) };
 		List<String> surveyTypes = new List<String>{ 'Customer' };
 
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
 
 		Test.stopTest();
 
@@ -198,10 +189,7 @@ private class SurveyRegenerationController_Test {
 		List<String> surveyIds = new List<String>{ String.valueOf(surveyId) };
 		List<String> surveyTypes = new List<String>{ 'Participant' };
 
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
 
 		Test.stopTest();
 
@@ -223,10 +211,7 @@ private class SurveyRegenerationController_Test {
 		List<String> invalidIds = new List<String>{ 'invalid_id' };
 		List<String> surveyTypes = new List<String>{ 'Customer' };
 
-		SurveyRegenerationController.RegenerationResult result1 = SurveyRegenerationController.regenerateSurveyInvitations(
-			invalidIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result1 = SurveyRegenerationController.regenerateSurveyInvitations(invalidIds, surveyTypes);
 		System.assertEquals(false, result1.success, 'Should fail with invalid IDs');
 		System.assert(result1.errors.size() > 0, 'Should have error messages');
 
@@ -234,10 +219,7 @@ private class SurveyRegenerationController_Test {
 		List<String> validIds = new List<String>{ '001000000000001' };
 		List<String> mismatchedTypes = new List<String>{ 'Customer', 'Trainer' };
 
-		SurveyRegenerationController.RegenerationResult result2 = SurveyRegenerationController.regenerateSurveyInvitations(
-			validIds,
-			mismatchedTypes
-		);
+		SurveyRegenerationController.RegenerationResult result2 = SurveyRegenerationController.regenerateSurveyInvitations(validIds, mismatchedTypes);
 		System.assertEquals(false, result2.success, 'Should fail with mismatched arrays');
 
 		Test.stopTest();
@@ -272,10 +254,7 @@ private class SurveyRegenerationController_Test {
 
 		Test.startTest();
 
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
 
 		Test.stopTest();
 

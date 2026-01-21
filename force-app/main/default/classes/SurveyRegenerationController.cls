@@ -180,14 +180,10 @@ public with sharing class SurveyRegenerationController {
 			}
 
 			// Query surveys
-			List<Schema.SObjectField> surveyFields = new List<Schema.SObjectField>{
-				Schema.Survey__c.fields.Name
-			};
+			List<Schema.SObjectField> surveyFields = new List<Schema.SObjectField>{ Schema.Survey__c.fields.Name };
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSObjectType(), surveyFields);
 
-			Map<Id, Survey__c> surveysMap = new Map<Id, Survey__c>(
-				[SELECT Id, Name FROM Survey__c WHERE Id IN :surveyIds WITH USER_MODE]
-			);
+			Map<Id, Survey__c> surveysMap = new Map<Id, Survey__c>([SELECT Id, Name FROM Survey__c WHERE Id IN :surveyIds WITH USER_MODE]);
 
 			// Build result data
 			Map<Id, Training_Request__c> trMap = new Map<Id, Training_Request__c>(trainingRequests);
@@ -264,10 +260,7 @@ public with sharing class SurveyRegenerationController {
 			}
 
 			// Check permissions
-			List<Schema.SObjectField> invitationFields = new List<Schema.SObjectField>{
-				Schema.SurveyInvitation__c.fields.Survey__c,
-				Schema.SurveyInvitation__c.fields.Status__c
-			};
+			List<Schema.SObjectField> invitationFields = new List<Schema.SObjectField>{ Schema.SurveyInvitation__c.fields.Survey__c, Schema.SurveyInvitation__c.fields.Status__c };
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.SurveyInvitation__c.getSObjectType(), invitationFields);
 			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.SurveyInvitation__c.getSObjectType());
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.SurveyInvitation__c.getSObjectType(), invitationFields);
