@@ -146,6 +146,11 @@ export default class SurveyInvitations extends LightningElement {
 	}
 
 	handleGenerateLinks() {
+		if (!this.effectiveSurveyId) {
+			this.showToast('Error', 'Please select a survey first', 'error');
+			return;
+		}
+
 		if (!this.linkCount || this.linkCount < 1 || this.linkCount > 200) {
 			this.showToast('Error', 'Please enter a valid number between 1 and 200', 'error');
 			return;
