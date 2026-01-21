@@ -117,9 +117,6 @@ private class SurveyRegenerationController_Test {
 		// Extract survey ID from URL
 		String customerSurveyUrl = tr.Customer_Survey__c;
 		String surveyIdStr = customerSurveyUrl.substringAfter('id=').substringBefore('&');
-		if (surveyIdStr.contains('&')) {
-			surveyIdStr = surveyIdStr.substringBefore('&');
-		}
 		Id surveyId = (Id) surveyIdStr;
 
 		Test.startTest();

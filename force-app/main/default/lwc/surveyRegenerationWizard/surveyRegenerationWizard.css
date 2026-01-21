@@ -21,7 +21,7 @@
 
 /* Icon Animations */
 .step-icon {
-	animation: pulse 2s infinite;
+	animation: pulse 2s ease-out;
 }
 
 @keyframes pulse {
@@ -88,7 +88,7 @@
 
 /* Processing Overlay */
 .processing-overlay {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
@@ -99,6 +99,10 @@
 	align-items: center;
 	justify-content: center;
 	animation: fadeIn 0.3s ease-in;
+}
+
+.regeneration-container {
+	position: relative;
 }
 
 /* Table Enhancements */

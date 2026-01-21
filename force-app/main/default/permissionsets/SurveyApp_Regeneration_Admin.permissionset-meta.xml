@@ -2,7 +2,7 @@
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>Permission set for Survey Regeneration Wizard access. Allows administrators to regenerate survey invitations in bulk by uploading Training Request IDs.</description>
     <hasActivationRequired>false</hasActivationRequired>
-    <label>SurveyApp_Regeneration_Admin</label>
+    <label>Survey App - Regeneration Admin</label>
     <license>Salesforce</license>
     <classAccesses>
         <apexClass>SurveyRegenerationController</apexClass>

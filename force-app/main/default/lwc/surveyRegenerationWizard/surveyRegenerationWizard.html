@@ -80,7 +80,13 @@
 								<legend class="slds-form-element__legend slds-form-element__label">Survey Types</legend>
 								<div class="slds-form-element__control">
 									<div class="slds-checkbox slds-m-bottom_small">
-										<input type="checkbox" id="checkbox-customer" value="Customer" onchange={handleSurveyTypeChange} checked={isCustomerSelected} />
+										<input
+											type="checkbox"
+											id="checkbox-customer"
+											value="Customer"
+											onchange={handleSurveyTypeChange}
+											checked={isCustomerSelected}
+											aria-describedby="survey-types-help" />
 										<label class="slds-checkbox__label" for="checkbox-customer">
 											<span class="slds-checkbox_faux"></span>
 											<span class="slds-form-element__label">
@@ -90,7 +96,13 @@
 										</label>
 									</div>
 									<div class="slds-checkbox slds-m-bottom_small">
-										<input type="checkbox" id="checkbox-trainer" value="Trainer" onchange={handleSurveyTypeChange} checked={isTrainerSelected} />
+										<input
+											type="checkbox"
+											id="checkbox-trainer"
+											value="Trainer"
+											onchange={handleSurveyTypeChange}
+											checked={isTrainerSelected}
+											aria-describedby="survey-types-help" />
 										<label class="slds-checkbox__label" for="checkbox-trainer">
 											<span class="slds-checkbox_faux"></span>
 											<span class="slds-form-element__label">
@@ -100,7 +112,13 @@
 										</label>
 									</div>
 									<div class="slds-checkbox">
-										<input type="checkbox" id="checkbox-participant" value="Participant" onchange={handleSurveyTypeChange} checked={isParticipantSelected} />
+										<input
+											type="checkbox"
+											id="checkbox-participant"
+											value="Participant"
+											onchange={handleSurveyTypeChange}
+											checked={isParticipantSelected}
+											aria-describedby="survey-types-help" />
 										<label class="slds-checkbox__label" for="checkbox-participant">
 											<span class="slds-checkbox_faux"></span>
 											<span class="slds-form-element__label">
@@ -109,6 +127,9 @@
 											</span>
 										</label>
 									</div>
+								</div>
+								<div id="survey-types-help" class="slds-form-element__help slds-m-top_small">
+									Select which survey types should be regenerated for the uploaded Training Requests
 								</div>
 							</fieldset>
 
@@ -262,8 +283,8 @@
 								<div class="slds-box slds-theme_error slds-m-top_medium slds-text-align_left">
 									<h3 class="slds-text-heading_small slds-m-bottom_small">Errors:</h3>
 									<ul class="slds-list_dotted">
-										<template for:each={errorMessages} for:item="error">
-											<li key={error}>{error}</li>
+										<template for:each={errorMessages} for:item="error" for:index="index">
+											<li key={index}>{error}</li>
 										</template>
 									</ul>
 								</div>

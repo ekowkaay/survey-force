@@ -145,13 +145,19 @@ export default class SurveyRegenerationWizard extends LightningElement {
 
 		parseTrainingRequestIds({ fileContent: content })
 			.then((result) => {
-				if (result.success) {
-					this.parsedIds = result.trainingRequestIds;
+				// Handle both direct List/array responses and wrapper-object responses
+				if (Array.isArray(result)) {
+					this.parsedIds = result || [];
+					if (this.parsedIds.length === 0) {
+						this.uploadError = 'No valid Training Request IDs found in the file.';
+					}
+				} else if (result && result.success) {
+					this.parsedIds = result.trainingRequestIds || [];
 					if (this.parsedIds.length === 0) {
 						this.uploadError = 'No valid Training Request IDs found in the file.';
 					}
 				} else {
-					this.uploadError = result.message;
+					this.uploadError = result && result.message ? result.message : 'Error parsing file content.';
 					this.parsedIds = [];
 				}
 				this.isProcessing = false;
@@ -242,8 +248,9 @@ export default class SurveyRegenerationWizard extends LightningElement {
 		this.isProcessing = true;
 
 		const surveyIds = this.surveysToRegenerate.map((survey) => survey.surveyId);
+		const surveyTypes = this.surveysToRegenerate.map((survey) => survey.surveyType);
 
-		regenerateSurveyInvitations({ surveyIds })
+		regenerateSurveyInvitations({ surveyIds, surveyTypes })
 			.then((result) => {
 				this.regenerationResult = result;
 				this.regenerationSuccess = result.success;

@@ -333,21 +333,31 @@ public with sharing class SurveyRegenerationController {
 	 */
 	private static Integer regenerateParticipantInvitations(Id surveyId) {
 		// Find the training request associated with this survey
+		// Query all training requests with participant surveys to avoid non-indexed LIKE query
 		List<Training_Request__c> trainingRequests = [
-			SELECT Id, (SELECT Id FROM Participants__r)
+			SELECT Id, Participant_Survey__c, (SELECT Id FROM Participants__r)
 			FROM Training_Request__c
-			WHERE Participant_Survey__c LIKE :('%id=' + surveyId + '%')
+			WHERE Participant_Survey__c != NULL
 			WITH USER_MODE
-			LIMIT 1
 		];
 
-		if (trainingRequests.isEmpty() || trainingRequests[0].Participants__r.isEmpty()) {
+		// Filter in Apex to find the matching training request
+		Training_Request__c matchedTrainingRequest = null;
+		String surveyIdToken = 'id=' + String.valueOf(surveyId);
+		for (Training_Request__c tr : trainingRequests) {
+			if (tr.Participant_Survey__c != null && tr.Participant_Survey__c.contains(surveyIdToken)) {
+				matchedTrainingRequest = tr;
+				break;
+			}
+		}
+
+		if (matchedTrainingRequest == null || matchedTrainingRequest.Participants__r.isEmpty()) {
 			return 0;
 		}
 
 		// Get participant IDs
 		Set<Id> participantIds = new Set<Id>();
-		for (Participants__c p : trainingRequests[0].Participants__r) {
+		for (Participants__c p : matchedTrainingRequest.Participants__r) {
 			participantIds.add(p.Id);
 		}
 
@@ -400,11 +410,11 @@ public with sharing class SurveyRegenerationController {
 	 * @return String Survey URL or null
 	 */
 	private static String getSurveyUrlFromTrainingRequest(Training_Request__c tr, String surveyType) {
-		if (surveyType == SURVEY_TYPE_PARTICIPANT) {
+		if (surveyType.equals(SURVEY_TYPE_PARTICIPANT)) {
 			return tr.Participant_Survey__c;
-		} else if (surveyType == SURVEY_TYPE_CUSTOMER) {
+		} else if (surveyType.equals(SURVEY_TYPE_CUSTOMER)) {
 			return tr.Customer_Survey__c;
-		} else if (surveyType == SURVEY_TYPE_TRAINER) {
+		} else if (surveyType.equals(SURVEY_TYPE_TRAINER)) {
 			return tr.Trainer_Survey__c;
 		}
 		return null;
