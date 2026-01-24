@@ -119,6 +119,7 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 - User-mode security enforcement (WITH USER_MODE)
 - Field-level security checks via SurveyForceUtil.accessController
 - Comprehensive error handling and logging
+- **Synchronous Regeneration Limit**: Maximum of 50 surveys per regeneration to prevent governor limit issues
 
 ### Lightning Web Component: surveyRegenerationWizard
 
@@ -158,6 +159,12 @@ Assign this permission set to users who need to regenerate survey invitations.
 
 ### Common Issues
 
+**Issue**: "Cannot regenerate more than 50 surveys at once"
+- **Solution**: You've exceeded the synchronous regeneration limit. Split your Training Request IDs into smaller batches:
+  - If regenerating all 3 survey types (Customer, Trainer, Participant), process ~16 Training Requests at a time
+  - If regenerating 1 survey type, process up to 50 Training Requests at a time
+  - Run the wizard multiple times for larger datasets
+
 **Issue**: "No surveys found for the selected types"
 - **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: Participant_Survey__c, Customer_Survey__c, Trainer_Survey__c
 
@@ -181,14 +188,24 @@ Assign this permission set to users who need to regenerate survey invitations.
 
 ## Governor Limits
 
-The feature is designed to handle large datasets efficiently:
+The feature is designed to handle large datasets efficiently while respecting Salesforce governor limits:
 - **Bulkified Queries**: All SOQL queries are bulkified
 - **Bulkified DML**: All insert/update/delete operations are bulkified
 - **Batch Processing**: Large sets of Training Requests are processed efficiently
 
-**Recommended Limits:**
-- Maximum Training Request IDs per regeneration: **1000**
-- System automatically validates and processes in bulk
+**Important Limits:**
+- **Maximum Surveys per Regeneration**: **50 surveys** per synchronous regeneration operation
+- This limit prevents governor limit exceptions during bulk processing
+- If you need to regenerate more than 50 surveys, split your Training Request IDs into smaller batches
+
+**Example:**
+- If each Training Request has 3 survey types (Customer, Trainer, Participant), you can regenerate approximately 16 Training Requests at once (16 × 3 = 48 surveys)
+- If you only select one survey type per Training Request, you can process up to 50 Training Requests at once
+
+**Recommended Process for Large Datasets:**
+1. Split your Training Request IDs into smaller batches (e.g., 10-20 Training Requests per batch)
+2. Run the regeneration wizard multiple times
+3. Monitor the success/failure messages after each batch
 
 ## Future Enhancements
 

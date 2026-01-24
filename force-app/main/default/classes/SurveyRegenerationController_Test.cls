@@ -258,4 +258,32 @@ private class SurveyRegenerationController_Test {
 		System.assert(result.totalProcessed > 0, 'Should process multiple surveys');
 		System.assert(result.successCount > 0, 'Should have some successes');
 	}
+
+	/**
+	 * @description Test regeneration limit enforcement
+	 */
+	@isTest
+	static void testRegenerationLimit() {
+		Test.startTest();
+
+		// Create a list exceeding MAX_SYNC_REGENERATION_LIMIT (50)
+		List<String> surveyIds = new List<String>();
+		List<String> surveyTypes = new List<String>();
+
+		// Add 51 dummy IDs to exceed the limit
+		for (Integer i = 0; i < 51; i++) {
+			// Generate fake IDs (won't be validated since we hit limit first)
+			surveyIds.add('a00000000000' + String.valueOf(i).leftPad(3, '0'));
+			surveyTypes.add('Customer');
+		}
+
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
+
+		Test.stopTest();
+
+		System.assertEquals(false, result.success, 'Should fail due to exceeding limit');
+		System.assert(result.message.contains('Cannot regenerate more than'), 'Error message should mention the limit');
+		System.assert(result.message.contains('50'), 'Error message should include the limit value');
+	}
+}
 }

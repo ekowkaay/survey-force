@@ -14,6 +14,9 @@ public with sharing class SurveyRegenerationController {
 	/** Survey invitation status constants */
 	private static final String STATUS_PENDING = SurveyForceConstants.STATUS_PENDING;
 
+	/** Maximum number of surveys allowed for synchronous regeneration to avoid governor limits */
+	private static final Integer MAX_SYNC_REGENERATION_LIMIT = 50;
+
 	/**
 	 * @description Wrapper class for survey regeneration results
 	 */
@@ -179,6 +182,12 @@ public with sharing class SurveyRegenerationController {
 				return result;
 			}
 
+			// Check if the number of surveys exceeds the synchronous regeneration limit
+			if (surveyIds.size() > MAX_SYNC_REGENERATION_LIMIT) {
+				result.message = 'Found ' + surveyIds.size() + ' surveys, which exceeds the limit of ' + MAX_SYNC_REGENERATION_LIMIT + ' surveys for synchronous regeneration. Please reduce the number of Training Requests or deselect some survey types.';
+				return result;
+			}
+
 			// Query surveys
 			List<Schema.SObjectField> surveyFields = new List<Schema.SObjectField>{ Schema.Survey__c.fields.Name };
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSObjectType(), surveyFields);
@@ -237,6 +246,12 @@ public with sharing class SurveyRegenerationController {
 
 			if (surveyTypes == null || surveyTypes.isEmpty() || surveyTypes.size() != surveyIds.size()) {
 				result.message = 'Survey types must match survey IDs';
+				return result;
+			}
+
+			// Check synchronous regeneration limit to avoid governor limits
+			if (surveyIds.size() > MAX_SYNC_REGENERATION_LIMIT) {
+				result.message = 'Cannot regenerate more than ' + MAX_SYNC_REGENERATION_LIMIT + ' surveys at once. Please reduce the number of Training Requests and try again.';
 				return result;
 			}
 
