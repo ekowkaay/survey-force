@@ -285,7 +285,7 @@ public with sharing class SurveyRegenerationController {
 				String surveyType = surveyIdToType.get(surveyId);
 
 				try {
-					if (surveyType == SURVEY_TYPE_PARTICIPANT) {
+					if (surveyType.equals(SURVEY_TYPE_PARTICIPANT)) {
 						// For participant surveys, create invitations for all participants
 						Integer count = regenerateParticipantInvitations(surveyId);
 						if (count > 0) {
@@ -334,6 +334,8 @@ public with sharing class SurveyRegenerationController {
 	private static Integer regenerateParticipantInvitations(Id surveyId) {
 		// Find the training request associated with this survey
 		// Query all training requests with participant surveys to avoid non-indexed LIKE query
+		// Note: This queries all Training_Request__c records with Participant_Survey__c populated.
+		// For better performance in large orgs, consider adding a custom indexed field to store the Survey ID.
 		List<Training_Request__c> trainingRequests = [
 			SELECT Id, Participant_Survey__c, (SELECT Id FROM Participants__r)
 			FROM Training_Request__c
@@ -377,6 +379,11 @@ public with sharing class SurveyRegenerationController {
 		}
 
 		if (!participantsToUpdate.isEmpty()) {
+			// Check FLS before updating Participants__c records
+			SurveyForceUtil.accessController.assertAuthorizedToUpdate(
+				Participants__c.SObjectType,
+				new List<Schema.SObjectField>{ Participants__c.Participant_Survey__c }
+			);
 			Database.update(participantsToUpdate, AccessLevel.USER_MODE);
 		}
 

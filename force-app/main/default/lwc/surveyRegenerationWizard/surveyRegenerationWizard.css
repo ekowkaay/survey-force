@@ -1,6 +1,7 @@
 .regeneration-container {
 	background: var(--slds-g-color-neutral-base-95, #f3f3f3);
 	min-height: 100vh;
+	position: relative;
 }
 
 /* Step Container Styling */
@@ -99,10 +100,6 @@
 	align-items: center;
 	justify-content: center;
 	animation: fadeIn 0.3s ease-in;
-}
-
-.regeneration-container {
-	position: relative;
 }
 
 /* Table Enhancements */
