@@ -135,6 +135,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 			this.parseFileContent(this.manualIds);
 		} else {
 			this.parsedIds = [];
+			this.surveysToRegenerate = [];
 			this.uploadError = '';
 		}
 	}
@@ -142,6 +143,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 	parseFileContent(content) {
 		this.isProcessing = true;
 		this.uploadError = '';
+		this.surveysToRegenerate = []; // Clear previous surveys when new IDs are parsed
 
 		parseTrainingRequestIds({ fileContent: content })
 			.then((result) => {
@@ -181,9 +183,12 @@ export default class SurveyRegenerationWizard extends LightningElement {
 			this.isParticipantSelected = isChecked;
 		}
 
-		// Auto-load surveys when a type is selected
-		if (isChecked && this.parsedIds.length > 0) {
+		// Reload surveys on any toggle to prevent stale data
+		if (this.parsedIds.length > 0) {
 			this.loadSurveysForRegeneration();
+		} else {
+			// Clear surveys if no IDs are available
+			this.surveysToRegenerate = [];
 		}
 	}
 
