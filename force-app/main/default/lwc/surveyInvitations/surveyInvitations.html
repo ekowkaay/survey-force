@@ -131,7 +131,7 @@
 								onchange={handleSurveyChange}
 								required></lightning-record-picker>
 							<template lwc:if={showSurveyRequiredMessage}>
-								<div class="slds-text-body_small slds-text-color_error slds-m-top_x-small slds-grid slds-grid_vertical-align-center">
+								<div class="slds-text-body_small slds-text-color_error slds-m-top_x-small slds-grid slds-grid_vertical-align-center" role="alert" aria-live="polite">
 									<lightning-icon icon-name="utility:warning" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
 									<span>Please select a survey to continue</span>
 								</div>

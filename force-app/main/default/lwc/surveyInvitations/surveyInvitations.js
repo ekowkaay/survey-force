@@ -106,9 +106,10 @@ export default class SurveyInvitations extends LightningElement {
 
 	/**
 	 * Lifecycle hook called when component is inserted into DOM.
-	 * Auto-opens the generate modal when accessed from standalone tab without a survey.
+	 * Auto-opens the generate modal when accessed from a standalone tab without a survey.
 	 * This provides immediate workflow access for users coming from the Survey Link Generator tab.
-	 * On record pages, loads invitations for the current survey.
+	 * Invitation loading for record pages is handled by the wired getInvitationsForSurvey adapter
+	 * based on the current effectiveSurveyId.
 	 */
 	connectedCallback() {
 		// Auto-open generate modal when on standalone tab without a survey
@@ -120,12 +121,21 @@ export default class SurveyInvitations extends LightningElement {
 
 	/**
 	 * Wire adapter to fetch invitations for the current survey.
+	 * Only fires when effectiveSurveyId is truthy to avoid unnecessary server calls.
 	 * Results are cached by Salesforce and can be refreshed using refreshApex
 	 * @param {Object} result - Wire adapter result containing data or error
 	 */
 	@wire(getInvitationsForSurvey, { surveyId: '$effectiveSurveyId' })
 	wiredInvitations(result) {
 		this.wiredInvitationsResult = result;
+
+		// Skip processing if no survey is selected
+		if (!this.effectiveSurveyId) {
+			this.isLoading = false;
+			this.invitations = [];
+			this.error = null;
+			return;
+		}
 
 		if (result.data) {
 			this.invitations = result.data.map((inv) => ({
@@ -136,10 +146,6 @@ export default class SurveyInvitations extends LightningElement {
 			this.error = null;
 		} else if (result.error) {
 			this.error = result.error.body?.message || 'Error loading invitations';
-			this.isLoading = false;
-			this.invitations = [];
-		} else if (!this.effectiveSurveyId) {
-			// No survey selected yet
 			this.isLoading = false;
 			this.invitations = [];
 		}
@@ -155,6 +161,9 @@ export default class SurveyInvitations extends LightningElement {
 		this.showSurveyRequiredMessage = false;
 		if (this.selectedSurveyId) {
 			this.isLoading = true; // Show loading while wire fetches data
+		} else {
+			// Survey was deselected, clear loading state immediately
+			this.isLoading = false;
 		}
 	}
 
@@ -239,7 +248,16 @@ export default class SurveyInvitations extends LightningElement {
 					this.generatedLinks = result.invitations;
 					this.showGenerateModal = false;
 					this.showLinksModal = true;
-					refreshApex(this.wiredInvitationsResult); // Refresh to show new invitations
+					// Refresh to show new invitations
+					refreshApex(this.wiredInvitationsResult).catch((error) => {
+						this.showToast(
+							'Warning',
+							'Invitations were created but the list could not be refreshed. Please refresh the page.',
+							'warning'
+						);
+						// eslint-disable-next-line no-console
+						console.error('Error refreshing invitations', error);
+					});
 					this.showToast('Success', result.message, 'success');
 				} else {
 					this.showToast('Error', result.message, 'error');
