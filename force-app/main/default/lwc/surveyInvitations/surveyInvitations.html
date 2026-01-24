@@ -120,6 +120,24 @@
 					<h2 class="slds-text-heading_medium">Generate Survey Links</h2>
 				</header>
 				<div class="slds-modal__content slds-p-around_medium">
+					<!-- Survey Selector in Modal (when no survey selected) -->
+					<template lwc:if={showSurveySelector}>
+						<div class="slds-m-bottom_medium">
+							<lightning-record-picker
+								label="Select Survey"
+								placeholder="Search for a survey..."
+								object-api-name="Survey__c"
+								onchange={handleSurveyChange}
+								required></lightning-record-picker>
+							<template lwc:if={showSurveyRequiredMessage}>
+								<p class="slds-text-body_small slds-text-color_error slds-m-top_x-small">
+									<lightning-icon icon-name="utility:warning" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+									Please select a survey to continue
+								</p>
+							</template>
+						</div>
+					</template>
+
 					<lightning-input
 						type="number"
 						label="Number of Links to Generate"
@@ -134,7 +152,7 @@
 				</div>
 				<footer class="slds-modal__footer">
 					<lightning-button label="Cancel" onclick={handleCloseGenerateModal}></lightning-button>
-					<lightning-button variant="brand" label="Generate" onclick={handleGenerateLinks} disabled={isGenerating}></lightning-button>
+					<lightning-button variant="brand" label="Generate" onclick={handleGenerateLinks} disabled={isGenerateDisabled}></lightning-button>
 				</footer>
 			</div>
 		</section>

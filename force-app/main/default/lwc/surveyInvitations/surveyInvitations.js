@@ -39,6 +39,7 @@ export default class SurveyInvitations extends LightningElement {
 	@track showGenerateModal = false;
 	@track linkCount = 10;
 	@track isGenerating = false;
+	@track showSurveyRequiredMessage = false;
 
 	// Links modal
 	@track showLinksModal = false;
@@ -80,16 +81,25 @@ export default class SurveyInvitations extends LightningElement {
 		return this.generatedLinks ? this.generatedLinks.length : 0;
 	}
 
+	get isGenerateDisabled() {
+		return this.isGenerating || !this.effectiveSurveyId;
+	}
+
 	connectedCallback() {
 		if (this.effectiveSurveyId) {
 			this.loadInvitations();
 		} else {
 			this.isLoading = false;
+			// Auto-open generate modal when on standalone tab without a survey
+			if (!this.recordId) {
+				this.showGenerateModal = true;
+			}
 		}
 	}
 
 	handleSurveyChange(event) {
 		this.selectedSurveyId = event.detail.recordId;
+		this.showSurveyRequiredMessage = false;
 		if (this.selectedSurveyId) {
 			this.loadInvitations();
 		}
@@ -134,11 +144,13 @@ export default class SurveyInvitations extends LightningElement {
 	// Generate Modal
 	handleOpenGenerateModal() {
 		this.linkCount = 10;
+		this.showSurveyRequiredMessage = false;
 		this.showGenerateModal = true;
 	}
 
 	handleCloseGenerateModal() {
 		this.showGenerateModal = false;
+		this.showSurveyRequiredMessage = false;
 	}
 
 	handleLinkCountChange(event) {
@@ -147,6 +159,7 @@ export default class SurveyInvitations extends LightningElement {
 
 	handleGenerateLinks() {
 		if (!this.effectiveSurveyId) {
+			this.showSurveyRequiredMessage = true;
 			this.showToast('Error', 'Please select a survey first', 'error');
 			return;
 		}
@@ -157,6 +170,7 @@ export default class SurveyInvitations extends LightningElement {
 		}
 
 		this.isGenerating = true;
+		this.showSurveyRequiredMessage = false;
 
 		createBulkInvitations({ surveyId: this.effectiveSurveyId, count: this.linkCount })
 			.then((result) => {
