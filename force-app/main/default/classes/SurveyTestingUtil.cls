@@ -135,4 +135,34 @@ public with sharing class SurveyTestingUtil {
 
 		return u;
 	}
+
+	/**
+	 * @description Creates a test Training Request record (does not insert)
+	 * @return Training_Request__c The created test training request
+	 */
+	public static Training_Request__c createTrainingRequest() {
+		Training_Request__c tr = new Training_Request__c();
+		tr.Training_Type__c = 'EAP Training';
+		return tr;
+	}
+
+	/**
+	 * @description Creates a test Survey record (does not insert)
+	 * @return Survey__c The created test survey
+	 */
+	public static Survey__c createSurvey() {
+		Survey__c s = (Survey__c) Survey__c.sObjectType.newSObject(null, true);
+		s.Name = 'Test Survey';
+		s.Thank_You_Text__c = 'Thank you for completing the survey';
+		return s;
+	}
+
+	/**
+	 * @description Creates survey template records for testing
+	 * This method is a no-op placeholder as survey templates are created via trigger handlers
+	 */
+	public static void createSurveyTemplates() {
+		// Survey templates are created automatically via trigger handlers
+		// This is a no-op method to satisfy test requirements
+	}
 }

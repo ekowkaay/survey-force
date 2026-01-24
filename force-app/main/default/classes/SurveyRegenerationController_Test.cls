@@ -15,7 +15,6 @@ private class SurveyRegenerationController_Test {
 		List<Training_Request__c> trainingRequests = new List<Training_Request__c>();
 		for (Integer i = 0; i < 3; i++) {
 			Training_Request__c tr = new Training_Request__c();
-			tr.Name = 'Test Training ' + i;
 			tr.Training_Type__c = 'EAP Training';
 			trainingRequests.add(tr);
 		}
@@ -285,5 +284,4 @@ private class SurveyRegenerationController_Test {
 		System.assert(result.message.contains('Cannot regenerate more than'), 'Error message should mention the limit');
 		System.assert(result.message.contains('50'), 'Error message should include the limit value');
 	}
-}
 }
