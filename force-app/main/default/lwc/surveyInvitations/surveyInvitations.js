@@ -1,5 +1,6 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
 import getInvitationsForSurvey from '@salesforce/apex/SurveyInvitationController.getInvitationsForSurvey';
 import createBulkInvitations from '@salesforce/apex/SurveyInvitationController.createBulkInvitations';
 
@@ -35,19 +36,33 @@ export default class SurveyInvitations extends LightningElement {
 	@track columns = COLUMNS;
 	@track selectedSurveyId = null;
 
+	// Store wired result for refreshApex
+	wiredInvitationsResult;
+
 	// Generate modal
 	@track showGenerateModal = false;
 	@track linkCount = 10;
 	@track isGenerating = false;
+	@track showSurveyRequiredMessage = false;
 
 	// Links modal
 	@track showLinksModal = false;
 	@track generatedLinks = [];
 
+	/**
+	 * Returns the survey ID to use for operations.
+	 * Priority: recordId (from record page) > selectedSurveyId (from user selection)
+	 * @returns {String} Survey ID or null
+	 */
 	get effectiveSurveyId() {
 		return this.recordId || this.selectedSurveyId;
 	}
 
+	/**
+	 * Determines if the survey selector should be displayed.
+	 * True when component is on standalone tab (no recordId), false on record pages
+	 * @returns {Boolean}
+	 */
 	get showSurveySelector() {
 		return !this.recordId;
 	}
@@ -80,44 +95,93 @@ export default class SurveyInvitations extends LightningElement {
 		return this.generatedLinks ? this.generatedLinks.length : 0;
 	}
 
+	/**
+	 * Determines if the Generate button should be disabled.
+	 * Button is disabled when generation is in progress or no survey is selected
+	 * @returns {Boolean} True if button should be disabled
+	 */
+	get isGenerateDisabled() {
+		return this.isGenerating || !this.effectiveSurveyId;
+	}
+
+	/**
+	 * Lifecycle hook called when component is inserted into DOM.
+	 * Auto-opens the generate modal when accessed from a standalone tab without a survey.
+	 * This provides immediate workflow access for users coming from the Survey Link Generator tab.
+	 * Invitation loading for record pages is handled by the wired getInvitationsForSurvey adapter
+	 * based on the current effectiveSurveyId.
+	 */
 	connectedCallback() {
-		if (this.effectiveSurveyId) {
-			this.loadInvitations();
-		} else {
+		// Auto-open generate modal when on standalone tab without a survey
+		if (!this.recordId && !this.selectedSurveyId) {
 			this.isLoading = false;
+			this.showGenerateModal = true;
 		}
 	}
 
-	handleSurveyChange(event) {
-		this.selectedSurveyId = event.detail.recordId;
-		if (this.selectedSurveyId) {
-			this.loadInvitations();
-		}
-	}
+	/**
+	 * Wire adapter to fetch invitations for the current survey.
+	 * Only fires when effectiveSurveyId is truthy to avoid unnecessary server calls.
+	 * Results are cached by Salesforce and can be refreshed using refreshApex
+	 * @param {Object} result - Wire adapter result containing data or error
+	 */
+	@wire(getInvitationsForSurvey, { surveyId: '$effectiveSurveyId' })
+	wiredInvitations(result) {
+		this.wiredInvitationsResult = result;
 
-	loadInvitations() {
+		// Skip processing if no survey is selected
 		if (!this.effectiveSurveyId) {
 			this.isLoading = false;
+			this.invitations = [];
+			this.error = null;
 			return;
 		}
 
-		this.isLoading = true;
-		this.error = null;
-
-		getInvitationsForSurvey({ surveyId: this.effectiveSurveyId })
-			.then((result) => {
-				this.invitations = result.map((inv) => ({
-					...inv,
-					statusClass: this.getStatusClass(inv.status)
-				}));
-				this.isLoading = false;
-			})
-			.catch((err) => {
-				this.error = err.body?.message || 'Error loading invitations';
-				this.isLoading = false;
-			});
+		if (result.data) {
+			this.invitations = result.data.map((inv) => ({
+				...inv,
+				statusClass: this.getStatusClass(inv.status)
+			}));
+			this.isLoading = false;
+			this.error = null;
+		} else if (result.error) {
+			this.error = result.error.body?.message || 'Error loading invitations';
+			this.isLoading = false;
+			this.invitations = [];
+		}
 	}
 
+	/**
+	 * Handles survey selection from the lightning-record-picker.
+	 * Clears validation errors. Wire adapter will automatically load invitations for the selected survey
+	 * @param {Event} event - Change event from lightning-record-picker
+	 */
+	handleSurveyChange(event) {
+		this.selectedSurveyId = event.detail.recordId;
+		this.showSurveyRequiredMessage = false;
+		if (this.selectedSurveyId) {
+			this.isLoading = true; // Show loading while wire fetches data
+		} else {
+			// Survey was deselected, clear loading state immediately
+			this.isLoading = false;
+		}
+	}
+
+	/**
+	 * Refreshes the invitations list from the server.
+	 * Uses refreshApex to bypass cache and fetch fresh data
+	 * Called when the refresh button is clicked
+	 */
+	handleRefresh() {
+		this.isLoading = true;
+		return refreshApex(this.wiredInvitationsResult);
+	}
+
+	/**
+	 * Returns the CSS class for invitation status styling
+	 * @param {String} status - Invitation status (Pending, Completed, Expired)
+	 * @returns {String} SLDS color class
+	 */
 	getStatusClass(status) {
 		if (status === 'Completed') {
 			return 'slds-text-color_success';
@@ -127,26 +191,45 @@ export default class SurveyInvitations extends LightningElement {
 		return '';
 	}
 
-	handleRefresh() {
-		this.loadInvitations();
-	}
-
 	// Generate Modal
+	/**
+	 * Opens the generate links modal and resets state.
+	 * Resets link count to default of 10 and clears any validation errors
+	 */
 	handleOpenGenerateModal() {
 		this.linkCount = 10;
+		this.showSurveyRequiredMessage = false;
 		this.showGenerateModal = true;
 	}
 
+	/**
+	 * Closes the generate links modal and resets validation state
+	 */
 	handleCloseGenerateModal() {
 		this.showGenerateModal = false;
+		this.showSurveyRequiredMessage = false;
 	}
 
+	/**
+	 * Handles changes to the link count input field
+	 * @param {Event} event - Input change event
+	 */
 	handleLinkCountChange(event) {
 		this.linkCount = parseInt(event.target.value, 10);
 	}
 
+	/**
+	 * Generates bulk survey invitation links.
+	 * Validates survey selection and link count before calling Apex.
+	 * Multi-layer validation:
+	 * 1. Checks for survey selection (shows warning message + toast)
+	 * 2. Validates link count is between 1-200
+	 * 3. Calls Apex to create invitations
+	 * 4. Displays generated links in modal on success
+	 */
 	handleGenerateLinks() {
 		if (!this.effectiveSurveyId) {
+			this.showSurveyRequiredMessage = true;
 			this.showToast('Error', 'Please select a survey first', 'error');
 			return;
 		}
@@ -157,6 +240,7 @@ export default class SurveyInvitations extends LightningElement {
 		}
 
 		this.isGenerating = true;
+		this.showSurveyRequiredMessage = false;
 
 		createBulkInvitations({ surveyId: this.effectiveSurveyId, count: this.linkCount })
 			.then((result) => {
@@ -164,7 +248,16 @@ export default class SurveyInvitations extends LightningElement {
 					this.generatedLinks = result.invitations;
 					this.showGenerateModal = false;
 					this.showLinksModal = true;
-					this.loadInvitations();
+					// Refresh to show new invitations
+					refreshApex(this.wiredInvitationsResult).catch((error) => {
+						this.showToast(
+							'Warning',
+							'Invitations were created but the list could not be refreshed. Please refresh the page.',
+							'warning'
+						);
+						// eslint-disable-next-line no-console
+						console.error('Error refreshing invitations', error);
+					});
 					this.showToast('Success', result.message, 'success');
 				} else {
 					this.showToast('Error', result.message, 'error');
