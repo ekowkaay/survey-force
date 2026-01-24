@@ -106,7 +106,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 	}
 
 	handleFileUpload(event) {
-		const uploadedFiles = event.detail.files;
+		const uploadedFiles = event.target.files;
 		if (uploadedFiles && uploadedFiles.length > 0) {
 			const file = uploadedFiles[0];
 			this.readFileContent(file);
