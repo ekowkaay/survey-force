@@ -21,13 +21,41 @@
 
 						<!-- File Upload -->
 						<div class="slds-box slds-theme_default slds-m-bottom_medium">
-							<lightning-input
-								type="file"
-								label="Upload Training Request IDs"
-								accept=".txt,.csv"
-								onchange={handleFileUpload}
-								disabled={isProcessing}></lightning-input>
-							<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Accepted formats: .txt, .csv</p>
+							<template lwc:if={hasUploadedFile}>
+								<!-- Uploaded File Display with Remove Button -->
+								<div class="slds-media slds-media_center slds-p-around_small slds-box slds-theme_shade">
+									<div class="slds-media__figure">
+										<lightning-icon icon-name="doctype:txt" size="small"></lightning-icon>
+									</div>
+									<div class="slds-media__body">
+										<h3 class="slds-text-heading_small">{uploadedFileName}</h3>
+										<template lwc:if={showUploadProgress}>
+											<div class="slds-m-top_x-small">
+												<lightning-progress-bar value={uploadProgress} size="small"></lightning-progress-bar>
+												<p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">Uploading... {uploadProgress}%</p>
+											</div>
+										</template>
+									</div>
+									<div class="slds-media__figure slds-media__figure_reverse">
+										<lightning-button-icon
+											icon-name="utility:close"
+											alternative-text="Remove file"
+											title="Remove file"
+											variant="bare"
+											onclick={handleRemoveFile}
+											disabled={isProcessing}></lightning-button-icon>
+									</div>
+								</div>
+							</template>
+							<template lwc:else>
+								<lightning-input
+									type="file"
+									label="Upload Training Request IDs"
+									accept=".txt,.csv"
+									onchange={handleFileUpload}
+									disabled={isProcessing}></lightning-input>
+								<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Accepted formats: .txt, .csv</p>
+							</template>
 						</div>
 
 						<!-- Manual Input Option -->

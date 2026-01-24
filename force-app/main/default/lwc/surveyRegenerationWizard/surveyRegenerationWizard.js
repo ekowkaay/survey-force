@@ -19,6 +19,11 @@ export default class SurveyRegenerationWizard extends LightningElement {
 	@track isProcessing = false;
 	@track isLoadingSurveys = false;
 
+	// File upload tracking
+	@track uploadedFileName = '';
+	@track uploadProgress = 0;
+	@track isUploading = false;
+
 	// Survey type selections
 	@track isCustomerSelected = false;
 	@track isTrainerSelected = false;
@@ -61,6 +66,14 @@ export default class SurveyRegenerationWizard extends LightningElement {
 
 	get hasSurveysFound() {
 		return this.surveysToRegenerate && this.surveysToRegenerate.length > 0;
+	}
+
+	get hasUploadedFile() {
+		return this.uploadedFileName !== '';
+	}
+
+	get showUploadProgress() {
+		return this.isUploading && this.uploadProgress < 100;
 	}
 
 	get surveysFoundCount() {
@@ -115,18 +128,53 @@ export default class SurveyRegenerationWizard extends LightningElement {
 
 	readFileContent(file) {
 		this.isProcessing = true;
+		this.isUploading = true;
 		this.uploadError = '';
+		this.uploadProgress = 0;
+		this.uploadedFileName = file.name;
 
 		const reader = new FileReader();
+
+		// Track progress
+		reader.onprogress = (e) => {
+			if (e.lengthComputable) {
+				this.uploadProgress = Math.round((e.loaded / e.total) * 100);
+			}
+		};
+
 		reader.onload = (e) => {
+			this.uploadProgress = 100;
 			const fileContent = e.target.result;
 			this.parseFileContent(fileContent);
+			// Keep isUploading true until parsing is complete
 		};
+
 		reader.onerror = () => {
 			this.uploadError = 'Error reading file. Please try again.';
 			this.isProcessing = false;
+			this.isUploading = false;
+			this.uploadProgress = 0;
+			this.uploadedFileName = '';
 		};
+
 		reader.readAsText(file);
+	}
+
+	handleRemoveFile() {
+		// Clear file upload state
+		this.uploadedFileName = '';
+		this.uploadProgress = 0;
+		this.isUploading = false;
+		this.parsedIds = [];
+		this.surveysToRegenerate = [];
+		this.uploadError = '';
+		this.manualIds = '';
+
+		// Reset the file input
+		const fileInput = this.template.querySelector('lightning-input[type="file"]');
+		if (fileInput) {
+			fileInput.value = '';
+		}
 	}
 
 	handleManualInput(event) {
@@ -163,11 +211,13 @@ export default class SurveyRegenerationWizard extends LightningElement {
 					this.parsedIds = [];
 				}
 				this.isProcessing = false;
+				this.isUploading = false; // Parsing complete
 			})
 			.catch((error) => {
 				this.uploadError = error.body?.message || 'Error parsing file content.';
 				this.parsedIds = [];
 				this.isProcessing = false;
+				this.isUploading = false; // Parsing failed
 			});
 	}
 
