@@ -228,11 +228,11 @@ public with sharing class SurveyRegenerationController {
 
 	/**
 	 * @description Regenerate survey invitations for selected surveys
-	 * Deletes existing pending invitations and creates new ones
-	 * For participant surveys, creates invitations for all existing participants
+	 * Automatically uses synchronous or asynchronous processing based on the number of surveys.
+	 * If surveys exceed MAX_SYNC_REGENERATION_LIMIT, initiates batch processing.
 	 * @param surveyIds List of Survey IDs to regenerate invitations for
 	 * @param surveyTypes Corresponding survey types for each survey ID
-	 * @return RegenerationResult with regeneration status
+	 * @return RegenerationResult with regeneration status or batch job info
 	 */
 	@AuraEnabled
 	public static RegenerationResult regenerateSurveyInvitations(List<String> surveyIds, List<String> surveyTypes) {
@@ -249,9 +249,66 @@ public with sharing class SurveyRegenerationController {
 				return result;
 			}
 
-			// Check synchronous regeneration limit to avoid governor limits
-			if (surveyIds.size() > MAX_SYNC_REGENERATION_LIMIT) {
-				result.message = 'Cannot regenerate more than ' + MAX_SYNC_REGENERATION_LIMIT + ' surveys at once. Please reduce the number of Training Requests and try again.';
+			// If within synchronous limit, process immediately
+			if (surveyIds.size() <= MAX_SYNC_REGENERATION_LIMIT) {
+				return regenerateSurveyInvitationsSynchronous(surveyIds, surveyTypes);
+			}
+
+			// Exceed limit - use batch processing for scalability
+			// Build survey data for batch processing
+			List<SurveyData> surveysForBatch = new List<SurveyData>();
+			for (Integer i = 0; i < surveyIds.size(); i++) {
+				try {
+					Id surveyId = (Id) surveyIds[i];
+					SurveyData data = new SurveyData();
+					data.surveyId = surveyId;
+					data.surveyType = surveyTypes[i];
+					surveysForBatch.add(data);
+				} catch (Exception e) {
+					result.errors.add('Invalid Survey ID: ' + surveyIds[i]);
+				}
+			}
+
+			if (surveysForBatch.isEmpty()) {
+				result.message = 'No valid Survey IDs provided for batch processing';
+				return result;
+			}
+
+			// Launch batch job - process 10 surveys per batch to stay well within governor limits
+			SurveyRegenerationBatch batchJob = new SurveyRegenerationBatch(surveysForBatch);
+			Id batchJobId = Database.executeBatch(batchJob, 10);
+
+			result.success = true;
+			result.message = 'Batch regeneration initiated for ' + surveysForBatch.size() + ' surveys. Job ID: ' + batchJobId + '. You will receive completion notification when processing is complete.';
+			result.totalProcessed = surveysForBatch.size();
+
+			return result;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyRegenerationController:regenerateSurveyInvitations():' + e.getMessage());
+			result.message = 'Error initiating regeneration: ' + e.getMessage();
+			return result;
+		}
+	}
+
+	/**
+	 * @description Synchronous regeneration of survey invitations
+	 * Deletes existing pending invitations and creates new ones
+	 * For participant surveys, creates invitations for all existing participants
+	 * @param surveyIds List of Survey IDs to regenerate invitations for
+	 * @param surveyTypes Corresponding survey types for each survey ID
+	 * @return RegenerationResult with regeneration status
+	 */
+	public static RegenerationResult regenerateSurveyInvitationsSynchronous(List<String> surveyIds, List<String> surveyTypes) {
+		RegenerationResult result = new RegenerationResult();
+
+		try {
+			if (surveyIds == null || surveyIds.isEmpty()) {
+				result.message = 'No surveys selected for regeneration';
+				return result;
+			}
+
+			if (surveyTypes == null || surveyTypes.isEmpty() || surveyTypes.size() != surveyIds.size()) {
+				result.message = 'Survey types must match survey IDs';
 				return result;
 			}
 

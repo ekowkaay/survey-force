@@ -112,14 +112,27 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 **Methods:**
 - `parseTrainingRequestIds(String fileContent)`: Parses IDs from file content
 - `getSurveysForRegeneration(List<String> trainingRequestIds, List<String> surveyTypes)`: Retrieves surveys to regenerate
-- `regenerateSurveyInvitations(List<String> surveyIds, List<String> surveyTypes)`: Deletes old invitations and creates new ones
+- `regenerateSurveyInvitations(List<String> surveyIds, List<String> surveyTypes)`: Intelligently routes to sync or async processing
+- `regenerateSurveyInvitationsSynchronous(List<String> surveyIds, List<String> surveyTypes)`: Synchronous regeneration for smaller datasets
 
 **Key Features:**
 - Bulkified operations for governor limit compliance
 - User-mode security enforcement (WITH USER_MODE)
 - Field-level security checks via SurveyForceUtil.accessController
 - Comprehensive error handling and logging
-- **Synchronous Regeneration Limit**: Maximum of 50 surveys per regeneration to prevent governor limit issues
+- **Automatic Async Processing**: When exceeding 50 surveys, automatically switches to batch processing for scalability
+- **Synchronous Regeneration Limit**: Maximum of 50 surveys per synchronous operation
+
+### Batch Class: SurveyRegenerationBatch
+
+**Purpose:** Handles large-scale survey regeneration asynchronously when the dataset exceeds the synchronous limit of 50 surveys.
+
+**Key Features:**
+- Implements `Database.Batchable` and `Database.Stateful` interfaces
+- Processes surveys in batches of 10 to optimize governor limit usage
+- Maintains state across batch iterations to track success/failure counts
+- Logs completion status with detailed results
+- Automatic execution when user exceeds synchronous limit
 
 ### Lightning Web Component: surveyRegenerationWizard
 
@@ -159,11 +172,12 @@ Assign this permission set to users who need to regenerate survey invitations.
 
 ### Common Issues
 
-**Issue**: "Cannot regenerate more than 50 surveys at once"
-- **Solution**: You've exceeded the synchronous regeneration limit. Split your Training Request IDs into smaller batches:
-  - If regenerating all 3 survey types (Customer, Trainer, Participant), process ~16 Training Requests at a time
-  - If regenerating 1 survey type, process up to 50 Training Requests at a time
-  - Run the wizard multiple times for larger datasets
+**Issue**: Large dataset (>50 surveys) taking time to process
+- **Solution**: The system automatically uses asynchronous batch processing for datasets exceeding 50 surveys. You'll receive:
+  - Immediate confirmation with batch Job ID
+  - Processing continues in the background
+  - Check Setup → Apex Jobs to monitor progress
+  - For very large datasets (1000+ surveys), processing may take several minutes
 
 **Issue**: "No surveys found for the selected types"
 - **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: Participant_Survey__c, Customer_Survey__c, Trainer_Survey__c
@@ -191,12 +205,22 @@ Assign this permission set to users who need to regenerate survey invitations.
 The feature is designed to handle large datasets efficiently while respecting Salesforce governor limits:
 - **Bulkified Queries**: All SOQL queries are bulkified
 - **Bulkified DML**: All insert/update/delete operations are bulkified
-- **Batch Processing**: Large sets of Training Requests are processed efficiently
+- **Intelligent Processing**: Automatically routes to synchronous or asynchronous processing based on dataset size
 
-**Important Limits:**
-- **Maximum Surveys per Regeneration**: **50 surveys** per synchronous regeneration operation
-- This limit prevents governor limit exceptions during bulk processing
-- If you need to regenerate more than 50 surveys, split your Training Request IDs into smaller batches
+**Processing Modes:**
+1. **Synchronous Processing** (≤50 surveys)
+   - Immediate execution and results
+   - Best for small to medium datasets
+   - Real-time feedback in the wizard
+
+2. **Asynchronous Batch Processing** (>50 surveys)
+   - Automatic activation when limit exceeded
+   - Processes surveys in batches of 10
+   - Runs in background for optimal performance
+   - Scalable to thousands of surveys
+   - Monitor progress via Setup → Apex Jobs
+
+**No Manual Intervention Required:** The system automatically determines the best processing method based on your dataset size.
 
 **Example:**
 - If each Training Request has 3 survey types (Customer, Trainer, Participant), you can regenerate approximately 16 Training Requests at once (16 × 3 = 48 surveys)
