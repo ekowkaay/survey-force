@@ -148,6 +148,7 @@ public with sharing class SurveyTestingUtil {
 
 	/**
 	 * @description Creates a test Survey record (does not insert)
+	 * Uses newSObject(null, true) for consistency with existing code pattern
 	 * @return Survey__c The created test survey
 	 */
 	public static Survey__c createSurvey() {
@@ -158,8 +159,10 @@ public with sharing class SurveyTestingUtil {
 	}
 
 	/**
-	 * @description Creates survey template records for testing
-	 * This method is a no-op placeholder as survey templates are created via trigger handlers
+	 * @description Placeholder for survey template creation in test setup
+	 * Surveys are created automatically via TrainingRequestTriggerHandler when
+	 * Training Request records are inserted, so explicit template creation is
+	 * not needed. This method exists to satisfy test class requirements.
 	 */
 	public static void createSurveyTemplates() {
 		// Survey templates are created automatically via trigger handlers
