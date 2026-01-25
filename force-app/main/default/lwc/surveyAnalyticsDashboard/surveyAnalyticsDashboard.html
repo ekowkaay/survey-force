@@ -60,39 +60,6 @@
 				</div>
 			</div>
 
-			<!-- Workflow Cards Section -->
-			<div class="workflows-section slds-p-horizontal_medium slds-m-bottom_large">
-				<h2 class="slds-text-heading_medium slds-m-bottom_medium">Quick Actions</h2>
-
-				<div class="slds-grid slds-wrap slds-gutters">
-					<template for:each={workflows} for:item="workflow">
-						<div key={workflow.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
-							<div class="workflow-card slds-box slds-theme_default" data-workflow-id={workflow.id} onclick={handleWorkflowSelect}>
-								<div class="workflow-header slds-m-bottom_small">
-									<div class="workflow-icon-container slds-m-bottom_small">
-										<lightning-icon icon-name={workflow.icon} size="medium" alternative-text={workflow.title}></lightning-icon>
-									</div>
-									<h3 class="slds-text-heading_small slds-m-bottom_x-small">{workflow.title}</h3>
-									<p class="slds-text-body_small slds-text-color_weak">{workflow.description}</p>
-								</div>
-
-								<div class="workflow-steps">
-									<ul class="slds-list_dotted">
-										<template for:each={workflow.steps} for:item="step">
-											<li key={step} class="slds-item slds-text-body_small">{step}</li>
-										</template>
-									</ul>
-								</div>
-
-								<div class="workflow-action slds-m-top_medium">
-									<lightning-button label="Get Started" variant="brand" class="slds-button_stretch"></lightning-button>
-								</div>
-							</div>
-						</div>
-					</template>
-				</div>
-			</div>
-
 			<!-- Key Metrics Cards -->
 			<template lwc:if={hasSurveys}>
 				<div class="metrics-section slds-p-horizontal_medium slds-m-bottom_large">
