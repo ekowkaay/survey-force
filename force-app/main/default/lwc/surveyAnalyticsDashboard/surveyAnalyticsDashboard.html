@@ -3,23 +3,23 @@
 		<!-- Loading State -->
 		<template lwc:if={isLoading}>
 			<div class="slds-is-relative loading-container">
-				<lightning-spinner alternative-text="Loading analytics..." size="medium"></lightning-spinner>
+				<lightning-spinner alternative-text="Loading results..." size="medium"></lightning-spinner>
 			</div>
 		</template>
 
-		<!-- Main Dashboard Content -->
+		<!-- Main Content -->
 		<template lwc:else>
-			<!-- Header Section with Search and Filters -->
+			<!-- Header Section -->
 			<div class="dashboard-header slds-p-around_medium">
 				<div class="slds-grid slds-grid_align-spread slds-gutters slds-m-bottom_medium">
 					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
 						<div class="slds-media slds-media_center">
 							<div class="slds-media__figure">
-								<lightning-icon icon-name="standard:metrics" size="large"></lightning-icon>
+								<lightning-icon icon-name="standard:report" size="large"></lightning-icon>
 							</div>
 							<div class="slds-media__body">
-								<h1 class="slds-text-heading_large">Survey Analytics</h1>
-								<p class="slds-text-body_small slds-text-color_weak">Comprehensive overview of your survey performance</p>
+								<h1 class="slds-text-heading_large">{surveyName}</h1>
+								<p class="slds-text-body_small slds-text-color_weak">Survey Analytics & Response Insights</p>
 							</div>
 						</div>
 					</div>
@@ -27,243 +27,303 @@
 						<div class="slds-grid slds-grid_align-end slds-gutters_small">
 							<div class="slds-col">
 								<lightning-combobox
-									name="timeframe"
-									label="Timeframe"
-									value={selectedTimeframe}
-									options={timeframeOptions}
-									onchange={handleTimeframeChange}
+									name="view"
+									label="View"
+									value={selectedView}
+									options={viewOptions}
+									onchange={handleViewChange}
 									variant="label-hidden"
-									placeholder="Select timeframe"></lightning-combobox>
+									placeholder="Select view"></lightning-combobox>
 							</div>
 							<div class="slds-col">
 								<lightning-button-group>
 									<lightning-button label="Refresh" icon-name="utility:refresh" onclick={handleRefresh}></lightning-button>
-									<lightning-button variant="brand" label="New Survey" icon-name="utility:add" onclick={handleCreateSurvey}></lightning-button>
+									<lightning-button label="Export" icon-name="utility:download" onclick={handleExport}></lightning-button>
 								</lightning-button-group>
 							</div>
 						</div>
 					</div>
 				</div>
-
-				<!-- Search Bar -->
 				<div class="slds-grid slds-gutters">
-					<div class="slds-col slds-size_1-of-1">
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
 						<lightning-input
 							type="search"
-							label="Search Surveys"
+							label="Search Responses"
 							value={searchTerm}
 							onchange={handleSearchChange}
-							placeholder="Search by survey name..."
+							placeholder="Search by response name..."
+							variant="label-hidden"></lightning-input>
+					</div>
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+						<lightning-combobox
+							name="timeframe"
+							label="Timeframe"
+							value={selectedTimeframe}
+							options={timeframeOptions}
+							onchange={handleTimeframeChange}
 							variant="label-hidden"
-							class="search-input"></lightning-input>
+							placeholder="Select timeframe"></lightning-combobox>
 					</div>
 				</div>
 			</div>
 
-			<!-- Key Metrics Cards -->
-			<template lwc:if={hasSurveys}>
-				<div class="metrics-section slds-p-horizontal_medium slds-m-bottom_large">
-					<div class="slds-grid slds-wrap slds-gutters">
-						<!-- Total Surveys -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="custom:custom63" size="small" alternative-text="Total Surveys"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Total Surveys</p>
-										<p class="slds-text-heading_large metric-value">{totalSurveys}</p>
-									</div>
+			<!-- Key Metrics Summary -->
+			<div class="metrics-section slds-p-horizontal_medium slds-m-bottom_large">
+				<div class="slds-grid slds-wrap slds-gutters">
+					<!-- Total Responses -->
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+						<div class="metric-card slds-box slds-theme_default">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="standard:feedback" size="small" alternative-text="Total Responses"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<p class="slds-text-body_small slds-text-color_weak">Total Responses</p>
+									<p class="slds-text-heading_large metric-value">{totalResponses}</p>
 								</div>
 							</div>
 						</div>
+					</div>
 
-						<!-- Total Responses -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="standard:feedback" size="small" alternative-text="Total Responses"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Total Responses</p>
-										<p class="slds-text-heading_large metric-value">{totalResponses}</p>
-									</div>
+					<!-- Unique Respondents -->
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+						<div class="metric-card slds-box slds-theme_default">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:people" size="small" alternative-text="Respondents"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<p class="slds-text-body_small slds-text-color_weak">Unique Respondents</p>
+									<p class="slds-text-heading_large metric-value">{uniqueRespondents}</p>
 								</div>
 							</div>
 						</div>
+					</div>
 
-						<!-- Total Questions -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="utility:questions_and_answers" size="small" alternative-text="Total Questions"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Total Questions</p>
-										<p class="slds-text-heading_large metric-value">{totalQuestions}</p>
-									</div>
+					<!-- Response Window -->
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+						<div class="metric-card slds-box slds-theme_default">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:date_input" size="small" alternative-text="Response Window"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<p class="slds-text-body_small slds-text-color_weak">Response Window</p>
+									<p class="slds-text-heading_large metric-value">{responseWindowLabel}</p>
 								</div>
 							</div>
 						</div>
+					</div>
 
-						<!-- Average Responses -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="utility:trending" size="small" alternative-text="Avg Responses"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Avg Responses</p>
-										<p class="slds-text-heading_large metric-value">{averageResponsesPerSurvey}</p>
-									</div>
+					<!-- Responses Last 7 Days -->
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+						<div class="metric-card slds-box slds-theme_default">
+							<div class="slds-media">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:trending" size="small" alternative-text="Responses Last 7 Days"></lightning-icon>
 								</div>
-							</div>
-						</div>
-
-						<!-- Active Surveys -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="utility:success" size="small" alternative-text="Active Surveys"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Active Surveys</p>
-										<p class="slds-text-heading_large metric-value">{activeSurveys}</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Public Surveys -->
-						<div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6">
-							<div class="metric-card slds-box slds-theme_default">
-								<div class="slds-media slds-media_center">
-									<div class="slds-media__figure">
-										<lightning-icon icon-name="utility:record_update" size="small" alternative-text="Active Surveys"></lightning-icon>
-									</div>
-									<div class="slds-media__body">
-										<p class="slds-text-body_small slds-text-color_weak">Active Surveys</p>
-										<p class="slds-text-heading_large metric-value">{activeSurveys}</p>
-									</div>
+								<div class="slds-media__body">
+									<p class="slds-text-body_small slds-text-color_weak">Responses (7d)</p>
+									<p class="slds-text-heading_large metric-value">{responsesLastSevenDays}</p>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Dashboard Content Grid -->
-				<template lwc:if={hasFilteredResults}>
-					<div class="dashboard-content slds-p-horizontal_medium">
-						<div class="slds-grid slds-wrap slds-gutters">
-							<!-- Top Performing Surveys -->
-							<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-								<div class="slds-card">
-									<div class="slds-card__header slds-grid">
-										<header class="slds-media slds-media_center slds-has-flexi-truncate">
-											<div class="slds-media__figure">
-												<lightning-icon icon-name="utility:chart" size="small"></lightning-icon>
-											</div>
-											<div class="slds-media__body">
-												<h2 class="slds-card__header-title">Top Performing Surveys</h2>
-											</div>
-										</header>
-									</div>
-									<div class="slds-card__body slds-card__body_inner">
-										<template for:each={topPerformingSurveys} for:item="survey">
-											<div key={survey.Id} class="survey-item slds-box slds-theme_shade slds-m-bottom_small">
+			<!-- Overview View -->
+			<template lwc:if={isOverviewView}>
+				<div class="content-section slds-p-horizontal_medium">
+					<div class="slds-grid slds-wrap slds-gutters">
+						<!-- Response Timeline -->
+						<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+							<div class="slds-card">
+								<div class="slds-card__header slds-grid">
+									<header class="slds-media slds-media_center slds-has-flexi-truncate">
+										<div class="slds-media__figure">
+											<lightning-icon icon-name="utility:chart" size="small"></lightning-icon>
+										</div>
+										<div class="slds-media__body">
+											<h2 class="slds-card__header-title">Response Timeline (Last 7 Days)</h2>
+										</div>
+										<div class="slds-no-flex response-trend">
+											<span class={responseTrend.className}>{responseTrend.label}</span>
+										</div>
+									</header>
+								</div>
+								<div class="slds-card__body slds-card__body_inner">
+									<template lwc:if={responsesByDate.length}>
+										<template for:each={responsesByDate} for:item="dataPoint">
+											<div key={dataPoint.date} class="timeline-item slds-p-vertical_small">
 												<div class="slds-grid slds-grid_vertical-align-center">
-													<div class="slds-col slds-grow">
-														<div
-															class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small"
-															data-survey-id={survey.Id}
-															onclick={handleViewSurvey}
-															style="cursor: pointer">
-															{survey.Name}
-														</div>
-														<div class="slds-text-body_small slds-text-color_weak">{survey.Completed_Surveys__c} responses • {survey.Questions__c} questions</div>
+													<div class="slds-col slds-size_1-of-3">
+														<span class="slds-text-body_small">{dataPoint.date}</span>
 													</div>
-													<div class="slds-col slds-no-flex">
-														<span class="slds-badge slds-theme_success">{survey.responsePercentage}%</span>
+													<div class="slds-col slds-size_2-of-3">
+														<div class="response-bar" style={dataPoint.barStyle}>
+															<span class="response-count">{dataPoint.count}</span>
+														</div>
 													</div>
 												</div>
 											</div>
 										</template>
-									</div>
-									<div class="slds-card__footer">
-										<lightning-button label="View All Surveys" onclick={handleViewAllSurveys} class="slds-button_stretch"></lightning-button>
-									</div>
+									</template>
+									<template lwc:else>
+										<div class="slds-text-align_center slds-p-vertical_large">
+											<p class="slds-text-body_small slds-text-color_weak">No response data available</p>
+										</div>
+									</template>
 								</div>
 							</div>
+						</div>
 
-							<!-- Recent Surveys -->
-							<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
-								<div class="slds-card">
-									<div class="slds-card__header slds-grid">
-										<header class="slds-media slds-media_center slds-has-flexi-truncate">
-											<div class="slds-media__figure">
-												<lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
+						<!-- Response Summary -->
+						<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+							<div class="slds-card">
+								<div class="slds-card__header slds-grid">
+									<header class="slds-media slds-media_center slds-has-flexi-truncate">
+										<div class="slds-media__figure">
+											<lightning-icon icon-name="utility:summary" size="small"></lightning-icon>
+										</div>
+										<div class="slds-media__body">
+											<h2 class="slds-card__header-title">Response Summary</h2>
+										</div>
+									</header>
+								</div>
+								<div class="slds-card__body slds-card__body_inner">
+									<template lwc:if={hasResponses}>
+										<div class="summary-grid slds-grid slds-wrap slds-p-around_large">
+											<div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+												<p class="slds-text-body_small slds-text-color_weak">Last Response</p>
+												<template lwc:if={lastResponseDate}>
+													<lightning-formatted-date-time value={lastResponseDate} day="numeric" month="short" year="numeric" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+												</template>
+												<template lwc:else>
+													<p class="slds-text-body_small slds-text-color_weak">N/A</p>
+												</template>
 											</div>
-											<div class="slds-media__body">
-												<h2 class="slds-card__header-title">Recently Created</h2>
+											<div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
+												<p class="slds-text-body_small slds-text-color_weak">Case-linked Responses</p>
+												<p class="slds-text-heading_small">{caseLinkedResponses}</p>
 											</div>
-										</header>
-									</div>
-									<div class="slds-card__body slds-card__body_inner">
-										<template for:each={recentSurveys} for:item="survey">
-											<div key={survey.Id} class="survey-item slds-box slds-theme_shade slds-m-bottom_small">
-												<div class="slds-grid slds-grid_vertical-align-center">
-													<div class="slds-col slds-grow">
-														<div
-															class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small"
-															data-survey-id={survey.Id}
-															onclick={handleViewSurvey}
-															style="cursor: pointer">
-															{survey.Name}
-														</div>
-														<div class="slds-text-body_small slds-text-color_weak">
-															<lightning-formatted-date-time value={survey.CreatedDate} day="numeric" month="short" year="numeric"></lightning-formatted-date-time>
-														</div>
-													</div>
-													<div class="slds-col slds-no-flex">
-														<!-- All surveys now use token-based access -->
-													</div>
-												</div>
+											<div class="slds-col slds-size_1-of-2">
+												<p class="slds-text-body_small slds-text-color_weak">Questions in Survey</p>
+												<p class="slds-text-heading_small">{totalQuestions}</p>
 											</div>
-										</template>
-									</div>
-									<div class="slds-card__footer">
-										<lightning-button label="Create New Survey" variant="brand" onclick={handleCreateSurvey} class="slds-button_stretch"></lightning-button>
-									</div>
+											<div class="slds-col slds-size_1-of-2">
+												<p class="slds-text-body_small slds-text-color_weak">Avg Time to Complete</p>
+												<p class="slds-text-heading_small">{averageTimeToComplete}</p>
+											</div>
+										</div>
+									</template>
+									<template lwc:else>
+										<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+											<div class="slds-text-longform">
+												<h3 class="slds-text-heading_medium">No Responses Yet</h3>
+												<p class="slds-text-body_regular">Responses will appear here once your survey is completed by participants.</p>
+											</div>
+										</div>
+									</template>
 								</div>
 							</div>
 						</div>
 					</div>
-				</template>
-
-				<!-- No Results State -->
-				<template lwc:else>
-					<div class="slds-illustration slds-illustration_small slds-p-around_xx-large slds-text-align_center">
-						<div class="slds-text-longform">
-							<h3 class="slds-text-heading_medium">No surveys match your filters</h3>
-							<p class="slds-text-body_regular">Try adjusting your search or timeframe</p>
-						</div>
-					</div>
-				</template>
+				</div>
 			</template>
 
-			<!-- Empty State -->
-			<template lwc:else>
-				<div class="empty-state slds-illustration slds-illustration_large slds-p-around_xx-large slds-text-align_center">
-					<lightning-icon icon-name="standard:survey" size="large" class="slds-m-bottom_large"></lightning-icon>
-					<div class="slds-text-longform">
-						<h3 class="slds-text-heading_large slds-m-bottom_medium">Welcome to Survey Force</h3>
-						<p class="slds-text-body_regular slds-m-bottom_large">Get started by creating your first survey to collect valuable feedback and insights.</p>
-						<lightning-button variant="brand" label="Create Your First Survey" icon-name="utility:add" onclick={handleCreateSurvey}></lightning-button>
+			<!-- Individual Responses View -->
+			<template lwc:if={isResponsesView}>
+				<div class="content-section slds-p-horizontal_medium">
+					<div class="slds-card">
+						<div class="slds-card__header slds-grid">
+							<header class="slds-media slds-media_center slds-has-flexi-truncate">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:list" size="small"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<h2 class="slds-card__header-title">Individual Responses</h2>
+								</div>
+							</header>
+						</div>
+						<div class="slds-card__body slds-card__body_inner">
+							<template lwc:if={hasResponses}>
+								<lightning-datatable
+									key-field="Id"
+									data={responseRows}
+									columns={responseColumns}
+									hide-checkbox-column="true"
+									class="response-table"></lightning-datatable>
+							</template>
+							<template lwc:else>
+								<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+									<div class="slds-text-longform">
+										<h3 class="slds-text-heading_medium">No Responses to Display</h3>
+										<p class="slds-text-body_regular">Individual responses will appear here once survey submissions are received.</p>
+									</div>
+								</div>
+							</template>
+						</div>
+					</div>
+				</div>
+			</template>
+
+			<!-- Question Analysis View -->
+			<template lwc:if={isQuestionsView}>
+				<div class="content-section slds-p-horizontal_medium">
+					<div class="slds-card">
+						<div class="slds-card__header slds-grid">
+							<header class="slds-media slds-media_center slds-has-flexi-truncate">
+								<div class="slds-media__figure">
+									<lightning-icon icon-name="utility:analytics" size="small"></lightning-icon>
+								</div>
+								<div class="slds-media__body">
+									<h2 class="slds-card__header-title">Question-by-Question Analysis</h2>
+								</div>
+							</header>
+						</div>
+						<div class="slds-card__body slds-card__body_inner">
+							<template lwc:if={questions.length}>
+								<div class="slds-grid slds-wrap slds-gutters">
+									<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+										<div class="question-metric">
+											<p class="slds-text-body_small slds-text-color_weak">Total Questions</p>
+											<p class="slds-text-heading_medium">{totalQuestions}</p>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+										<div class="question-metric">
+											<p class="slds-text-body_small slds-text-color_weak">Required Questions</p>
+											<p class="slds-text-heading_medium">{requiredQuestionsCount}</p>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+										<div class="question-metric">
+											<p class="slds-text-body_small slds-text-color_weak">Optional Questions</p>
+											<p class="slds-text-heading_medium">{optionalQuestionsCount}</p>
+										</div>
+									</div>
+								</div>
+
+								<div class="slds-m-top_large">
+									<h3 class="slds-text-title_bold slds-m-bottom_small">Question Type Breakdown</h3>
+									<template for:each={questionSummary} for:item="questionType">
+										<div key={questionType.type} class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
+											<span class="slds-text-body_small">{questionType.type}</span>
+											<span class="slds-text-body_small">{questionType.count}</span>
+										</div>
+									</template>
+								</div>
+							</template>
+							<template lwc:else>
+								<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+									<div class="slds-text-longform">
+										<h3 class="slds-text-heading_medium">No Questions Available</h3>
+										<p class="slds-text-body_regular">Question analytics will appear once the survey includes questions.</p>
+									</div>
+								</div>
+							</template>
+						</div>
 					</div>
 				</div>
 			</template>
