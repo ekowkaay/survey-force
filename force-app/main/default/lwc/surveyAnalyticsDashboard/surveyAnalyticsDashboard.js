@@ -14,33 +14,6 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 	@track selectedTimeframe = 'all';
 	@track searchTerm = '';
 
-	workflows = [
-		{
-			id: 'manage',
-			title: 'Manage Surveys',
-			description: 'View, edit, and analyze your existing surveys',
-			icon: 'utility:list',
-			steps: ['View all surveys', 'Edit or clone', 'Review responses'],
-			action: 'handleViewAllSurveys'
-		},
-		{
-			id: 'generate',
-			title: 'Generate Survey Links',
-			description: 'Create unique invitation links to share with participants',
-			icon: 'utility:link',
-			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
-			action: 'handleGenerateLinks'
-		},
-		{
-			id: 'create',
-			title: 'Create a Survey',
-			description: 'Build a new survey from scratch with our intuitive builder',
-			icon: 'utility:add',
-			steps: ['Design questions', 'Configure settings', 'Preview and publish'],
-			action: 'handleCreateSurvey'
-		}
-	];
-
 	// Computed analytics
 	get totalSurveys() {
 		return this.filteredSurveys.length;
@@ -152,23 +125,6 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 
 	handleTimeframeChange(event) {
 		this.selectedTimeframe = event.detail.value;
-	}
-
-	handleWorkflowSelect(event) {
-		const workflowId = event.currentTarget.dataset.workflowId;
-		const workflow = this.workflows.find((w) => w.id === workflowId);
-		if (workflow) {
-			this[workflow.action]();
-		}
-	}
-
-	handleGenerateLinks() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Link_Generator'
-			}
-		});
 	}
 
 	handleCreateSurvey() {

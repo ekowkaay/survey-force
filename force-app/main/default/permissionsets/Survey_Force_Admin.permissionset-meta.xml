@@ -232,6 +232,10 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>Survey_Regeneration</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>Survey_Templates</tab>
         <visibility>Visible</visibility>
     </tabSettings>
