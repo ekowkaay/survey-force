@@ -135,4 +135,110 @@ public with sharing class SurveyTestingUtil {
 
 		return u;
 	}
+
+	/**
+	 * @description Creates a test Training Request record (does not insert)
+	 * @return Training_Request__c The created test training request
+	 */
+	public static Training_Request__c createTrainingRequest() {
+		Training_Request__c tr = new Training_Request__c();
+		tr.Training_Type__c = 'EAP Training';
+		return tr;
+	}
+
+	/**
+	 * @description Creates a test Survey record (does not insert)
+	 * Uses newSObject(null, true) for consistency with existing code pattern
+	 * @return Survey__c The created test survey
+	 */
+	public static Survey__c createSurvey() {
+		Survey__c s = (Survey__c) Survey__c.sObjectType.newSObject(null, true);
+		s.Name = 'Test Survey';
+		s.Thank_You_Text__c = 'Thank you for completing the survey';
+		return s;
+	}
+
+	/**
+	 * @description Ensures required Survey__c template records exist for tests
+	 *
+	 * This method creates Survey__c template records with names that match the
+	 * SurveyForceConstants.TEMPLATE_* values used by trigger logic
+	 * (e.g., TrainingRequestTriggerHandler / SurveyUtilities.createSurveysInBulk()).
+	 * It is intended for use in test setup so that trigger-driven survey creation
+	 * can successfully find and use these templates.
+	 *
+	 * The method is idempotent: if templates already exist with the required
+	 * names, they are not recreated.
+	 *
+	 * Usage example (in a test):
+	 * @TestSetup
+	 * static void setup() {
+	 *     SurveyTestingUtil.createSurveyTemplates();
+	 *     // Insert Training_Request__c records here; triggers will create surveys
+	 * }
+	 */
+	public static void createSurveyTemplates() {
+		// Collect the template names required by the application.
+		List<String> templateNames = new List<String>();
+
+		// Add known template constant values used in the codebase.
+		if (String.isNotBlank(SurveyForceConstants.TEMPLATE_PARTICIPANT_ENGLISH)) {
+			templateNames.add(SurveyForceConstants.TEMPLATE_PARTICIPANT_ENGLISH);
+		}
+		if (String.isNotBlank(SurveyForceConstants.TEMPLATE_PARTICIPANT_SPANISH)) {
+			templateNames.add(SurveyForceConstants.TEMPLATE_PARTICIPANT_SPANISH);
+		}
+		if (String.isNotBlank(SurveyForceConstants.TEMPLATE_CUSTOMER)) {
+			templateNames.add(SurveyForceConstants.TEMPLATE_CUSTOMER);
+		}
+		if (String.isNotBlank(SurveyForceConstants.TEMPLATE_TRAINER)) {
+			templateNames.add(SurveyForceConstants.TEMPLATE_TRAINER);
+		}
+
+		// Return early if there are no templates to create.
+		if (templateNames.isEmpty()) {
+			return;
+		}
+
+		// Query existing templates by name to avoid duplicates.
+		List<Survey__c> existingTemplates = [
+			SELECT Id, Name
+			FROM Survey__c
+			WHERE Name IN :templateNames
+			WITH USER_MODE
+		];
+
+		Set<String> existingNames = new Set<String>();
+		for (Survey__c existing : existingTemplates) {
+			existingNames.add(existing.Name);
+		}
+
+		// Build new Survey__c template records for any missing names.
+		List<Survey__c> templatesToInsert = new List<Survey__c>();
+		for (String templateName : templateNames) {
+			if (existingNames.contains(templateName)) {
+				continue;
+			}
+
+			Survey__c templateSurvey = (Survey__c) Survey__c.sObjectType.newSObject(null, true);
+			templateSurvey.Name = templateName;
+			templateSurvey.Thank_You_Text__c = 'Thank you for completing the survey';
+
+			templatesToInsert.add(templateSurvey);
+		}
+
+		// No DML if everything already exists.
+		if (templatesToInsert.isEmpty()) {
+			return;
+		}
+
+		// Insert templates in user mode with exception handling.
+		try {
+			Database.insert(templatesToInsert, AccessLevel.USER_MODE);
+		} catch (DmlException e) {
+			// In test utilities, we do not rethrow; tests can still proceed even if
+			// some templates fail to insert, though they may fail functionally.
+			System.debug('Failed to insert survey templates: ' + e.getMessage());
+		}
+	}
 }
