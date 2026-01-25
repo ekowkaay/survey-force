@@ -16,7 +16,7 @@
     <tabs>Survey_Dashboard</tabs>
     <tabs>Survey_Templates</tabs>
     <tabs>Create_Survey</tabs>
-    <tabs>Survey_Regeneration</tabs>
+    <tabs>Survey_Link_Generator</tabs>
     <tabs>Getting_Started_LWC</tabs>
     <tabs>Survey__c</tabs>
     <tabs>SurveyTaker__c</tabs>

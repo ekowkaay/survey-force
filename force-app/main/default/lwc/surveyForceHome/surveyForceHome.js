@@ -37,13 +37,13 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 			action: 'handleManageSurveys'
 		},
 		{
-			id: 'regenerate',
-			title: 'Regenerate Survey Invitations',
-			description: 'Regenerate survey invitations in bulk',
-			icon: 'utility:refresh',
+			id: 'generate',
+			title: 'Generate Survey Links',
+			description: 'Create unique invitation links to share with participants',
+			icon: 'utility:link',
 			iconBg: 'slds-icon-standard-link',
-			steps: ['Upload training requests', 'Process invitations', 'Track regeneration'],
-			action: 'handleRegenerateInvitations'
+			steps: ['Generate unique links', 'Copy and share', 'Track responses'],
+			action: 'handleGenerateLinks'
 		}
 	];
 
@@ -102,11 +102,11 @@ export default class SurveyForceHome extends NavigationMixin(LightningElement) {
 		});
 	}
 
-	handleRegenerateInvitations() {
+	handleGenerateLinks() {
 		this[NavigationMixin.Navigate]({
 			type: 'standard__navItemPage',
 			attributes: {
-				apiName: 'Survey_Regeneration'
+				apiName: 'Survey_Link_Generator'
 			}
 		});
 	}
