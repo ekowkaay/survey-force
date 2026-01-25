@@ -92,6 +92,13 @@ export default class SurveyRegenerationWizard extends LightningElement {
 		return this.errorMessages && this.errorMessages.length > 0;
 	}
 
+	get errorMessagesForDisplay() {
+		return this.errorMessages.map((error, index) => ({
+			id: `error-${index}`,
+			message: error
+		}));
+	}
+
 	get showBackButton() {
 		return this.currentStep === STEPS.SELECT || this.currentStep === STEPS.CONFIRM;
 	}

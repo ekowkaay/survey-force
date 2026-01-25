@@ -48,12 +48,7 @@
 								</div>
 							</template>
 							<template lwc:else>
-								<lightning-input
-									type="file"
-									label="Upload Training Request IDs"
-									accept=".txt,.csv"
-									onchange={handleFileUpload}
-									disabled={isProcessing}></lightning-input>
+								<lightning-input type="file" label="Upload Training Request IDs" accept=".txt,.csv" onchange={handleFileUpload} disabled={isProcessing}></lightning-input>
 								<p class="slds-text-body_small slds-text-color_weak slds-m-top_small">Accepted formats: .txt, .csv</p>
 							</template>
 						</div>
@@ -311,8 +306,8 @@
 								<div class="slds-box slds-theme_error slds-m-top_medium slds-text-align_left">
 									<h3 class="slds-text-heading_small slds-m-bottom_small">Errors:</h3>
 									<ul class="slds-list_dotted">
-										<template for:each={errorMessages} for:item="error" for:index="index">
-											<li key={index}>{error}</li>
+										<template for:each={errorMessagesForDisplay} for:item="error">
+											<li key={error.id}>{error.message}</li>
 										</template>
 									</ul>
 								</div>
