@@ -1,122 +1,271 @@
-import { LightningElement, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getAllSurveys from '@salesforce/apex/SurveyTemplateController.getAllSurveys';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData';
+import getSurveyResponses from '@salesforce/apex/SurveyTakerController.getSurveyResponses';
+
+const SURVEY_FIELDS = ['Survey__c.Name', 'Survey__c.Questions__c', 'Survey__c.Completed_Surveys__c'];
 
 /**
- * Modern analytics dashboard providing immersive overview of all surveys
- * Uses SLDS 2 design patterns for modern, engaging user experience
+ * Comprehensive survey analytics dashboard with analytics and visualizations
+ * Modern SLDS 2 design for immersive results viewing experience
  */
-export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningElement) {
-	@track surveys = [];
+export default class SurveyAnalyticsDashboard extends LightningElement {
+	@api recordId; // Survey ID
+
 	@track isLoading = true;
 	@track error = null;
-	@track selectedTimeframe = 'all';
+	@track responses = [];
+	@track questions = [];
+	@track selectedView = 'overview';
+	@track selectedTimeframe = '30days';
 	@track searchTerm = '';
 
-	// Computed analytics
-	get totalSurveys() {
-		return this.filteredSurveys.length;
-	}
+	// Survey data from record
+	surveyName;
+	totalQuestions;
+	totalResponses;
 
-	get totalResponses() {
-		return this.filteredSurveys.reduce((sum, survey) => sum + (survey.Completed_Surveys__c || 0), 0);
-	}
-
-	get totalQuestions() {
-		return this.filteredSurveys.reduce((sum, survey) => sum + (survey.Questions__c || 0), 0);
-	}
-
-	get averageResponsesPerSurvey() {
-		if (this.totalSurveys === 0) return 0;
-		return Math.round(this.totalResponses / this.totalSurveys);
-	}
-
-	get activeSurveys() {
-		return this.filteredSurveys.filter((s) => (s.Completed_Surveys__c || 0) > 0).length;
-	}
-
-	get filteredSurveys() {
-		if (!this.surveys) return [];
-
-		let filtered = this.surveys;
-
-		// Apply search filter
-		if (this.searchTerm) {
-			const term = this.searchTerm.toLowerCase();
-			filtered = filtered.filter((survey) => survey.Name.toLowerCase().includes(term));
+	@wire(getRecord, { recordId: '$recordId', fields: SURVEY_FIELDS })
+	wiredSurvey({ error, data }) {
+		if (data) {
+			this.surveyName = getFieldValue(data, 'Survey__c.Name');
+			this.totalQuestions = getFieldValue(data, 'Survey__c.Questions__c');
+			this.totalResponses = getFieldValue(data, 'Survey__c.Completed_Surveys__c');
+		} else if (error) {
+			this.error = 'Error loading survey details';
 		}
-
-		// Apply timeframe filter
-		const now = new Date();
-		if (this.selectedTimeframe === '7days') {
-			const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-			filtered = filtered.filter((s) => new Date(s.CreatedDate) >= sevenDaysAgo);
-		} else if (this.selectedTimeframe === '30days') {
-			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-			filtered = filtered.filter((s) => new Date(s.CreatedDate) >= thirtyDaysAgo);
-		}
-
-		return filtered;
-	}
-
-	get topPerformingSurveys() {
-		if (!this.filteredSurveys || this.filteredSurveys.length === 0) return [];
-
-		return [...this.filteredSurveys]
-			.sort((a, b) => (b.Completed_Surveys__c || 0) - (a.Completed_Surveys__c || 0))
-			.slice(0, 5)
-			.map((survey) => ({
-				...survey,
-				responsePercentage: this.totalResponses > 0 ? Math.round(((survey.Completed_Surveys__c || 0) / this.totalResponses) * 100) : 0
-			}));
-	}
-
-	get recentSurveys() {
-		if (!this.filteredSurveys || this.filteredSurveys.length === 0) return [];
-
-		return [...this.filteredSurveys].sort((a, b) => new Date(b.CreatedDate) - new Date(a.CreatedDate)).slice(0, 5);
-	}
-
-	get hasSurveys() {
-		return this.surveys && this.surveys.length > 0;
-	}
-
-	get hasFilteredResults() {
-		return this.filteredSurveys && this.filteredSurveys.length > 0;
-	}
-
-	get timeframeOptions() {
-		return [
-			{ label: 'All Time', value: 'all' },
-			{ label: 'Last 7 Days', value: '7days' },
-			{ label: 'Last 30 Days', value: '30days' }
-		];
 	}
 
 	connectedCallback() {
-		this.loadDashboardData();
+		if (this.recordId) {
+			this.loadResponses();
+			this.loadQuestions();
+		}
 	}
 
-	loadDashboardData() {
+	loadResponses() {
 		this.isLoading = true;
 		this.error = null;
 
-		getAllSurveys()
+		getSurveyResponses({ surveyId: this.recordId })
 			.then((result) => {
-				this.surveys = result;
+				this.responses = result || [];
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = error.body?.message || 'Error loading dashboard data';
+				this.error = error.body?.message || 'Error loading responses';
 				this.isLoading = false;
 				this.showToast('Error', this.error, 'error');
 			});
 	}
 
-	handleRefresh() {
-		this.loadDashboardData();
-		this.showToast('Success', 'Dashboard refreshed', 'success');
+	loadQuestions() {
+		getSurveyData({ surveyId: this.recordId, caseId: null, contactId: null })
+			.then((result) => {
+				this.questions = result?.questions || [];
+			})
+			.catch(() => {
+				this.questions = [];
+			});
+	}
+
+	// Computed properties
+	get hasResponses() {
+		return this.responses && this.responses.length > 0;
+	}
+
+	get filteredResponses() {
+		if (!this.responses) return [];
+
+		let filtered = [...this.responses];
+
+		if (this.searchTerm) {
+			const term = this.searchTerm.toLowerCase();
+			filtered = filtered.filter((response) => (response.Name || '').toLowerCase().includes(term));
+		}
+
+		if (this.selectedTimeframe !== 'all') {
+			const cutoff = new Date();
+			if (this.selectedTimeframe === '7days') {
+				cutoff.setDate(cutoff.getDate() - 7);
+			} else if (this.selectedTimeframe === '30days') {
+				cutoff.setDate(cutoff.getDate() - 30);
+			} else if (this.selectedTimeframe === '90days') {
+				cutoff.setDate(cutoff.getDate() - 90);
+			}
+			filtered = filtered.filter((response) => new Date(response.CreatedDate) >= cutoff);
+		}
+
+		return filtered;
+	}
+
+	get averageTimeToComplete() {
+		// Placeholder - would need to calculate from response timestamps
+		return 'N/A';
+	}
+
+	get responsesByDate() {
+		if (!this.filteredResponses || this.filteredResponses.length === 0) return [];
+
+		// Group responses by date
+		const grouped = {};
+		this.filteredResponses.forEach((response) => {
+			const date = new Date(response.CreatedDate).toLocaleDateString();
+			grouped[date] = (grouped[date] || 0) + 1;
+		});
+
+		const maxCount = Math.max(...Object.values(grouped));
+		return Object.keys(grouped)
+			.sort()
+			.map((date) => ({
+				date,
+				count: grouped[date],
+				barStyle: `width:${Math.max(10, Math.round((grouped[date] / maxCount) * 100))}%`
+			}))
+			.slice(-7); // Last 7 days
+	}
+
+	get responsesLastSevenDays() {
+		const now = new Date();
+		const cutoff = new Date();
+		cutoff.setDate(now.getDate() - 7);
+		return this.responses.filter((response) => new Date(response.CreatedDate) >= cutoff).length;
+	}
+
+	get responsesPreviousSevenDays() {
+		const now = new Date();
+		const start = new Date();
+		start.setDate(now.getDate() - 14);
+		const end = new Date();
+		end.setDate(now.getDate() - 7);
+		return this.responses.filter((response) => {
+			const created = new Date(response.CreatedDate);
+			return created >= start && created < end;
+		}).length;
+	}
+
+	get responseTrend() {
+		const previous = this.responsesPreviousSevenDays || 0;
+		const current = this.responsesLastSevenDays || 0;
+		if (previous === 0 && current === 0) {
+			return { label: 'No change', className: 'trend-pill trend-neutral' };
+		}
+		if (previous === 0) {
+			return { label: 'New activity', className: 'trend-pill trend-positive' };
+		}
+		const delta = Math.round(((current - previous) / previous) * 100);
+		return {
+			label: `${delta >= 0 ? '+' : ''}${delta}% vs last week`,
+			className: delta >= 0 ? 'trend-pill trend-positive' : 'trend-pill trend-negative'
+		};
+	}
+
+	get uniqueRespondents() {
+		const unique = new Set(this.responses.filter((response) => response.Contact__c).map((response) => response.Contact__c));
+		return unique.size;
+	}
+
+	get caseLinkedResponses() {
+		return this.responses.filter((response) => response.Case__c).length;
+	}
+
+	get lastResponseDate() {
+		if (!this.responses.length) return null;
+		return this.responses.reduce((latest, response) => {
+			const created = new Date(response.CreatedDate);
+			return created > latest ? created : latest;
+		}, new Date(0));
+	}
+
+	get responseWindowLabel() {
+		if (!this.responses.length) return 'N/A';
+		const dates = this.responses.map((response) => new Date(response.CreatedDate));
+		const earliest = new Date(Math.min(...dates));
+		const latest = new Date(Math.max(...dates));
+		const diffDays = Math.max(1, Math.ceil((latest - earliest) / (1000 * 60 * 60 * 24)));
+		return `${diffDays} day window`;
+	}
+
+	get responseRows() {
+		return this.filteredResponses.map((response) => ({
+			...response,
+			contactDisplay: response.Contact__c ? 'Linked' : 'Anonymous',
+			caseDisplay: response.Case__c ? 'Linked' : '—'
+		}));
+	}
+
+	get responseColumns() {
+		return [
+			{ label: 'Response', fieldName: 'Name', type: 'text' },
+			{
+				label: 'Submitted',
+				fieldName: 'CreatedDate',
+				type: 'date',
+				typeAttributes: { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+			},
+			{ label: 'Contact', fieldName: 'contactDisplay', type: 'text' },
+			{ label: 'Case', fieldName: 'caseDisplay', type: 'text' }
+		];
+	}
+
+	get questionSummary() {
+		if (!this.questions || this.questions.length === 0) return [];
+
+		const grouped = this.questions.reduce((acc, question) => {
+			const type = question.questionType || 'Other';
+			acc[type] = (acc[type] || 0) + 1;
+			return acc;
+		}, {});
+
+		return Object.keys(grouped)
+			.sort((a, b) => grouped[b] - grouped[a])
+			.map((type) => ({
+				type,
+				count: grouped[type]
+			}));
+	}
+
+	get requiredQuestionsCount() {
+		return this.questions.filter((question) => question.required).length;
+	}
+
+	get optionalQuestionsCount() {
+		return this.questions.length - this.requiredQuestionsCount;
+	}
+
+	get viewOptions() {
+		return [
+			{ label: 'Overview', value: 'overview' },
+			{ label: 'Individual Responses', value: 'responses' },
+			{ label: 'Question Analysis', value: 'questions' }
+		];
+	}
+
+	get timeframeOptions() {
+		return [
+			{ label: 'Last 7 Days', value: '7days' },
+			{ label: 'Last 30 Days', value: '30days' },
+			{ label: 'Last 90 Days', value: '90days' },
+			{ label: 'All Time', value: 'all' }
+		];
+	}
+
+	get isOverviewView() {
+		return this.selectedView === 'overview';
+	}
+
+	get isResponsesView() {
+		return this.selectedView === 'responses';
+	}
+
+	get isQuestionsView() {
+		return this.selectedView === 'questions';
+	}
+
+	// Event handlers
+	handleViewChange(event) {
+		this.selectedView = event.detail.value;
 	}
 
 	handleSearchChange(event) {
@@ -127,34 +276,15 @@ export default class SurveyAnalyticsDashboard extends NavigationMixin(LightningE
 		this.selectedTimeframe = event.detail.value;
 	}
 
-	handleCreateSurvey() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Create_Survey'
-			}
-		});
+	handleRefresh() {
+		this.loadResponses();
+		this.loadQuestions();
+		this.showToast('Success', 'Results refreshed', 'success');
 	}
 
-	handleViewSurvey(event) {
-		const surveyId = event.currentTarget.dataset.surveyId;
-		this[NavigationMixin.Navigate]({
-			type: 'standard__recordPage',
-			attributes: {
-				recordId: surveyId,
-				objectApiName: 'Survey__c',
-				actionName: 'view'
-			}
-		});
-	}
-
-	handleViewAllSurveys() {
-		this[NavigationMixin.Navigate]({
-			type: 'standard__navItemPage',
-			attributes: {
-				apiName: 'Survey_Dashboard'
-			}
-		});
+	handleExport() {
+		// Placeholder for export functionality
+		this.showToast('Info', 'Export functionality coming soon', 'info');
 	}
 
 	showToast(title, message, variant) {

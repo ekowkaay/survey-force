@@ -15,10 +15,6 @@
 	border-bottom: 1px solid var(--slds-g-color-border-base-1, #c9c9c9);
 }
 
-.search-input {
-	max-width: 600px;
-}
-
 .metrics-section {
 	animation: fadeIn 0.3s ease-in;
 }
@@ -40,25 +36,78 @@
 	font-weight: 700;
 }
 
-.survey-item {
-	transition: all 0.2s ease;
-	cursor: pointer;
+.content-section {
+	animation: fadeIn 0.4s ease-in;
 }
 
-.survey-item:hover {
-	transform: translateX(4px);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+.timeline-item {
+	border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
 }
 
-.survey-name:hover {
-	color: var(--slds-g-color-brand-base-60, #0176d3);
-	text-decoration: underline;
+.timeline-item:last-child {
+	border-bottom: none;
 }
 
-.empty-state {
-	background: var(--slds-g-color-neutral-base-100, #ffffff);
-	border-radius: 0.25rem;
-	margin: 2rem;
+.response-bar {
+	background: linear-gradient(90deg, var(--slds-g-color-brand-base-60, #0176d3) 0%, var(--slds-g-color-brand-base-50, #0b5cab) 100%);
+	padding: 0.5rem 1rem;
+	border-radius: 4px;
+	color: white;
+	display: inline-block;
+	min-width: 60px;
+	text-align: center;
+	transition: all 0.3s ease;
+}
+
+.response-bar:hover {
+	transform: scaleX(1.05);
+	box-shadow: 0 2px 6px rgba(1, 118, 211, 0.3);
+}
+
+.response-count {
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.response-trend {
+	margin-left: auto;
+}
+
+.trend-pill {
+	border-radius: 999px;
+	padding: 0.2rem 0.5rem;
+	font-size: 0.7rem;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.trend-positive {
+	background: rgba(30, 135, 55, 0.12);
+	color: #1e8737;
+}
+
+.trend-negative {
+	background: rgba(194, 57, 52, 0.12);
+	color: #c23934;
+}
+
+.trend-neutral {
+	background: var(--slds-g-color-neutral-base-90, #eef1f6);
+	color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+}
+
+.summary-grid p {
+	margin-bottom: 0.25rem;
+}
+
+.response-table {
+	--slds-c-table-color-background: var(--slds-g-color-neutral-base-100, #ffffff);
+}
+
+.question-metric {
+	background: var(--slds-g-color-neutral-base-95, #f7f9fb);
+	border-radius: 0.5rem;
+	padding: 0.75rem;
 }
 
 @keyframes fadeIn {
@@ -72,6 +121,19 @@
 	}
 }
 
-.dashboard-content {
-	animation: fadeIn 0.4s ease-in;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.dashboard-header .slds-grid {
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.timeline-item .slds-grid {
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.response-bar {
+		width: 100%;
+	}
 }
