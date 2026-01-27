@@ -184,12 +184,7 @@ public with sharing class SurveyRegenerationController {
 
 			// Check if the number of surveys exceeds the synchronous regeneration limit
 			if (surveyIds.size() > MAX_SYNC_REGENERATION_LIMIT) {
-				result.message =
-					'Found ' +
-					surveyIds.size() +
-					' surveys, which exceeds the limit of ' +
-					MAX_SYNC_REGENERATION_LIMIT +
-					' surveys for synchronous regeneration. Please reduce the number of Training Requests or deselect some survey types.';
+				result.message = 'Found ' + surveyIds.size() + ' surveys, which exceeds the limit of ' + MAX_SYNC_REGENERATION_LIMIT + ' surveys for synchronous regeneration. Please reduce the number of Training Requests or deselect some survey types.';
 				return result;
 			}
 
@@ -284,12 +279,7 @@ public with sharing class SurveyRegenerationController {
 			Id batchJobId = Database.executeBatch(batchJob, 10);
 
 			result.success = true;
-			result.message =
-				'Batch regeneration initiated for ' +
-				surveysForBatch.size() +
-				' surveys. Job ID: ' +
-				batchJobId +
-				'. You will receive completion notification when processing is complete.';
+			result.message = 'Batch regeneration initiated for ' + surveysForBatch.size() + ' surveys. Job ID: ' + batchJobId + '. You will receive completion notification when processing is complete.';
 			result.totalProcessed = surveysForBatch.size();
 
 			return result;
@@ -462,7 +452,10 @@ public with sharing class SurveyRegenerationController {
 
 		if (!participantsToUpdate.isEmpty()) {
 			// Check FLS before updating Participants__c records
-			SurveyForceUtil.accessController.assertAuthorizedToUpdate(Participants__c.SObjectType, new List<Schema.SObjectField>{ Participants__c.Participant_Survey__c });
+			SurveyForceUtil.accessController.assertAuthorizedToUpdate(
+				Participants__c.SObjectType,
+				new List<Schema.SObjectField>{ Participants__c.Participant_Survey__c }
+			);
 			Database.update(participantsToUpdate, AccessLevel.USER_MODE);
 		}
 

@@ -250,7 +250,11 @@ export default class SurveyInvitations extends LightningElement {
 					this.showLinksModal = true;
 					// Refresh to show new invitations
 					refreshApex(this.wiredInvitationsResult).catch((error) => {
-						this.showToast('Warning', 'Invitations were created but the list could not be refreshed. Please refresh the page.', 'warning');
+						this.showToast(
+							'Warning',
+							'Invitations were created but the list could not be refreshed. Please refresh the page.',
+							'warning'
+						);
 						// eslint-disable-next-line no-console
 						console.error('Error refreshing invitations', error);
 					});

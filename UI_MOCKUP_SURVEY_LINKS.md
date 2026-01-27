@@ -43,7 +43,6 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ```
 
 **Key Points**:
-
 - ✅ Modal opens immediately when tab loads
 - ✅ Survey selector at top with red asterisk (required)
 - ✅ Link count pre-filled with 10
@@ -93,7 +92,6 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ```
 
 **Key Points**:
-
 - ⚠️ Red warning message appears below survey selector
 - ⚠️ Error toast notification at top
 - 🔒 Button remains disabled
@@ -137,7 +135,6 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ```
 
 **Key Points**:
-
 - ✅ Survey selected with icon
 - ✅ Warning message gone
 - ✅ Generate button now ENABLED (blue/brand color)
@@ -187,7 +184,6 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ```
 
 **Key Points**:
-
 - ✅ Success toast at top
 - ✅ Links modal shows all generated links
 - ✅ Copy button for each link
@@ -251,7 +247,6 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ```
 
 **Key Points**:
-
 - ✅ NO survey selector (survey already known from recordId)
 - ✅ Generate button ENABLED immediately
 - ✅ Works exactly as before
@@ -264,20 +259,17 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ### SLDS Colors Used
 
 **Before Survey Selected:**
-
 - Survey selector: Default/neutral
 - Warning message: `slds-text-color_error` (red)
 - Warning icon: `utility:warning` (yellow/orange)
 - Generate button: Disabled (gray)
 
 **After Survey Selected:**
-
 - Survey selector: Shows selected item with icon
 - Generate button: `variant="brand"` (blue/brand color)
 - No warning messages
 
 **After Generation:**
-
 - Success toast: `variant="success"` (green)
 - Links: Link icon with blue color
 - Stats cards:
@@ -290,19 +282,16 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 ## Responsive Behavior
 
 ### Desktop (>768px)
-
 - Modal centered with max width
 - Three-column stat cards layout
 - Full modal experience
 
 ### Tablet (>480px, <768px)
-
 - Modal nearly full width
 - Two-column stat cards
 - Slightly reduced padding
 
 ### Mobile (<480px)
-
 - Modal full width
 - Single-column stat cards
 - Optimized touch targets
@@ -316,30 +305,26 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 3. **Screen Reader Support**: Error messages announced
 4. **Focus Management**: Focus moves to survey selector on modal open
 5. **Color Contrast**: All text meets WCAG AA standards
-6. **Required Fields**: Visual (\*) and programmatic (required attribute)
+6. **Required Fields**: Visual (*) and programmatic (required attribute)
 
 ---
 
 ## Animation Details
 
 ### Modal Open
-
 - Fade in backdrop: 0.3s
 - Slide down modal: 0.3s
 - Focus animation on first field
 
 ### Survey Selection
-
 - Warning message fade out: 0.2s
 - Button state transition: 0.2s
 
 ### Success
-
 - Toast slide in from top: 0.3s
 - Links modal replace with fade: 0.3s
 
 ### Hover Effects
-
 - Stat cards lift: `translateY(-2px)` on hover
 - Link items highlight on hover
 - Buttons show shadow on hover
@@ -348,15 +333,15 @@ Since we cannot deploy to a live Salesforce org in this environment, here's a de
 
 ## Comparison: Before vs After
 
-| Aspect                | Before        | After                          |
-| --------------------- | ------------- | ------------------------------ |
-| **Initial Load**      | Empty page    | Modal ready                    |
-| **Steps to Generate** | 6 clicks      | 4 clicks                       |
-| **Survey Selection**  | Separate step | Integrated in modal            |
-| **Error Prevention**  | Toast only    | Multi-layer validation         |
-| **Visual Feedback**   | Minimal       | Warning icon + message + toast |
-| **User Guidance**     | Unclear       | Clear, progressive             |
-| **Mobile Experience** | OK            | Better                         |
+| Aspect | Before | After |
+|--------|--------|-------|
+| **Initial Load** | Empty page | Modal ready |
+| **Steps to Generate** | 6 clicks | 4 clicks |
+| **Survey Selection** | Separate step | Integrated in modal |
+| **Error Prevention** | Toast only | Multi-layer validation |
+| **Visual Feedback** | Minimal | Warning icon + message + toast |
+| **User Guidance** | Unclear | Clear, progressive |
+| **Mobile Experience** | OK | Better |
 
 ---
 
