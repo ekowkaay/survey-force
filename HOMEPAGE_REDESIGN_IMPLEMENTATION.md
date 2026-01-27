@@ -11,11 +11,13 @@ This implementation transforms the Survey Force homepage from a static welcome p
 **Purpose:** Centralized data provider for the homepage that calculates metrics and aggregates activity.
 
 **Methods:**
+
 - `getHomePageData()` - Returns comprehensive home page data including:
   - Survey counts by status (drafts, ready to launch, active, stalled)
-  - Recent activity feed from Survey__c and SurveyTaker__c records
+  - Recent activity feed from Survey**c and SurveyTaker**c records
 
 **Metrics Calculation:**
+
 - **Drafts**: Surveys with 0 questions
 - **Ready to Launch**: Surveys with questions but no responses (created within last 30 days)
 - **Active**: Surveys with one or more responses
@@ -26,6 +28,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
 ### 2. New Child LWC Components
 
 #### `surveyHomeHero`
+
 - **Purpose:** Dynamic hero banner that adapts its message based on survey state
 - **Features:**
   - Context-aware headline (e.g., "3 surveys ready to launch")
@@ -33,6 +36,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
   - Primary CTA that changes based on highest priority need
 
 #### `surveyHomeActionCenter`
+
 - **Purpose:** Contextual action cards that prioritize what users should do next
 - **Features:**
   - Adapts actions based on survey state
@@ -42,6 +46,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
   - Always includes "Create New Survey" option
 
 #### `surveyHomeSnapshot`
+
 - **Purpose:** Quick view of operational metrics
 - **Features:**
   - Four metric cards: Drafts, Ready to Launch, Active, Need Attention
@@ -49,6 +54,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
   - Descriptive text explaining each metric
 
 #### `surveyHomeActivityFeed`
+
 - **Purpose:** Shows recent operational events
 - **Features:**
   - Timeline view of last 5 activities
@@ -57,6 +63,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
   - Graceful empty state handling
 
 #### `surveyHomeGuidedResources`
+
 - **Purpose:** Progress-driven onboarding and contextual resources
 - **Features:**
   - 5-step onboarding checklist with completion tracking
@@ -66,6 +73,7 @@ This implementation transforms the Survey Force homepage from a static welcome p
 ### 3. Updated `surveyForceHome` Component
 
 **Changes:**
+
 - Replaced static content with dynamic child components
 - Added wire adapter to fetch data from `SurveyHomeController`
 - Implemented loading and error states
@@ -75,12 +83,14 @@ This implementation transforms the Survey Force homepage from a static welcome p
 ### 4. Design Improvements
 
 **Layout:**
+
 - Reduced hero height from full-screen to compact banner
 - Stacked sections for better information hierarchy
 - Consistent spacing and animations (fadeInUp)
 - Mobile-first responsive grid system
 
 **User Experience:**
+
 - Context-aware messaging guides users to next best action
 - Progress indicators show onboarding completion
 - Activity feed provides sense of momentum
