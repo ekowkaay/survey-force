@@ -3,7 +3,7 @@
 		<!-- Loading State -->
 		<template lwc:if={isLoading}>
 			<div class="slds-is-relative loading-container">
-				<lightning-spinner alternative-text="Loading analytics..." size="medium"></lightning-spinner>
+				<lightning-spinner alternative-text="Loading survey dashboard data..." size="medium"></lightning-spinner>
 			</div>
 		</template>
 
@@ -208,13 +208,13 @@
 												<div key={survey.Id} class="survey-item slds-box slds-theme_shade slds-m-bottom_small">
 													<div class="slds-grid slds-grid_vertical-align-center">
 														<div class="slds-col slds-grow">
-															<div
-																class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small"
+															<button
+																class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small slds-button_reset"
 																data-survey-id={survey.Id}
 																onclick={handleViewSurvey}
-																style="cursor: pointer">
+																title="View {survey.Name}">
 																{survey.Name}
-															</div>
+															</button>
 															<div class="slds-text-body_small slds-text-color_weak">{survey.Questions__c} questions • {survey.Completed_Surveys__c} responses</div>
 														</div>
 														<div class="slds-col slds-no-flex">
@@ -252,13 +252,13 @@
 											<div key={survey.Id} class="survey-item slds-box slds-theme_shade slds-m-bottom_small">
 												<div class="slds-grid slds-grid_vertical-align-center">
 													<div class="slds-col slds-grow">
-														<div
-															class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small"
+														<button
+															class="survey-name slds-text-body_regular slds-text-color_default slds-truncate slds-m-bottom_xx-small slds-button_reset"
 															data-survey-id={survey.Id}
 															onclick={handleViewSurvey}
-															style="cursor: pointer">
+															title="View {survey.Name}">
 															{survey.Name}
-														</div>
+														</button>
 														<div class="slds-text-body_small slds-text-color_weak">
 															<lightning-formatted-date-time value={survey.CreatedDate} day="numeric" month="short" year="numeric"></lightning-formatted-date-time>
 														</div>

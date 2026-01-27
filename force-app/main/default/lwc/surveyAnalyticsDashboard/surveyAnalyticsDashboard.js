@@ -17,6 +17,7 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 	@track error = null;
 	@track responses = [];
 	@track questions = [];
+	@track questionsLoading = false;
 	@track selectedView = 'overview';
 	@track selectedTimeframe = '30days';
 	@track searchTerm = '';
@@ -41,6 +42,10 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 		if (this.recordId) {
 			this.loadResponses();
 			this.loadQuestions();
+		} else {
+			// When used on non-record targets (App Page / Tab), recordId may be undefined.
+			// In that case, stop the loading state so the UI does not show an indefinite spinner.
+			this.isLoading = false;
 		}
 	}
 
@@ -61,12 +66,16 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 	}
 
 	loadQuestions() {
+		this.questionsLoading = true;
 		getSurveyData({ surveyId: this.recordId, caseId: null, contactId: null })
 			.then((result) => {
 				this.questions = result?.questions || [];
+				this.questionsLoading = false;
 			})
-			.catch(() => {
+			.catch((error) => {
 				this.questions = [];
+				this.questionsLoading = false;
+				// Questions are supplementary, so we don't need to show a toast for this failure
 			});
 	}
 

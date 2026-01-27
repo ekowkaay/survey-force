@@ -145,7 +145,7 @@
 											<lightning-icon icon-name="utility:chart" size="small"></lightning-icon>
 										</div>
 										<div class="slds-media__body">
-											<h2 class="slds-card__header-title">Response Timeline (Last 7 Days)</h2>
+											<h2 class="slds-card__header-title">Response Timeline (Last 7 Response Dates)</h2>
 										</div>
 										<div class="slds-no-flex response-trend">
 											<span class={responseTrend.className}>{responseTrend.label}</span>
@@ -252,7 +252,7 @@
 									key-field="Id"
 									data={responseRows}
 									columns={responseColumns}
-									hide-checkbox-column="true"
+									hide-checkbox-column
 									class="response-table"></lightning-datatable>
 							</template>
 							<template lwc:else>
