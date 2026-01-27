@@ -20,11 +20,13 @@ private class SurveyHomeController_Test {
 		Survey__c active = new Survey__c(Name = 'Active Survey', Questions__c = 3, Completed_Surveys__c = 10);
 		surveys.add(active);
 
-		// Stalled survey (has questions, no responses, created 40 days ago)
-		Survey__c stalled = new Survey__c(Name = 'Stalled Survey', Questions__c = 2, Completed_Surveys__c = 0, CreatedDate = DateTime.now().addDays(-40));
-		surveys.add(stalled);
-
 		insert surveys;
+
+		// Stalled survey (has questions, no responses, created 40 days ago)
+		// Use Test.setCreatedDate to simulate older record
+		Survey__c stalled = new Survey__c(Name = 'Stalled Survey', Questions__c = 2, Completed_Surveys__c = 0);
+		insert stalled;
+		Test.setCreatedDate(stalled.Id, DateTime.now().addDays(-40));
 
 		// Create a survey taker for activity
 		SurveyTaker__c taker = new SurveyTaker__c(Survey__c = active.Id);
