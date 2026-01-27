@@ -58,8 +58,8 @@ public with sharing class SurveyHomeController {
 
 			return data;
 		} catch (Exception e) {
-			SurveyForceUtil.log('SurveyHomeController:getHomePageData():' + e.getMessage());
-			throw new AuraHandledException('Error loading home page data: ' + e.getMessage());
+			SurveyForceUtil.log('SurveyHomeController:getHomePageData(): ' + e.getMessage() + ' | StackTrace: ' + e.getStackTraceString());
+			throw new AuraHandledException('An unexpected error occurred while loading home page data. Please contact your administrator.');
 		}
 	}
 
@@ -128,7 +128,7 @@ public with sharing class SurveyHomeController {
 
 			return activities;
 		} catch (Exception e) {
-			SurveyForceUtil.log('SurveyHomeController:getRecentActivity():' + e.getMessage());
+			SurveyForceUtil.log('SurveyHomeController:getRecentActivity(): ' + e.getMessage() + ' | StackTrace: ' + e.getStackTraceString());
 			return new List<Activity>();
 		}
 	}

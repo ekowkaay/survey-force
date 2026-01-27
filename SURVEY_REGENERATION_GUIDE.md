@@ -195,7 +195,7 @@ Assign this permission set to users who need to regenerate survey invitations.
 
 **Issue**: "No surveys found for the selected types"
 
-- **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: Participant_Survey**c, Customer_Survey**c, Trainer_Survey\_\_c
+- **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: `Participant_Survey__c`, `Customer_Survey__c`, `Trainer_Survey__c`
 
 **Issue**: "Invalid ID" errors
 
