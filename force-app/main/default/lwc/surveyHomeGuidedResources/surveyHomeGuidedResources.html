@@ -55,7 +55,15 @@
 					</div>
 					<div class="slds-card__body slds-card__body_inner">
 						<template for:each={resources} for:item="resource">
-							<div key={resource.id} class="resource-item slds-m-bottom_medium" data-resource-id={resource.id} onclick={handleResourceClick}>
+							<div
+								key={resource.id}
+								class="resource-item slds-m-bottom_medium"
+								data-resource-id={resource.id}
+								onclick={handleResourceClick}
+								onkeydown={handleResourceKeyDown}
+								role="button"
+								tabindex="0"
+							>
 								<div class="slds-media">
 									<div class="slds-media__figure">
 										<lightning-icon icon-name={resource.icon} size="small"></lightning-icon>

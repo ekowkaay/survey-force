@@ -113,9 +113,9 @@ Successfully implemented the Survey Force homepage redesign as specified in `doc
 ### Metrics Calculation
 
 - **Drafts**: `Questions__c == 0`
-- **Ready**: `Questions__c > 0 AND Completed_Surveys__c == 0 AND CreatedDate < 30 days`
+- **Ready**: `Questions__c > 0 AND Completed_Surveys__c == 0` and survey was **created within the last 30 days**
 - **Active**: `Completed_Surveys__c > 0`
-- **Stalled**: `Questions__c > 0 AND Completed_Surveys__c == 0 AND CreatedDate >= 30 days`
+- **Stalled**: `Questions__c > 0 AND Completed_Surveys__c == 0` and survey was **created more than 30 days ago**
 
 ### Activity Sources
 

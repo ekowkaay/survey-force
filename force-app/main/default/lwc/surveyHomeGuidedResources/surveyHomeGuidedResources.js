@@ -30,7 +30,7 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 			{
 				id: 'links',
 				label: 'Generate survey links',
-				completed: active > 0 || (totalSurveys > 0 && readyToLaunch < totalSurveys),
+				completed: active > 0,
 				description: 'Create unique links to share with participants'
 			},
 			{
@@ -151,5 +151,13 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				detail: { action: 'gettingstarted', resourceId }
 			})
 		);
+	}
+
+	handleResourceKeyDown(event) {
+		// Handle Enter and Space key presses for keyboard accessibility
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			this.handleResourceClick(event);
+		}
 	}
 }

@@ -5,6 +5,7 @@
 public with sharing class SurveyHomeController {
 	/**
 	 * Get comprehensive home page data including surveys and metrics
+	 * Fetches all surveys with security checks and calculates operational metrics
 	 * @return HomeData wrapper containing all home page information
 	 */
 	@AuraEnabled(cacheable=true)

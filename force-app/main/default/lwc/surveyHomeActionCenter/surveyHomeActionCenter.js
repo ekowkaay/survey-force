@@ -99,4 +99,12 @@ export default class SurveyHomeActionCenter extends LightningElement {
 			})
 		);
 	}
+
+	handleActionKeyDown(event) {
+		// Handle Enter and Space key presses for keyboard accessibility
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			this.handleActionClick(event);
+		}
+	}
 }
