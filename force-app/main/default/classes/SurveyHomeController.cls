@@ -127,7 +127,7 @@ public with sharing class SurveyHomeController {
 
 			// Return only the 5 most recent
 			if (activities.size() > 5) {
-				return new List<Activity>(activities).subList(0, 5);
+				return activities.subList(0, 5);
 			}
 
 			return activities;

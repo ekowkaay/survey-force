@@ -9,24 +9,46 @@ private class SurveyHomeController_Test {
 		List<Survey__c> surveys = new List<Survey__c>();
 
 		// Draft survey (no questions)
-		Survey__c draft = new Survey__c(Name = 'Draft Survey', Questions__c = 0, Completed_Surveys__c = 0);
+		Survey__c draft = new Survey__c(Name = 'Draft Survey');
 		surveys.add(draft);
 
 		// Ready to launch survey (has questions, no responses)
-		Survey__c ready = new Survey__c(Name = 'Ready Survey', Questions__c = 5, Completed_Surveys__c = 0);
+		Survey__c ready = new Survey__c(Name = 'Ready Survey');
 		surveys.add(ready);
 
 		// Active survey (has questions and responses)
-		Survey__c active = new Survey__c(Name = 'Active Survey', Questions__c = 3, Completed_Surveys__c = 10);
+		Survey__c active = new Survey__c(Name = 'Active Survey');
 		surveys.add(active);
 
 		insert surveys;
 
+		// Create questions for the surveys
+		List<Survey_Question__c> questions = new List<Survey_Question__c>();
+
+		// Ready survey - 5 questions
+		for (Integer i = 0; i < 5; i++) {
+			questions.add(new Survey_Question__c(Survey__c = ready.Id, Question__c = 'Question ' + i, Type__c = 'Free Text'));
+		}
+
+		// Active survey - 3 questions
+		for (Integer i = 0; i < 3; i++) {
+			questions.add(new Survey_Question__c(Survey__c = active.Id, Question__c = 'Question ' + i, Type__c = 'Free Text'));
+		}
+
+		insert questions;
+
 		// Stalled survey (has questions, no responses, created 40 days ago)
 		// Use Test.setCreatedDate to simulate older record
-		Survey__c stalled = new Survey__c(Name = 'Stalled Survey', Questions__c = 2, Completed_Surveys__c = 0);
+		Survey__c stalled = new Survey__c(Name = 'Stalled Survey');
 		insert stalled;
 		Test.setCreatedDate(stalled.Id, DateTime.now().addDays(-40));
+
+		// Create questions for stalled survey
+		List<Survey_Question__c> stalledQuestions = new List<Survey_Question__c>();
+		for (Integer i = 0; i < 2; i++) {
+			stalledQuestions.add(new Survey_Question__c(Survey__c = stalled.Id, Question__c = 'Question ' + i, Type__c = 'Free Text'));
+		}
+		insert stalledQuestions;
 
 		// Create a survey taker for activity
 		SurveyTaker__c taker = new SurveyTaker__c(Survey__c = active.Id);
@@ -89,9 +111,16 @@ private class SurveyHomeController_Test {
 		// Create more surveys to generate more activities
 		List<Survey__c> extraSurveys = new List<Survey__c>();
 		for (Integer i = 0; i < 10; i++) {
-			extraSurveys.add(new Survey__c(Name = 'Extra Survey ' + i, Questions__c = 1, Completed_Surveys__c = 0));
+			extraSurveys.add(new Survey__c(Name = 'Extra Survey ' + i));
 		}
 		insert extraSurveys;
+
+		// Create questions for each survey
+		List<Survey_Question__c> extraQuestions = new List<Survey_Question__c>();
+		for (Survey__c survey : extraSurveys) {
+			extraQuestions.add(new Survey_Question__c(Survey__c = survey.Id, Question__c = 'Question 1', Type__c = 'Free Text'));
+		}
+		insert extraQuestions;
 
 		Test.startTest();
 		SurveyHomeController.HomeData result = SurveyHomeController.getHomePageData();
