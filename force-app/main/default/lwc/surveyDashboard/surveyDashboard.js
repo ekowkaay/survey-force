@@ -45,9 +45,7 @@ export default class SurveyDashboard extends NavigationMixin(LightningElement) {
 	}
 
 	get readyToLaunchSurveys() {
-		return this.filteredSurveys.filter(
-			(survey) => (survey.Questions__c || 0) > 0 && (survey.Completed_Surveys__c || 0) === 0 && !this.isSurveyStalled(survey)
-		);
+		return this.filteredSurveys.filter((survey) => (survey.Questions__c || 0) > 0 && (survey.Completed_Surveys__c || 0) === 0 && !this.isSurveyStalled(survey));
 	}
 
 	get readyToLaunchCount() {
@@ -97,11 +95,12 @@ export default class SurveyDashboard extends NavigationMixin(LightningElement) {
 	get needsAttentionSurveys() {
 		if (!this.filteredSurveys || this.filteredSurveys.length === 0) return [];
 
-		const attention = [...this.filteredSurveys].filter(
-			(survey) => (survey.Questions__c || 0) === 0 || this.isSurveyStalled(survey)
-		);
+		const attention = [...this.filteredSurveys].filter((survey) => (survey.Questions__c || 0) === 0 || this.isSurveyStalled(survey));
 
-		return attention.sort((a, b) => new Date(a.CreatedDate) - new Date(b.CreatedDate)).slice(0, 5).map((survey) => this.decorateSurvey(survey));
+		return attention
+			.sort((a, b) => new Date(a.CreatedDate) - new Date(b.CreatedDate))
+			.slice(0, 5)
+			.map((survey) => this.decorateSurvey(survey));
 	}
 
 	get recentSurveys() {

@@ -7,12 +7,14 @@ The Survey Regeneration feature provides administrators with a streamlined wizar
 ## Key Features
 
 ### 1. File Upload Wizard
+
 - **Multi-format Support**: Upload Training Request IDs in .txt or .csv files
 - **Flexible Parsing**: Automatically handles comma-separated, newline-separated, or space-separated IDs
 - **Manual Entry Option**: Paste IDs directly into a text area if you don't have a file
 - **Validation**: Validates Salesforce ID format (15 or 18 characters) before processing
 
 ### 2. Survey Type Selection
+
 - **Granular Control**: Select which survey types to regenerate:
   - **Customer Surveys**: Single-invitation surveys for customer feedback
   - **Trainer Surveys**: Single-invitation surveys for trainer evaluation
@@ -20,12 +22,14 @@ The Survey Regeneration feature provides administrators with a streamlined wizar
 - **Multi-select**: Regenerate multiple survey types simultaneously
 
 ### 3. Smart Invitation Regeneration
+
 - **Automatic Cleanup**: Deletes existing pending invitations before creating new ones
 - **Participant Support**: For participant surveys, automatically creates invitations for all associated participants
 - **Preserves Completed Data**: Only deletes pending invitations; completed responses remain intact
 - **Bulk Processing**: Handles multiple Training Requests and surveys efficiently
 
 ### 4. Enhanced User Experience
+
 - **4-Step Wizard**: Clear progress indicator showing upload → select → confirm → complete
 - **Real-time Feedback**: Live validation and error messaging at each step
 - **Preview & Confirmation**: Review exactly which surveys will be regenerated before proceeding
@@ -43,17 +47,20 @@ The Survey Regeneration feature provides administrators with a streamlined wizar
 ### Step 1: Upload Training Request IDs
 
 **Option A: File Upload**
+
 1. Click "Upload Training Request IDs"
 2. Select a .txt or .csv file containing Training Request IDs
 3. The system will automatically parse and validate the IDs
 4. View the count of successfully parsed IDs
 
 **Option B: Manual Entry**
+
 1. Paste Training Request IDs into the "Or paste IDs manually" text area
 2. IDs can be separated by commas, spaces, or newlines
 3. The system will automatically parse and validate the IDs
 
 **Example Input Formats:**
+
 ```
 # Comma-separated
 a0X1234567890ABC, a0X1234567890DEF, a0X1234567890GHI
@@ -110,12 +117,14 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 ### Apex Controller: SurveyRegenerationController
 
 **Methods:**
+
 - `parseTrainingRequestIds(String fileContent)`: Parses IDs from file content
 - `getSurveysForRegeneration(List<String> trainingRequestIds, List<String> surveyTypes)`: Retrieves surveys to regenerate
 - `regenerateSurveyInvitations(List<String> surveyIds, List<String> surveyTypes)`: Intelligently routes to sync or async processing
 - `regenerateSurveyInvitationsSynchronous(List<String> surveyIds, List<String> surveyTypes)`: Synchronous regeneration for smaller datasets
 
 **Key Features:**
+
 - Bulkified operations for governor limit compliance
 - User-mode security enforcement (WITH USER_MODE)
 - Field-level security checks via SurveyForceUtil.accessController
@@ -128,6 +137,7 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 **Purpose:** Handles large-scale survey regeneration asynchronously when the dataset exceeds the synchronous limit of 50 surveys.
 
 **Key Features:**
+
 - Implements `Database.Batchable` and `Database.Stateful` interfaces
 - Processes surveys in batches of 10 to optimize governor limit usage
 - Maintains state across batch iterations to track success/failure counts
@@ -137,11 +147,13 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 ### Lightning Web Component: surveyRegenerationWizard
 
 **Component Structure:**
+
 - **HTML**: Multi-step wizard with progress indicator
 - **JavaScript**: State management, file handling, and Apex integration
 - **CSS**: SLDS-compliant styling with animations and responsive design
 
 **Key Features:**
+
 - File upload with FileReader API
 - Real-time validation
 - Dynamic UI updates
@@ -150,6 +162,7 @@ a0X1234567890ABC a0X1234567890DEF a0X1234567890GHI
 ### Permission Set: SurveyApp_Regeneration_Admin
 
 **Grants Access To:**
+
 - SurveyRegenerationController Apex class
 - Survey Regeneration tab
 
@@ -173,6 +186,7 @@ Assign this permission set to users who need to regenerate survey invitations.
 ### Common Issues
 
 **Issue**: Large dataset (>50 surveys) taking time to process
+
 - **Solution**: The system automatically uses asynchronous batch processing for datasets exceeding 50 surveys. You'll receive:
   - Immediate confirmation with batch Job ID
   - Processing continues in the background
@@ -180,15 +194,19 @@ Assign this permission set to users who need to regenerate survey invitations.
   - For very large datasets (1000+ surveys), processing may take several minutes
 
 **Issue**: "No surveys found for the selected types"
-- **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: Participant_Survey__c, Customer_Survey__c, Trainer_Survey__c
+
+- **Solution**: Verify that the Training Requests have surveys created for the selected types. Check the Training Request fields: `Participant_Survey__c`, `Customer_Survey__c`, `Trainer_Survey__c`
 
 **Issue**: "Invalid ID" errors
+
 - **Solution**: Ensure IDs are valid Salesforce IDs (15 or 18 characters). Remove any special characters or extra whitespace
 
 **Issue**: "No participants found for survey"
+
 - **Solution**: For participant surveys, verify that participants have been added to the Training Request before regenerating
 
 **Issue**: Regeneration fails for some surveys
+
 - **Solution**: Check the error messages in the completion step. Common causes:
   - Permission issues: Ensure you have the SurveyApp_Regeneration_Admin permission set
   - Data issues: Verify the Training Request and Survey records exist
@@ -203,11 +221,13 @@ Assign this permission set to users who need to regenerate survey invitations.
 ## Governor Limits
 
 The feature is designed to handle large datasets efficiently while respecting Salesforce governor limits:
+
 - **Bulkified Queries**: All SOQL queries are bulkified
 - **Bulkified DML**: All insert/update/delete operations are bulkified
 - **Intelligent Processing**: Automatically routes to synchronous or asynchronous processing based on dataset size
 
 **Processing Modes:**
+
 1. **Synchronous Processing** (≤50 surveys)
    - Immediate execution and results
    - Best for small to medium datasets
@@ -223,10 +243,12 @@ The feature is designed to handle large datasets efficiently while respecting Sa
 **No Manual Intervention Required:** The system automatically determines the best processing method based on your dataset size.
 
 **Example:**
+
 - If each Training Request has 3 survey types (Customer, Trainer, Participant), you can regenerate approximately 16 Training Requests at once (16 × 3 = 48 surveys)
 - If you only select one survey type per Training Request, you can process up to 50 Training Requests at once
 
 **Recommended Process for Large Datasets:**
+
 1. Split your Training Request IDs into smaller batches (e.g., 10-20 Training Requests per batch)
 2. Run the regeneration wizard multiple times
 3. Monitor the success/failure messages after each batch
@@ -234,6 +256,7 @@ The feature is designed to handle large datasets efficiently while respecting Sa
 ## Future Enhancements
 
 Potential improvements for future releases:
+
 1. Email notification to participants when invitations are regenerated
 2. Schedule regeneration for future dates
 3. Export regeneration history/audit log
@@ -243,6 +266,7 @@ Potential improvements for future releases:
 ## Support
 
 For issues or questions:
+
 1. Check the error messages in the wizard
 2. Verify permission set assignment
 3. Review the troubleshooting section above
@@ -251,6 +275,7 @@ For issues or questions:
 ## Version History
 
 **Version 1.0** (Current)
+
 - Initial release
 - File upload with CSV/TXT support
 - Multi-survey type selection

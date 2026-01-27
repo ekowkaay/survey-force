@@ -43,10 +43,7 @@ public class SurveyRegenerationBatch implements Database.Batchable<SurveyRegener
 		}
 
 		// Call the synchronous regeneration method for this batch
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitationsSynchronous(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitationsSynchronous(surveyIds, surveyTypes);
 
 		// Accumulate results
 		if (result != null) {

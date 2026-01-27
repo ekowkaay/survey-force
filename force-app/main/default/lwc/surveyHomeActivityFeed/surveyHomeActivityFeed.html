@@ -1,0 +1,43 @@
+<template>
+	<div class="activity-feed slds-p-horizontal_large slds-p-bottom_large">
+		<h2 class="slds-text-heading_medium slds-m-bottom_medium">Recent Activity</h2>
+
+		<div class="slds-card">
+			<div class="slds-card__body slds-card__body_inner">
+				<template if:true={hasActivities}>
+					<ul class="slds-timeline">
+						<template for:each={activities} for:item="activity">
+							<li key={activity.id}>
+								<div class="slds-timeline__item_expandable slds-timeline__item_task">
+									<span class="slds-assistive-text">Activity</span>
+									<div class="slds-media">
+										<div class="slds-media__figure">
+											<lightning-icon icon-name={activity.iconName} size="x-small" variant={activity.iconVariant}></lightning-icon>
+										</div>
+										<div class="slds-media__body">
+											<div class="slds-grid slds-grid_align-spread slds-timeline__trigger">
+												<div class="slds-grid slds-grid_vertical-align-center slds-truncate_container_75 slds-no-space">
+													<h3 class="slds-truncate slds-text-body_regular" title={activity.message}>{activity.message}</h3>
+												</div>
+												<div class="slds-timeline__actions slds-timeline__actions_inline">
+													<span class="slds-text-body_small slds-text-color_weak">{activity.formattedTime}</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</li>
+						</template>
+					</ul>
+				</template>
+
+				<template if:false={hasActivities}>
+					<div class="slds-text-align_center slds-p-around_large">
+						<lightning-icon icon-name="utility:info" size="small" class="slds-m-bottom_small"></lightning-icon>
+						<p class="slds-text-body_regular slds-text-color_weak">{emptyStateMessage}</p>
+					</div>
+				</template>
+			</div>
+		</div>
+	</div>
+</template>

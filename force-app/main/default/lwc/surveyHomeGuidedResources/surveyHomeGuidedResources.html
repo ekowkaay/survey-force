@@ -1,0 +1,83 @@
+<template>
+	<div class="guided-resources slds-p-horizontal_large slds-p-bottom_large">
+		<h2 class="slds-text-heading_medium slds-m-bottom_medium">Getting Started</h2>
+
+		<div class="slds-grid slds-wrap slds-gutters">
+			<!-- Onboarding Checklist -->
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+				<div class="slds-card">
+					<div class="slds-card__header slds-grid">
+						<header class="slds-media slds-media_center slds-has-flexi-truncate">
+							<div class="slds-media__figure">
+								<lightning-icon icon-name="utility:checkin" size="small"></lightning-icon>
+							</div>
+							<div class="slds-media__body">
+								<h3 class="slds-card__header-title">Onboarding Checklist</h3>
+							</div>
+						</header>
+					</div>
+					<div class="slds-card__body slds-card__body_inner">
+						<ul class="checklist">
+							<template for:each={checklist} for:item="item">
+								<li key={item.id} class="checklist-item">
+									<div class="slds-media slds-media_center slds-m-bottom_small">
+										<div class="slds-media__figure">
+											<lightning-icon
+												icon-name={item.completed ? 'utility:check' : 'utility:chevronright'}
+												size="x-small"
+												variant={item.completed ? 'success' : 'default'}
+											></lightning-icon>
+										</div>
+										<div class="slds-media__body">
+											<div class={item.completed ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'}>{item.label}</div>
+											<div class="slds-text-body_small slds-text-color_weak">{item.description}</div>
+										</div>
+									</div>
+								</li>
+							</template>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			<!-- Resources -->
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+				<div class="slds-card">
+					<div class="slds-card__header slds-grid">
+						<header class="slds-media slds-media_center slds-has-flexi-truncate">
+							<div class="slds-media__figure">
+								<lightning-icon icon-name="utility:knowledge_base" size="small"></lightning-icon>
+							</div>
+							<div class="slds-media__body">
+								<h3 class="slds-card__header-title">Resources</h3>
+							</div>
+						</header>
+					</div>
+					<div class="slds-card__body slds-card__body_inner">
+						<template for:each={resources} for:item="resource">
+							<div
+								key={resource.id}
+								class="resource-item slds-m-bottom_medium"
+								data-resource-id={resource.id}
+								onclick={handleResourceClick}
+								onkeydown={handleResourceKeyDown}
+								role="button"
+								tabindex="0"
+							>
+								<div class="slds-media">
+									<div class="slds-media__figure">
+										<lightning-icon icon-name={resource.icon} size="small"></lightning-icon>
+									</div>
+									<div class="slds-media__body">
+										<h4 class="slds-text-body_regular slds-m-bottom_xx-small resource-title">{resource.title}</h4>
+										<p class="slds-text-body_small slds-text-color_weak">{resource.description}</p>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>

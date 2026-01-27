@@ -32,9 +32,7 @@ private class SurveyRegenerationBatch_Test {
 		surveyData.surveyType = SurveyForceConstants.SURVEY_TYPE_CUSTOMER;
 		surveyData.invitationCount = 0;
 
-		List<SurveyRegenerationController.SurveyData> surveysToProcess = new List<SurveyRegenerationController.SurveyData>{
-			surveyData
-		};
+		List<SurveyRegenerationController.SurveyData> surveysToProcess = new List<SurveyRegenerationController.SurveyData>{ surveyData };
 
 		Test.startTest();
 		// Execute batch
@@ -119,10 +117,7 @@ private class SurveyRegenerationBatch_Test {
 
 		Test.startTest();
 		// Call regeneration - should automatically trigger batch processing
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
 		Test.stopTest();
 
 		// Verify batch processing was initiated
@@ -154,10 +149,7 @@ private class SurveyRegenerationBatch_Test {
 
 		Test.startTest();
 		// Call regeneration - should process synchronously
-		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(
-			surveyIds,
-			surveyTypes
-		);
+		SurveyRegenerationController.RegenerationResult result = SurveyRegenerationController.regenerateSurveyInvitations(surveyIds, surveyTypes);
 		Test.stopTest();
 
 		// Verify synchronous processing was used
