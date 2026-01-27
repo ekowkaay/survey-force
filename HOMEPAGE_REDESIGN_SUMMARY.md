@@ -11,7 +11,7 @@ Successfully implemented the Survey Force homepage redesign as specified in `doc
 1. **SurveyHomeController.cls** - Main controller for homepage data
    - Fetches survey data with security checks
    - Calculates operational metrics (drafts, ready, active, stalled)
-   - Aggregates recent activity from Survey**c and SurveyTaker**c
+   - Aggregates recent activity from `Survey__c` and `SurveyTaker__c`
    - Returns structured data via HomeData and Activity wrapper classes
 
 2. **SurveyHomeController_Test.cls** - Comprehensive test coverage
@@ -63,11 +63,9 @@ Successfully implemented the Survey Force homepage redesign as specified in `doc
 
 1. **Survey_Force_Admin.permissionset-meta.xml**
    - Added SurveyHomeController access
-   - Added SurveyHomeController_Test access
 
 2. **Survey_Force_SuperAdmin.permissionset-meta.xml**
    - Added SurveyHomeController access
-   - Added SurveyHomeController_Test access
 
 ### Documentation Created
 
