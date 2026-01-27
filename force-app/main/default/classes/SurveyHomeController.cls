@@ -127,7 +127,11 @@ public with sharing class SurveyHomeController {
 
 			// Return only the 5 most recent
 			if (activities.size() > 5) {
-				return activities.subList(0, 5);
+				List<Activity> recentActivities = new List<Activity>();
+				for (Integer i = 0; i < 5; i++) {
+					recentActivities.add(activities[i]);
+				}
+				return recentActivities;
 			}
 
 			return activities;

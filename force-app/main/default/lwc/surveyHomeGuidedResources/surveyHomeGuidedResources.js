@@ -5,6 +5,9 @@ import { LightningElement, api } from 'lwc';
  * Displays onboarding checklist and contextual resources
  */
 export default class SurveyHomeGuidedResources extends LightningElement {
+	static LABEL_CLASS_DEFAULT = 'slds-text-body_regular';
+	static LABEL_CLASS_COMPLETED = 'slds-text-body_regular completed-item';
+
 	@api homeData;
 
 	get checklist() {
@@ -21,7 +24,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: totalSurveys > 0,
 				description: 'Build a survey with our intuitive creator',
 				iconName: totalSurveys > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: totalSurveys > 0 ? 'success' : 'default'
+				iconVariant: totalSurveys > 0 ? 'success' : 'default',
+				labelClass: totalSurveys > 0 ? SurveyHomeGuidedResources.LABEL_CLASS_COMPLETED : SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'questions',
@@ -29,7 +33,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: totalSurveys > drafts,
 				description: 'Design meaningful questions for your audience',
 				iconName: totalSurveys > drafts ? 'utility:check' : 'utility:chevronright',
-				iconVariant: totalSurveys > drafts ? 'success' : 'default'
+				iconVariant: totalSurveys > drafts ? 'success' : 'default',
+				labelClass: totalSurveys > drafts ? SurveyHomeGuidedResources.LABEL_CLASS_COMPLETED : SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'links',
@@ -37,7 +42,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Create unique links to share with participants',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? SurveyHomeGuidedResources.LABEL_CLASS_COMPLETED : SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'responses',
@@ -45,7 +51,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Share your survey and gather feedback',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? SurveyHomeGuidedResources.LABEL_CLASS_COMPLETED : SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'analytics',
@@ -53,7 +60,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Analyze results and gain insights',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? SurveyHomeGuidedResources.LABEL_CLASS_COMPLETED : SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			}
 		];
 	}
@@ -66,7 +74,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Build a survey with our intuitive creator',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'questions',
@@ -74,7 +83,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Design meaningful questions for your audience',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'links',
@@ -82,7 +92,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Create unique links to share with participants',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'responses',
@@ -90,7 +101,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Share your survey and gather feedback',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			},
 			{
 				id: 'analytics',
@@ -98,7 +110,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Analyze results and gain insights',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: SurveyHomeGuidedResources.LABEL_CLASS_DEFAULT
 			}
 		];
 	}
