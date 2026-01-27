@@ -6,7 +6,7 @@
 User Action                    System Response
 ───────────                    ───────────────
 
-1. Click "Survey Link          → Shows empty page with
+1. Click "Survey Link          → Shows empty page with 
    Generator" tab                survey selector
 
 2. Search for survey           → Displays survey options
@@ -14,7 +14,7 @@ User Action                    System Response
 3. Select survey               → Loads invitation stats
                                  Shows "Generate Links" button
 
-4. Click "Generate Links"      → Opens modal with
+4. Click "Generate Links"      → Opens modal with 
    button                        link count field
 
 5. Enter link count            → Validates input
@@ -43,7 +43,7 @@ User Action                    System Response
                                  Error message clears (if shown)
 
 3. Adjust link count           → Validates 1-200 range
-   (optional)
+   (optional)                    
 
 4. Click "Generate"            → Creates links
                                  Shows success modal
@@ -287,9 +287,9 @@ handleGenerateLinks()
    │ Survey      │  │ Survey Link      │  │ Survey     │
    │ Record Page │  │ Generator Tab    │  │ Dashboard  │
    └─────────────┘  └──────────────────┘  └────────────┘
-            │                 │
-            │                 │
-            ▼                 ▼
+            │                 │                 
+            │                 │                 
+            ▼                 ▼                 
    ┌─────────────────────────────────────────────┐
    │      surveyInvitations Component            │
    │      (Works in all contexts)                │

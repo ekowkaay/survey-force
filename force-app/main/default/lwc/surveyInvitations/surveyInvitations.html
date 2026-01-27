@@ -4,12 +4,7 @@
 			<!-- Survey Selector (when not on a record page) -->
 			<template lwc:if={showSurveySelector}>
 				<div class="slds-m-around_medium">
-					<lightning-record-picker
-						label="Select Survey"
-						placeholder="Search for a survey..."
-						object-api-name="Survey__c"
-						value={selectedSurveyId}
-						onchange={handleSurveyChange}></lightning-record-picker>
+					<lightning-record-picker label="Select Survey" placeholder="Search for a survey..." object-api-name="Survey__c" value={selectedSurveyId} onchange={handleSurveyChange}></lightning-record-picker>
 				</div>
 			</template>
 
