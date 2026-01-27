@@ -9,6 +9,7 @@
  * System.schedule('Survey Invitation Expiration', '0 0 2 * * ?', new SurveyInvitationExpirationScheduler());
  */
 public with sharing class SurveyInvitationExpirationBatch implements Database.Batchable<SObject> {
+	// Track counts across batches for logging in finish method
 	private Integer processedCount = 0;
 	private Integer expiredCount = 0;
 

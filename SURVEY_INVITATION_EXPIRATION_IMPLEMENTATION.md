@@ -60,10 +60,16 @@ Implemented a scheduled batch job to automatically expire survey invitations tha
 
 ### 1. Deploy Components
 
-Deploy the following files to your Salesforce org:
+Deploy all new classes at once (recommended):
 
 ```bash
-# Deploy all new classes
+sf project deploy start --source-path force-app/main/default/classes
+```
+
+Or deploy individual files if needed:
+
+```bash
+# Deploy individual classes
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationBatch.cls
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationBatch.cls-meta.xml
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationScheduler.cls
@@ -72,12 +78,6 @@ sf project deploy start --source-path force-app/main/default/classes/SurveyInvit
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationBatch_Test.cls-meta.xml
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationScheduler_Test.cls
 sf project deploy start --source-path force-app/main/default/classes/SurveyInvitationExpirationScheduler_Test.cls-meta.xml
-```
-
-Or deploy all at once:
-
-```bash
-sf project deploy start --source-path force-app/main/default/classes
 ```
 
 ### 2. Run Tests
