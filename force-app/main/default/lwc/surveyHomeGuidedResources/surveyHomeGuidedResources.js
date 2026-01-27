@@ -19,31 +19,41 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				id: 'create',
 				label: 'Create your first survey',
 				completed: totalSurveys > 0,
-				description: 'Build a survey with our intuitive creator'
+				description: 'Build a survey with our intuitive creator',
+				iconName: totalSurveys > 0 ? 'utility:check' : 'utility:chevronright',
+				iconVariant: totalSurveys > 0 ? 'success' : 'default'
 			},
 			{
 				id: 'questions',
 				label: 'Add questions to a survey',
 				completed: totalSurveys > drafts,
-				description: 'Design meaningful questions for your audience'
+				description: 'Design meaningful questions for your audience',
+				iconName: totalSurveys > drafts ? 'utility:check' : 'utility:chevronright',
+				iconVariant: totalSurveys > drafts ? 'success' : 'default'
 			},
 			{
 				id: 'links',
 				label: 'Generate survey links',
 				completed: active > 0,
-				description: 'Create unique links to share with participants'
+				description: 'Create unique links to share with participants',
+				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
+				iconVariant: active > 0 ? 'success' : 'default'
 			},
 			{
 				id: 'responses',
 				label: 'Collect survey responses',
 				completed: active > 0,
-				description: 'Share your survey and gather feedback'
+				description: 'Share your survey and gather feedback',
+				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
+				iconVariant: active > 0 ? 'success' : 'default'
 			},
 			{
 				id: 'analytics',
 				label: 'Review survey analytics',
 				completed: active > 0,
-				description: 'Analyze results and gain insights'
+				description: 'Analyze results and gain insights',
+				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
+				iconVariant: active > 0 ? 'success' : 'default'
 			}
 		];
 	}
@@ -54,31 +64,41 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				id: 'create',
 				label: 'Create your first survey',
 				completed: false,
-				description: 'Build a survey with our intuitive creator'
+				description: 'Build a survey with our intuitive creator',
+				iconName: 'utility:chevronright',
+				iconVariant: 'default'
 			},
 			{
 				id: 'questions',
 				label: 'Add questions to a survey',
 				completed: false,
-				description: 'Design meaningful questions for your audience'
+				description: 'Design meaningful questions for your audience',
+				iconName: 'utility:chevronright',
+				iconVariant: 'default'
 			},
 			{
 				id: 'links',
 				label: 'Generate survey links',
 				completed: false,
-				description: 'Create unique links to share with participants'
+				description: 'Create unique links to share with participants',
+				iconName: 'utility:chevronright',
+				iconVariant: 'default'
 			},
 			{
 				id: 'responses',
 				label: 'Collect survey responses',
 				completed: false,
-				description: 'Share your survey and gather feedback'
+				description: 'Share your survey and gather feedback',
+				iconName: 'utility:chevronright',
+				iconVariant: 'default'
 			},
 			{
 				id: 'analytics',
 				label: 'Review survey analytics',
 				completed: false,
-				description: 'Analyze results and gain insights'
+				description: 'Analyze results and gain insights',
+				iconName: 'utility:chevronright',
+				iconVariant: 'default'
 			}
 		];
 	}
