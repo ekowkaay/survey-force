@@ -22,11 +22,14 @@ public with sharing class SurveyHomeController {
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey__c.getSobjectType(), surveyFields);
 
+			// Limit to recent surveys for performance (last 1000 most recent)
+			// Homepage metrics focus on operational status, not historical analysis
 			List<Survey__c> allSurveys = [
 				SELECT Id, Name, CreatedDate, Questions__c, Completed_Surveys__c
 				FROM Survey__c
 				WITH USER_MODE
 				ORDER BY CreatedDate DESC
+				LIMIT 1000
 			];
 
 			// Calculate metrics

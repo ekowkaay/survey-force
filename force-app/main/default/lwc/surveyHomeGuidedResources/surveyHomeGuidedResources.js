@@ -12,7 +12,7 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 			return this.defaultChecklist;
 		}
 
-		const { totalSurveys, drafts, readyToLaunch, active } = this.homeData;
+		const { totalSurveys, drafts, active } = this.homeData;
 
 		return [
 			{

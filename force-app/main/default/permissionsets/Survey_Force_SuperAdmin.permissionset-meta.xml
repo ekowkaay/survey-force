@@ -37,10 +37,6 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SurveyHomeController_Test</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>SurveyTakerController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
