@@ -21,7 +21,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: totalSurveys > 0,
 				description: 'Build a survey with our intuitive creator',
 				iconName: totalSurveys > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: totalSurveys > 0 ? 'success' : 'default'
+				iconVariant: totalSurveys > 0 ? 'success' : 'default',
+				labelClass: totalSurveys > 0 ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'
 			},
 			{
 				id: 'questions',
@@ -29,7 +30,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: totalSurveys > drafts,
 				description: 'Design meaningful questions for your audience',
 				iconName: totalSurveys > drafts ? 'utility:check' : 'utility:chevronright',
-				iconVariant: totalSurveys > drafts ? 'success' : 'default'
+				iconVariant: totalSurveys > drafts ? 'success' : 'default',
+				labelClass: totalSurveys > drafts ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'
 			},
 			{
 				id: 'links',
@@ -37,7 +39,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Create unique links to share with participants',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'
 			},
 			{
 				id: 'responses',
@@ -45,7 +48,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Share your survey and gather feedback',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'
 			},
 			{
 				id: 'analytics',
@@ -53,7 +57,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: active > 0,
 				description: 'Analyze results and gain insights',
 				iconName: active > 0 ? 'utility:check' : 'utility:chevronright',
-				iconVariant: active > 0 ? 'success' : 'default'
+				iconVariant: active > 0 ? 'success' : 'default',
+				labelClass: active > 0 ? 'slds-text-body_regular completed-item' : 'slds-text-body_regular'
 			}
 		];
 	}
@@ -66,7 +71,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Build a survey with our intuitive creator',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: 'slds-text-body_regular'
 			},
 			{
 				id: 'questions',
@@ -74,7 +80,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Design meaningful questions for your audience',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: 'slds-text-body_regular'
 			},
 			{
 				id: 'links',
@@ -82,7 +89,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Create unique links to share with participants',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: 'slds-text-body_regular'
 			},
 			{
 				id: 'responses',
@@ -90,7 +98,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Share your survey and gather feedback',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: 'slds-text-body_regular'
 			},
 			{
 				id: 'analytics',
@@ -98,7 +107,8 @@ export default class SurveyHomeGuidedResources extends LightningElement {
 				completed: false,
 				description: 'Analyze results and gain insights',
 				iconName: 'utility:chevronright',
-				iconVariant: 'default'
+				iconVariant: 'default',
+				labelClass: 'slds-text-body_regular'
 			}
 		];
 	}
