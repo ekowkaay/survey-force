@@ -507,4 +507,76 @@ private class SurveyCreationController_Test {
 			System.assertEquals(originalSurveyId, updatedQuestion.Survey__c, 'Survey__c should remain unchanged');
 		}
 	}
+
+	@IsTest
+	private static void testCreateSurveyQuestionsWithScaleLabels() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create a horizontal scale question with labels
+			List<Map<String, Object>> questions = new List<Map<String, Object>>();
+			Map<String, Object> scaleQuestion = new Map<String, Object>();
+			scaleQuestion.put('question', 'How satisfied are you?');
+			scaleQuestion.put('questionType', 'Single Select--Horizontal');
+			scaleQuestion.put('required', true);
+			scaleQuestion.put('choices', new List<String>{ '1', '2', '3', '4', '5' });
+			scaleQuestion.put('orderNumber', 1);
+			scaleQuestion.put('scaleStartLabel', 'Very Dissatisfied');
+			scaleQuestion.put('scaleEndLabel', 'Very Satisfied');
+			questions.add(scaleQuestion);
+
+			Test.startTest();
+			SurveyCreationController.createSurveyQuestions(tu.surveyId, questions);
+			Test.stopTest();
+
+			// Verify scale labels were saved
+			List<Survey_Question__c> createdQuestions = [
+				SELECT Id, Question__c, Type__c, Scale_Start_Label__c, Scale_End_Label__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu.surveyId AND Question__c = 'How satisfied are you?'
+			];
+
+			System.assertEquals(1, createdQuestions.size(), 'Should have created one scale question');
+			System.assertEquals('Single Select--Horizontal', createdQuestions[0].Type__c, 'Question type should be horizontal');
+			System.assertEquals('Very Dissatisfied', createdQuestions[0].Scale_Start_Label__c, 'Start label should be saved');
+			System.assertEquals('Very Satisfied', createdQuestions[0].Scale_End_Label__c, 'End label should be saved');
+		}
+	}
+
+	@IsTest
+	private static void testUpdateSurveyQuestionsWithScaleLabels() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Update questions with scale labels
+			List<Map<String, Object>> questions = new List<Map<String, Object>>();
+			Map<String, Object> scaleQuestion = new Map<String, Object>();
+			scaleQuestion.put('question', 'Rate the difficulty');
+			scaleQuestion.put('questionType', 'Single Select--Horizontal');
+			scaleQuestion.put('required', false);
+			scaleQuestion.put('choices', new List<String>{ '1', '2', '3', '4', '5' });
+			scaleQuestion.put('orderNumber', 1);
+			scaleQuestion.put('scaleStartLabel', 'Very Difficult');
+			scaleQuestion.put('scaleEndLabel', 'Very Easy');
+			questions.add(scaleQuestion);
+
+			Test.startTest();
+			SurveyCreationController.updateSurveyQuestions(tu.surveyId, questions);
+			Test.stopTest();
+
+			// Verify scale labels were saved
+			List<Survey_Question__c> updatedQuestions = [
+				SELECT Id, Question__c, Type__c, Scale_Start_Label__c, Scale_End_Label__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :tu.surveyId
+			];
+
+			System.assertEquals(1, updatedQuestions.size(), 'Should have one question');
+			System.assertEquals('Rate the difficulty', updatedQuestions[0].Question__c, 'Question text should match');
+			System.assertEquals('Very Difficult', updatedQuestions[0].Scale_Start_Label__c, 'Start label should be saved');
+			System.assertEquals('Very Easy', updatedQuestions[0].Scale_End_Label__c, 'End label should be saved');
+		}
+	}
 }
