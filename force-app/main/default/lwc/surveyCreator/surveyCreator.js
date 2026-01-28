@@ -481,7 +481,9 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							questionType: q.questionType,
 							required: q.required,
 							choices: q.choices,
-							orderNumber: index + 1
+							orderNumber: index + 1,
+							scaleStartLabel: q.scaleStartLabel || '',
+							scaleEndLabel: q.scaleEndLabel || ''
 						}));
 
 						// Use update for existing surveys, create for new ones
