@@ -145,7 +145,7 @@ public with sharing class SurveyUtilities {
 			// Single SOQL query for all template questions
 			Map<Id, List<Survey_Question__c>> templateQuestionsMap = new Map<Id, List<Survey_Question__c>>();
 			for (Survey_Question__c question : [
-				SELECT Id, Name, Question__c, Type__c, Choices__c, OrderNumber__c, Required__c, Survey__c
+				SELECT Id, Name, Question__c, Type__c, Choices__c, OrderNumber__c, Required__c, Survey__c, Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c IN :templateIds
 				WITH USER_MODE
