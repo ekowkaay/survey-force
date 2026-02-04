@@ -745,13 +745,15 @@ public with sharing class SurveyCreationController {
 				Schema.Survey_Question__c.fields.Type__c,
 				Schema.Survey_Question__c.fields.Required__c,
 				Schema.Survey_Question__c.fields.Choices__c,
-				Schema.Survey_Question__c.fields.Hide_on_Survey__c
+				Schema.Survey_Question__c.fields.Hide_on_Survey__c,
+				Schema.Survey_Question__c.fields.Scale_Start_Label__c,
+				Schema.Survey_Question__c.fields.Scale_End_Label__c
 			};
 			SurveyForceUtil.accessController.assertAuthorizedToView(Schema.Survey_Question__c.getSobjectType(), questionFields);
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey_Question__c.getSobjectType(), questionFields);
 
 			List<Survey_Question__c> sourceQuestions = [
-				SELECT Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c
+				SELECT Question__c, OrderNumber__c, Type__c, Required__c, Choices__c, Hide_on_Survey__c, Scale_Start_Label__c, Scale_End_Label__c
 				FROM Survey_Question__c
 				WHERE Survey__c = :sourceSurveyId
 				WITH USER_MODE
