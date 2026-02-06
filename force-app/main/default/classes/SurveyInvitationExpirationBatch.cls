@@ -8,7 +8,7 @@
  * Example scheduling (run daily at 2 AM):
  * System.schedule('Survey Invitation Expiration', '0 0 2 * * ?', new SurveyInvitationExpirationScheduler());
  */
-public with sharing class SurveyInvitationExpirationBatch implements Database.Batchable<SObject> {
+public with sharing class SurveyInvitationExpirationBatch implements Database.Batchable<SObject>, Database.Stateful {
 	// Track counts across batches for logging in finish method
 	private Integer processedCount = 0;
 	private Integer expiredCount = 0;
@@ -35,10 +35,11 @@ public with sharing class SurveyInvitationExpirationBatch implements Database.Ba
 	 * @param bc BatchableContext
 	 * @param scope List of invitations to process in this batch
 	 */
-	public void execute(Database.BatchableContext bc, List<SurveyInvitation__c> scope) {
+	public void execute(Database.BatchableContext bc, List<SObject> scope) {
 		List<SurveyInvitation__c> invitationsToUpdate = new List<SurveyInvitation__c>();
 
-		for (SurveyInvitation__c invitation : scope) {
+		for (SObject obj : scope) {
+			SurveyInvitation__c invitation = (SurveyInvitation__c) obj;
 			invitation.Status__c = SurveyForceConstants.STATUS_EXPIRED;
 			invitationsToUpdate.add(invitation);
 			processedCount++;

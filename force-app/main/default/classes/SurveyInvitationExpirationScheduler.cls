@@ -19,7 +19,7 @@ public with sharing class SurveyInvitationExpirationScheduler implements Schedul
 	 * @param sc SchedulableContext
 	 */
 	public void execute(SchedulableContext sc) {
-		// Execute the batch job with batch size of 200 (maximum per transaction)
+		// Execute the batch job with a chosen batch size of 200 (tuned for this job, not the platform maximum)
 		SurveyInvitationExpirationBatch batch = new SurveyInvitationExpirationBatch();
 		Database.executeBatch(batch, 200);
 	}

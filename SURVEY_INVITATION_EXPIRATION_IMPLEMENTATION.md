@@ -254,9 +254,9 @@ Potential improvements for future consideration:
 
 ## Related Documentation
 
-- [SurveyInvitationController.cls](../classes/SurveyInvitationController.cls) - Original expiration validation logic
-- [SurveyForceConstants.cls](../classes/SurveyForceConstants.cls) - Status constants
-- [SURVEY_TOKEN_URL_IMPLEMENTATION.md](../SURVEY_TOKEN_URL_IMPLEMENTATION.md) - Token URL implementation
+- [SurveyInvitationController.cls](force-app/main/default/classes/SurveyInvitationController.cls) - Original expiration validation logic
+- [SurveyForceConstants.cls](force-app/main/default/classes/SurveyForceConstants.cls) - Status constants
+- [SURVEY_TOKEN_URL_IMPLEMENTATION.md](SURVEY_TOKEN_URL_IMPLEMENTATION.md) - Token URL implementation
 
 ## Rollback Plan
 
