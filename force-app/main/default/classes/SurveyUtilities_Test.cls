@@ -521,9 +521,13 @@ private class SurveyUtilities_Test {
 	 */
 	@IsTest
 	static void testCreateSurveysInBulk_ScaleLabelsCloned() {
-		// Create a template with scale labels
-		Survey__c templateWithScaleLabels = new Survey__c();
-		templateWithScaleLabels.Name = 'ParticipantSurveyTemplate';
+		// Use the existing participant survey template and add scale labels-related configuration
+		Survey__c templateWithScaleLabels = [
+			SELECT Id, Thank_You_Text__c
+			FROM Survey__c
+			WHERE Name = 'ParticipantSurveyTemplate'
+			LIMIT 1
+		];
 		templateWithScaleLabels.Thank_You_Text__c = 'Thank you!';
 		update templateWithScaleLabels;
 
