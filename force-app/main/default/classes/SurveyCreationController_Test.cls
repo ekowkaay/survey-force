@@ -97,6 +97,54 @@ private class SurveyCreationController_Test {
 	}
 
 	@IsTest
+	private static void testCloneSurveyWithScaleLabels() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			// Create a survey with a question that has scale labels
+			Survey__c sourceSurvey = new Survey__c();
+			sourceSurvey.Name = 'Source Survey with Scale Labels';
+			sourceSurvey.Survey_Header__c = 'Test Header';
+			insert sourceSurvey;
+
+			// Create a question with scale labels
+			Survey_Question__c sourceQuestion = new Survey_Question__c();
+			sourceQuestion.Survey__c = sourceSurvey.Id;
+			sourceQuestion.Question__c = 'How satisfied are you?';
+			sourceQuestion.Type__c = 'Single Select--Vertical';
+			sourceQuestion.Required__c = true;
+			sourceQuestion.OrderNumber__c = 1;
+			sourceQuestion.Scale_Start_Label__c = 'Not Satisfied';
+			sourceQuestion.Scale_End_Label__c = 'Very Satisfied';
+			sourceQuestion.Choices__c = '1\n2\n3\n4\n5';
+			insert sourceQuestion;
+
+			String newSurveyName = 'Cloned Survey with Scale Labels ' + System.now();
+
+			Test.startTest();
+			SurveyCreationController.CreationResult result = SurveyCreationController.cloneSurvey(sourceSurvey.Id, newSurveyName);
+			Test.stopTest();
+
+			System.assertEquals(true, result.success, 'Cloning should succeed');
+			System.assertNotEquals(null, result.surveyId, 'New survey ID should not be null');
+			System.assertNotEquals(sourceSurvey.Id, result.surveyId, 'New survey should have different ID');
+
+			// Verify the cloned question has the scale labels
+			List<Survey_Question__c> clonedQuestions = [
+				SELECT Id, Question__c, Scale_Start_Label__c, Scale_End_Label__c, Type__c, Choices__c
+				FROM Survey_Question__c
+				WHERE Survey__c = :result.surveyId
+			];
+
+			System.assertEquals(1, clonedQuestions.size(), 'Should have one cloned question');
+			System.assertEquals(sourceQuestion.Question__c, clonedQuestions[0].Question__c, 'Question text should match');
+			System.assertEquals('Not Satisfied', clonedQuestions[0].Scale_Start_Label__c, 'Scale start label should be cloned');
+			System.assertEquals('Very Satisfied', clonedQuestions[0].Scale_End_Label__c, 'Scale end label should be cloned');
+			System.assertEquals(sourceQuestion.Type__c, clonedQuestions[0].Type__c, 'Question type should match');
+			System.assertEquals(sourceQuestion.Choices__c, clonedQuestions[0].Choices__c, 'Choices should match');
+		}
+	}
+
+	@IsTest
 	private static void testCloneSurveyWithoutName() {
 		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
 		System.runAs(u) {

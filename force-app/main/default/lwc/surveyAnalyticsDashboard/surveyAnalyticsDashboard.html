@@ -197,7 +197,13 @@
 											<div class="slds-col slds-size_1-of-2 slds-m-bottom_medium">
 												<p class="slds-text-body_small slds-text-color_weak">Last Response</p>
 												<template lwc:if={lastResponseDate}>
-													<lightning-formatted-date-time value={lastResponseDate} day="numeric" month="short" year="numeric" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+													<lightning-formatted-date-time
+														value={lastResponseDate}
+														day="numeric"
+														month="short"
+														year="numeric"
+														hour="2-digit"
+														minute="2-digit"></lightning-formatted-date-time>
 												</template>
 												<template lwc:else>
 													<p class="slds-text-body_small slds-text-color_weak">N/A</p>
@@ -248,12 +254,7 @@
 						</div>
 						<div class="slds-card__body slds-card__body_inner">
 							<template lwc:if={hasResponses}>
-								<lightning-datatable
-									key-field="Id"
-									data={responseRows}
-									columns={responseColumns}
-									hide-checkbox-column
-									class="response-table"></lightning-datatable>
+								<lightning-datatable key-field="Id" data={responseRows} columns={responseColumns} hide-checkbox-column class="response-table"></lightning-datatable>
 							</template>
 							<template lwc:else>
 								<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">

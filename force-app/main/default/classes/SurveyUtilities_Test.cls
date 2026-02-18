@@ -515,4 +515,60 @@ private class SurveyUtilities_Test {
 		}
 		System.assertEquals(3, tokens.size(), 'All tokens should be unique');
 	}
+
+	/**
+	 * @description Test that scale labels are cloned when creating surveys in bulk
+	 */
+	@IsTest
+	static void testCreateSurveysInBulk_ScaleLabelsCloned() {
+		// Use the existing participant survey template and add scale labels-related configuration
+		Survey__c templateWithScaleLabels = [
+			SELECT Id, Thank_You_Text__c
+			FROM Survey__c
+			WHERE Name = 'ParticipantSurveyTemplate'
+			LIMIT 1
+		];
+		templateWithScaleLabels.Thank_You_Text__c = 'Thank you!';
+		update templateWithScaleLabels;
+
+		// Add a question with scale labels to the template
+		Survey_Question__c templateQuestion = new Survey_Question__c();
+		templateQuestion.Survey__c = [SELECT Id FROM Survey__c WHERE Name = 'ParticipantSurveyTemplate' LIMIT 1].Id;
+		templateQuestion.Question__c = 'How satisfied are you with the training?';
+		templateQuestion.Type__c = 'Single Select--Vertical';
+		templateQuestion.Choices__c = '1\n2\n3\n4\n5';
+		templateQuestion.OrderNumber__c = 10;
+		templateQuestion.Required__c = true;
+		templateQuestion.Scale_Start_Label__c = 'Not Satisfied';
+		templateQuestion.Scale_End_Label__c = 'Very Satisfied';
+		insert templateQuestion;
+
+		Training_Request__c tr = [SELECT Id FROM Training_Request__c LIMIT 1];
+
+		Test.startTest();
+
+		List<SurveyUtilities.SurveyCreationRequest> requests = new List<SurveyUtilities.SurveyCreationRequest>();
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Participant', 'English', 'Survey with Scale Labels'));
+
+		Map<String, SurveyUtilities.SurveyCreationResult> results = SurveyUtilities.createSurveysInBulk(requests);
+
+		Test.stopTest();
+
+		// Verify the result
+		String key = tr.Id + '_Participant';
+		System.assert(results.containsKey(key), 'Should have result for request');
+		System.assertEquals(true, results.get(key).success, 'Request should succeed');
+		System.assertNotEquals(null, results.get(key).surveyId, 'Should have survey ID');
+
+		// Verify the cloned question has scale labels
+		List<Survey_Question__c> clonedQuestions = [
+			SELECT Id, Question__c, Scale_Start_Label__c, Scale_End_Label__c, Type__c
+			FROM Survey_Question__c
+			WHERE Survey__c = :results.get(key).surveyId AND Question__c = 'How satisfied are you with the training?'
+		];
+
+		System.assertEquals(1, clonedQuestions.size(), 'Should have one cloned question with scale labels');
+		System.assertEquals('Not Satisfied', clonedQuestions[0].Scale_Start_Label__c, 'Scale start label should be cloned');
+		System.assertEquals('Very Satisfied', clonedQuestions[0].Scale_End_Label__c, 'Scale end label should be cloned');
+	}
 }

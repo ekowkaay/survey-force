@@ -13,6 +13,7 @@ This refactoring improves the user experience when accessing the Survey Link Gen
 **Solution**: The modal now automatically opens when users access the standalone Survey Link Generator tab (when not on a record page), streamlining the workflow.
 
 **Implementation**:
+
 ```javascript
 connectedCallback() {
     if (this.effectiveSurveyId) {
@@ -34,6 +35,7 @@ connectedCallback() {
 **Solution**: The modal now includes the survey selector when no survey is pre-selected, allowing users to complete the entire workflow in one place.
 
 **Features**:
+
 - Survey picker appears at the top of the modal when `showSurveySelector` is true
 - Survey picker is marked as required
 - Default link count remains at 10
@@ -45,6 +47,7 @@ connectedCallback() {
 **Solution**: Added multiple layers of validation and feedback:
 
 1. **Disabled Button State**: Generate button is disabled until a survey is selected
+
    ```javascript
    get isGenerateDisabled() {
        return this.isGenerating || !this.effectiveSurveyId;
@@ -52,32 +55,35 @@ connectedCallback() {
    ```
 
 2. **Visual Error Message**: When users attempt to generate without a survey, a warning message appears below the survey picker
+
    ```html
-   <template lwc:if={showSurveyRequiredMessage}>
-       <p class="slds-text-body_small slds-text-color_error slds-m-top_x-small">
-           <lightning-icon icon-name="utility:warning" size="xx-small"></lightning-icon>
-           Please select a survey to continue
-       </p>
+   <template lwc:if="{showSurveyRequiredMessage}">
+   	<p class="slds-text-body_small slds-text-color_error slds-m-top_x-small">
+   		<lightning-icon icon-name="utility:warning" size="xx-small"></lightning-icon>
+   		Please select a survey to continue
+   	</p>
    </template>
    ```
 
 3. **Toast Notification**: Error toast appears if validation somehow fails
    ```javascript
    if (!this.effectiveSurveyId) {
-       this.showSurveyRequiredMessage = true;
-       this.showToast('Error', 'Please select a survey first', 'error');
-       return;
+   	this.showSurveyRequiredMessage = true;
+   	this.showToast('Error', 'Please select a survey first', 'error');
+   	return;
    }
    ```
 
 ### 4. State Management
 
 **New Track Variable**:
+
 ```javascript
 @track showSurveyRequiredMessage = false;
 ```
 
 **State Reset Logic**: The warning message is automatically cleared when:
+
 - User selects a survey
 - User closes the modal
 - User opens the modal
@@ -219,6 +225,7 @@ get isGenerateDisabled() {
 ### Automated Testing (Future)
 
 Consider adding Jest tests for:
+
 - `connectedCallback` modal opening logic
 - `isGenerateDisabled` computed property
 - `handleSurveyChange` state management
@@ -235,6 +242,7 @@ Consider adding Jest tests for:
 ## Conclusion
 
 This refactoring significantly improves the user experience for the Survey Link Generator tab by:
+
 - Reducing the number of clicks required
 - Providing clear guidance through the process
 - Preventing errors before they happen
