@@ -59,7 +59,7 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = 'Unable to load survey responses. Please check your network connection and try refreshing. Details: ' + (error.body?.message || 'Unknown error');
+				this.error = `Unable to load survey responses. Please check your network connection and try refreshing. Details: ${error.body?.message || 'Unknown error'}`;
 				this.isLoading = false;
 				this.showToast('Error', this.error, 'error');
 			});

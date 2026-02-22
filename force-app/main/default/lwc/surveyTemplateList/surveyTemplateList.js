@@ -89,7 +89,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = 'Unable to load survey templates. Please check your network connection and refresh the page. Details: ' + (error.body?.message || 'Unknown error');
+				this.error = `Unable to load survey templates. Please check your network connection and refresh the page. Details: ${error.body?.message || 'Unknown error'}`;
 				this.isLoading = false;
 			});
 	}
@@ -179,11 +179,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 					this.loadSurveys();
 				})
 				.catch((error) => {
-					this.showToast(
-						'Error',
-						'Unable to delete survey. It may have active responses or you may lack permissions. Details: ' + (error.body?.message || 'Unknown error'),
-						'error'
-					);
+					this.showToast('Error', `Unable to delete survey. It may have active responses or you may lack permissions. Details: ${error.body?.message || 'Unknown error'}`, 'error');
 					this.isLoading = false;
 				});
 		}
@@ -223,7 +219,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 				this.isCreating = false;
 			})
 			.catch((error) => {
-				this.showToast('Error', 'Unable to create survey template. Please verify your inputs and try again. Details: ' + (error.body?.message || 'Unknown error'), 'error');
+				this.showToast('Error', `Unable to create survey template. Please verify your inputs and try again. Details: ${error.body?.message || 'Unknown error'}`, 'error');
 				this.isCreating = false;
 			});
 	}
@@ -263,11 +259,7 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 				this.isCloning = false;
 			})
 			.catch((error) => {
-				this.showToast(
-					'Error',
-					'Unable to clone survey. Please verify the source survey still exists and try again. Details: ' + (error.body?.message || 'Unknown error'),
-					'error'
-				);
+				this.showToast('Error', `Unable to clone survey. Please verify the source survey still exists and try again. Details: ${error.body?.message || 'Unknown error'}`, 'error');
 				this.isCloning = false;
 			});
 	}

@@ -221,7 +221,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 				this.isUploading = false; // Parsing complete
 			})
 			.catch((error) => {
-				this.uploadError = 'Unable to parse file content. Please ensure the file format is correct (.txt or .csv). Details: ' + (error.body?.message || 'Unknown error');
+				this.uploadError = `Unable to parse file content. Please ensure the file format is correct (.txt or .csv). Details: ${error.body?.message || 'Unknown error'}`;
 				this.parsedIds = [];
 				this.isProcessing = false;
 				this.isUploading = false; // Parsing failed
@@ -282,7 +282,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 			.catch((error) => {
 				this.showToast(
 					'Error',
-					'Unable to load surveys for regeneration. Please verify the Training Request IDs are correct and try again. Details: ' + (error.body?.message || 'Unknown error'),
+					`Unable to load surveys for regeneration. Please verify the Training Request IDs are correct and try again. Details: ${error.body?.message || 'Unknown error'}`,
 					'error'
 				);
 				this.surveysToRegenerate = [];
@@ -337,7 +337,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 			})
 			.catch((error) => {
 				this.regenerationSuccess = false;
-				this.regenerationMessage = 'Unable to regenerate invitations. Please try again or contact your administrator. Details: ' + (error.body?.message || 'Unknown error');
+				this.regenerationMessage = `Unable to regenerate invitations. Please try again or contact your administrator. Details: ${error.body?.message || 'Unknown error'}`;
 				this.errorMessages = [error.body?.message || 'An unexpected error occurred during regeneration'];
 				this.currentStep = STEPS.COMPLETE;
 				this.isProcessing = false;

@@ -96,7 +96,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			})
 			.catch((error) => {
 				const detail = error.body?.message || error.message || 'Unknown error';
-				this.showToast('Error', 'Unable to load the survey builder. Please check your network connection and refresh the page. Details: ' + detail, 'error');
+				this.showToast('Error', `Unable to load the survey builder. Please check your network connection and refresh the page. Details: ${detail}`, 'error');
 				this.isLoading = false;
 			});
 	}
@@ -152,7 +152,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				const detail = error.body?.message || error.message || 'Unknown error';
 				this.showToast(
 					'Error',
-					'Unable to load survey details. The survey may have been deleted or you may lack access. Please try again or contact your administrator. Details: ' + detail,
+					`Unable to load survey details. The survey may have been deleted or you may lack access. Please try again or contact your administrator. Details: ${detail}`,
 					'error'
 				);
 				this.isLoading = false;
@@ -504,7 +504,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 							})
 							.catch((error) => {
 								const errorMessage = isUpdate ? 'Error updating questions' : 'Error saving questions';
-								this.showToast('Error', errorMessage + '. Please check your question data and try again. Details: ' + (error.body?.message || error.message), 'error');
+								this.showToast('Error', `${errorMessage}. Please check your question data and try again. Details: ${error.body?.message || error.message}`, 'error');
 								this.isCreating = false;
 							});
 					} else {
@@ -522,7 +522,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				const errorMessage = isUpdate ? 'Error updating survey' : 'Error creating survey';
 				this.showToast(
 					'Error',
-					errorMessage + '. Please verify your inputs and try again. If the issue persists, contact your administrator. Details: ' + (error.body?.message || error.message),
+					`${errorMessage}. Please verify your inputs and try again. If the issue persists, contact your administrator. Details: ${error.body?.message || error.message}`,
 					'error'
 				);
 				this.isCreating = false;

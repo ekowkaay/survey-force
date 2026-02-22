@@ -11,7 +11,7 @@
 						value={selectedSurveyId}
 						onchange={handleSurveyChange}></lightning-record-picker>
 					<p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
-						<lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+						<lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small" alternative-text="Information"></lightning-icon>
 						Choose a survey to view existing invitations or generate new unique links.
 					</p>
 				</div>
@@ -20,7 +20,7 @@
 			<!-- Loading State -->
 			<template lwc:if={isLoading}>
 				<div class="slds-is-relative loading-container">
-					<lightning-spinner alternative-text="Loading invitations..." size="medium"></lightning-spinner>
+					<lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
 					<p class="slds-text-align_center slds-m-top_medium slds-text-body_small slds-text-color_weak">Loading invitations...</p>
 				</div>
 			</template>

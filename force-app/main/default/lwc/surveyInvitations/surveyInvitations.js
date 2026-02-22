@@ -153,8 +153,7 @@ export default class SurveyInvitations extends LightningElement {
 			this.isLoading = false;
 			this.error = null;
 		} else if (result.error) {
-			this.error =
-				'Unable to load invitations. Please ensure the selected survey exists and you have access to view it. Details: ' + (result.error.body?.message || 'Unknown error');
+			this.error = `Unable to load invitations. Please ensure the selected survey exists and you have access to view it. Details: ${result.error.body?.message || 'Unknown error'}`;
 			this.isLoading = false;
 			this.invitations = [];
 		}
@@ -270,7 +269,7 @@ export default class SurveyInvitations extends LightningElement {
 				this.isGenerating = false;
 			})
 			.catch((err) => {
-				this.showToast('Error', 'Unable to generate survey links. Please verify the survey is active and try again. Details: ' + (err.body?.message || 'Unknown error'), 'error');
+				this.showToast('Error', `Unable to generate survey links. Please verify the survey is active and try again. Details: ${err.body?.message || 'Unknown error'}`, 'error');
 				this.isGenerating = false;
 			});
 	}
