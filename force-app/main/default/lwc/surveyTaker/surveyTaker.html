@@ -1,5 +1,52 @@
 <template>
-	<div class="survey-shell">
+	<div class={surveyShellClass}>
+		<!-- Preview Mode Banner -->
+		<template if:true={isPreviewMode}>
+			<div class="preview-banner" role="alert">
+				<div class="preview-banner-content">
+					<div class="preview-banner-left">
+						<lightning-icon icon-name="utility:preview" size="small" alternative-text="Preview Mode"></lightning-icon>
+						<div class="preview-banner-text">
+							<div class="preview-banner-title">Preview Mode</div>
+							<div class="preview-banner-subtitle">This is a preview. Responses will not be saved.</div>
+						</div>
+					</div>
+					<div class="preview-banner-actions">
+						<lightning-button-group>
+							<lightning-button-menu
+								alternative-text="Test as user context"
+								icon-name="utility:user"
+								menu-alignment="right"
+								variant="border-filled"
+								onselect={handlePreviewContextChange}>
+								<lightning-menu-item value="authenticated" label="Authenticated User" checked={previewUserContext === 'authenticated'}></lightning-menu-item>
+								<lightning-menu-item value="anonymous" label="Anonymous User" checked={previewUserContext === 'anonymous'}></lightning-menu-item>
+								<lightning-menu-item value="guest" label="Guest User" checked={previewUserContext === 'guest'}></lightning-menu-item>
+							</lightning-button-menu>
+							<lightning-button
+								icon-name="utility:phone_portrait"
+								variant="border-filled"
+								onclick={handleMobileToggle}
+								alternative-text="Toggle mobile preview"
+								title="Toggle mobile preview">
+							</lightning-button>
+							<lightning-button
+								label="Return to Builder"
+								icon-name="utility:edit"
+								variant="brand"
+								onclick={handleReturnToBuilder}>
+							</lightning-button>
+						</lightning-button-group>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<!-- Preview Mode Watermark -->
+		<template if:true={isPreviewMode}>
+			<div class="preview-watermark" aria-hidden="true">PREVIEW</div>
+		</template>
+
 		<!-- Loading State -->
 		<template if:true={isLoading}>
 			<div class="slds-is-relative" style="min-height: 400px">
@@ -40,12 +87,6 @@
 							<div class="brandIcon" aria-hidden="true">📊</div>
 							<span>{headerTitle}</span>
 						</div>
-						<template if:true={isPreviewMode}>
-							<div class="slds-badge slds-badge_inverse slds-m-left_small" role="status" aria-live="polite">
-								<lightning-icon icon-name="utility:preview" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-								Preview Mode
-							</div>
-						</template>
 						<template if:true={hasQuestions}>
 							<div class="pill" role="status" aria-live="polite" aria-label={progressAriaLabel}>Question {currentQuestionNumber} of {totalQuestions}</div>
 						</template>

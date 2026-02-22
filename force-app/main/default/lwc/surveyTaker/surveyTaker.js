@@ -1,6 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { CurrentPageReference } from 'lightning/navigation';
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
 import getSurveyData from '@salesforce/apex/SurveyTakerController.getSurveyData';
 import getSurveyDataByToken from '@salesforce/apex/SurveyTakerController.getSurveyDataByToken';
 import submitSurveyResponses from '@salesforce/apex/SurveyTakerController.submitSurveyResponses';
@@ -14,7 +14,7 @@ const QUESTION_TYPE = {
 	MULTI_SELECT_VERTICAL: 'Multi-Select--Vertical'
 };
 
-export default class SurveyTaker extends LightningElement {
+export default class SurveyTaker extends NavigationMixin(LightningElement) {
 	@api recordId;
 	@api caseId = null;
 	@api contactId = null;
@@ -99,6 +99,32 @@ export default class SurveyTaker extends LightningElement {
 		return this._urlPreview === true;
 	}
 
+	/**
+	 * Get user context options for preview mode
+	 */
+	get userContextOptions() {
+		return [
+			{ label: 'Authenticated User', value: 'authenticated' },
+			{ label: 'Anonymous User', value: 'anonymous' },
+			{ label: 'Guest User', value: 'guest' }
+		];
+	}
+
+	/**
+	 * Get preview mode display context label
+	 */
+	get previewContextLabel() {
+		const option = this.userContextOptions.find((opt) => opt.value === this.previewUserContext);
+		return option ? option.label : 'Authenticated User';
+	}
+
+	/**
+	 * Get mobile preview class
+	 */
+	get surveyShellClass() {
+		return this.previewMobileMode ? 'survey-shell mobile-preview' : 'survey-shell';
+	}
+
 	// Track the recordId and token that was successfully loaded to prevent double-loading
 	_loadedRecordId = null;
 	_loadedToken = null;
@@ -128,6 +154,10 @@ export default class SurveyTaker extends LightningElement {
 	// New properties for one-question-at-a-time navigation
 	@track currentQuestionIndex = 0;
 	@track showAnonymousSelection = false;
+
+	// Preview mode enhancements
+	@track previewUserContext = 'authenticated'; // authenticated, anonymous, guest
+	@track previewMobileMode = false;
 
 	get visibleQuestions() {
 		return this.questions.filter((q) => !q.hideOnSurvey);
@@ -650,6 +680,37 @@ export default class SurveyTaker extends LightningElement {
 
 	handleAnonymousChange(event) {
 		this.anonymousValue = event.detail.value;
+	}
+
+	/**
+	 * Handle preview mode user context change
+	 */
+	handlePreviewContextChange(event) {
+		this.previewUserContext = event.detail.value;
+	}
+
+	/**
+	 * Handle preview mode mobile toggle
+	 */
+	handleMobileToggle() {
+		this.previewMobileMode = !this.previewMobileMode;
+	}
+
+	/**
+	 * Handle return to builder navigation
+	 */
+	handleReturnToBuilder() {
+		if (this.effectiveRecordId) {
+			this[NavigationMixin.Navigate]({
+				type: 'standard__navItemPage',
+				attributes: {
+					apiName: 'Survey_Creator_Page'
+				},
+				state: {
+					c__recordId: this.effectiveRecordId
+				}
+			});
+		}
 	}
 
 	handleSubmit() {
