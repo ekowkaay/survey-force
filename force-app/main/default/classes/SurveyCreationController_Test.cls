@@ -145,6 +145,38 @@ private class SurveyCreationController_Test {
 	}
 
 	@IsTest
+	private static void testCloneSurveyHeaderAndSubheaderCopied() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			// Create a survey with header and subheader
+			Survey__c sourceSurvey = new Survey__c();
+			sourceSurvey.Name = 'Source Survey with Header';
+			sourceSurvey.Survey_Header__c = 'Original Header';
+			sourceSurvey.Survey_Subheader__c = 'Original Subheader';
+			insert sourceSurvey;
+
+			String newSurveyName = 'Cloned Survey Header Test ' + System.now();
+
+			Test.startTest();
+			SurveyCreationController.CreationResult result = SurveyCreationController.cloneSurvey(sourceSurvey.Id, newSurveyName);
+			Test.stopTest();
+
+			System.assertEquals(true, result.success, 'Cloning should succeed');
+			System.assertNotEquals(null, result.surveyId, 'New survey ID should not be null');
+
+			// Verify header and subheader were copied
+			Survey__c clonedSurvey = [
+				SELECT Id, Name, Survey_Header__c, Survey_Subheader__c
+				FROM Survey__c
+				WHERE Id = :result.surveyId
+			];
+			System.assertEquals(newSurveyName, clonedSurvey.Name, 'Cloned survey name should match');
+			System.assertEquals('Original Header', clonedSurvey.Survey_Header__c, 'Survey header should be copied from source');
+			System.assertEquals('Original Subheader', clonedSurvey.Survey_Subheader__c, 'Survey subheader should be copied from source');
+		}
+	}
+
+	@IsTest
 	private static void testCloneSurveyWithoutName() {
 		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
 		System.runAs(u) {

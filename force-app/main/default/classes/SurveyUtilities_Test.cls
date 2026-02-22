@@ -22,6 +22,8 @@ private class SurveyUtilities_Test {
 		Survey__c participantTemplate = new Survey__c();
 		participantTemplate.Name = 'ParticipantSurveyTemplate';
 		participantTemplate.Thank_You_Text__c = 'Thank you for your participation!';
+		participantTemplate.Survey_Header__c = 'Participant Survey Header';
+		participantTemplate.Survey_Subheader__c = 'Participant Survey Subheader';
 		templates.add(participantTemplate);
 
 		Survey__c spanishTemplate = new Survey__c();
@@ -514,6 +516,36 @@ private class SurveyUtilities_Test {
 			tokens.add(inv.Token__c);
 		}
 		System.assertEquals(3, tokens.size(), 'All tokens should be unique');
+	}
+
+	/**
+	 * @description Test that survey header and subheader are copied from template during survey creation
+	 */
+	@IsTest
+	static void testCreateSurveysInBulk_HeaderAndSubheaderCopied() {
+		Training_Request__c tr = [SELECT Id FROM Training_Request__c LIMIT 1];
+
+		Test.startTest();
+
+		List<SurveyUtilities.SurveyCreationRequest> requests = new List<SurveyUtilities.SurveyCreationRequest>();
+		requests.add(new SurveyUtilities.SurveyCreationRequest(tr.Id, 'Participant', 'English', 'Survey With Header'));
+
+		Map<String, SurveyUtilities.SurveyCreationResult> results = SurveyUtilities.createSurveysInBulk(requests);
+
+		Test.stopTest();
+
+		String key = tr.Id + '_Participant';
+		System.assert(results.containsKey(key), 'Should have result for request');
+		System.assertEquals(true, results.get(key).success, 'Request should succeed');
+
+		// Verify header and subheader were copied from template
+		Survey__c createdSurvey = [
+			SELECT Id, Survey_Header__c, Survey_Subheader__c
+			FROM Survey__c
+			WHERE Id = :results.get(key).surveyId
+		];
+		System.assertEquals('Participant Survey Header', createdSurvey.Survey_Header__c, 'Survey header should be copied from template');
+		System.assertEquals('Participant Survey Subheader', createdSurvey.Survey_Subheader__c, 'Survey subheader should be copied from template');
 	}
 
 	/**

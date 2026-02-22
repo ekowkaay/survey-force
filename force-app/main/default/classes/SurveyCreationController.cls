@@ -726,7 +726,7 @@ public with sharing class SurveyCreationController {
 			SurveyForceUtil.accessController.assertAuthorizedToCreate(Schema.Survey__c.getSobjectType(), surveyFields);
 
 			Survey__c sourceSurvey = [
-				SELECT Survey_Header__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c
+				SELECT Survey_Header__c, Survey_Subheader__c, Hide_Survey_Name__c, Thank_You_Text__c, Thank_You_Link__c, All_Responses_Anonymous__c, Survey_Container_CSS__c
 				FROM Survey__c
 				WHERE Id = :sourceSurveyId
 				WITH USER_MODE
