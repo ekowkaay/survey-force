@@ -3,7 +3,8 @@
 		<!-- Loading State -->
 		<template lwc:if={isLoading}>
 			<div class="slds-is-relative loading-container">
-				<lightning-spinner alternative-text="Loading survey dashboard data..." size="medium"></lightning-spinner>
+				<lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+				<p class="slds-text-align_center slds-m-top_medium slds-text-body_small slds-text-color_weak">Loading your survey dashboard...</p>
 			</div>
 		</template>
 
@@ -329,9 +330,12 @@
 				<!-- No Results State -->
 				<template lwc:else>
 					<div class="slds-illustration slds-illustration_small slds-p-around_xx-large slds-text-align_center">
+						<div class="slds-m-bottom_medium">
+							<lightning-icon icon-name="utility:filterList" size="large" alternative-text="No matching surveys"></lightning-icon>
+						</div>
 						<div class="slds-text-longform">
 							<h3 class="slds-text-heading_medium">No surveys match your filters</h3>
-							<p class="slds-text-body_regular">Try adjusting your search or timeframe</p>
+							<p class="slds-text-body_regular slds-m-bottom_medium">Try adjusting your search term or selecting a different timeframe to see results.</p>
 						</div>
 					</div>
 				</template>
@@ -340,10 +344,13 @@
 			<!-- Empty State -->
 			<template lwc:else>
 				<div class="empty-state slds-illustration slds-illustration_large slds-p-around_xx-large slds-text-align_center">
-					<lightning-icon icon-name="standard:survey" size="large" class="slds-m-bottom_large"></lightning-icon>
+					<lightning-icon icon-name="standard:survey" size="large" class="slds-m-bottom_large" alternative-text="Survey"></lightning-icon>
 					<div class="slds-text-longform">
 						<h3 class="slds-text-heading_large slds-m-bottom_medium">Welcome to Survey Force</h3>
-						<p class="slds-text-body_regular slds-m-bottom_large">Get started by creating your first survey to collect valuable feedback and insights.</p>
+						<p class="slds-text-body_regular slds-m-bottom_medium">Get started by creating your first survey to collect valuable feedback and insights from your audience.</p>
+						<p class="slds-text-body_small slds-text-color_weak slds-m-bottom_large">
+							Build surveys with multiple question types, share via unique links, and track responses — all in one place.
+						</p>
 						<lightning-button variant="brand" label="Create Your First Survey" icon-name="utility:add" onclick={handleCreateSurvey}></lightning-button>
 					</div>
 				</div>

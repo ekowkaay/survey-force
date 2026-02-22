@@ -3,7 +3,8 @@
 		<!-- Loading State -->
 		<template if:true={isLoading}>
 			<div class="slds-is-relative" style="min-height: 300px">
-				<lightning-spinner alternative-text="Loading surveys..." size="medium"></lightning-spinner>
+				<lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+				<p class="slds-text-align_center slds-text-body_small slds-text-color_weak slds-p-top_xx-large">Loading survey templates...</p>
 			</div>
 		</template>
 
@@ -52,9 +53,12 @@
 					<!-- Empty State -->
 					<template if:false={hasSurveys}>
 						<div class="slds-box slds-theme_default slds-text-align_center slds-p-vertical_large">
-							<lightning-icon icon-name="utility:survey" size="large" class="slds-m-bottom_medium"></lightning-icon>
+							<lightning-icon icon-name="utility:survey" size="large" class="slds-m-bottom_medium" alternative-text="Survey template"></lightning-icon>
 							<h3 class="slds-text-heading_medium slds-m-bottom_small">No Survey Templates Yet</h3>
-							<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">Create a survey template to get started.</p>
+							<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_small">
+								Create your first survey template to get started. Templates can be reused and cloned to save time.
+							</p>
+							<p class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">You can add questions, configure settings, and share your survey once it's ready.</p>
 							<lightning-button variant="brand" label="Create Your First Template" icon-name="utility:add" onclick={handleOpenCreateModal}></lightning-button>
 						</div>
 					</template>
@@ -77,11 +81,17 @@
 					<h2 class="slds-text-heading_medium">Create New Survey Template</h2>
 				</header>
 				<div class="slds-modal__content slds-p-around_medium">
-					<lightning-input label="Template Name" value={newSurveyName} onchange={handleNewSurveyNameChange} required placeholder="Enter template name"></lightning-input>
+					<lightning-input
+						label="Template Name"
+						value={newSurveyName}
+						onchange={handleNewSurveyNameChange}
+						required
+						placeholder="Enter template name"
+						field-level-help="Give your template a descriptive name. You can clone this template later to create surveys faster."></lightning-input>
 				</div>
 				<footer class="slds-modal__footer">
 					<lightning-button label="Cancel" onclick={handleCloseCreateModal}></lightning-button>
-					<lightning-button variant="brand" label="Create Template" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
+					<lightning-button variant="brand" label={createTemplateButtonLabel} onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
 				</footer>
 			</div>
 		</section>
@@ -112,7 +122,7 @@
 				</div>
 				<footer class="slds-modal__footer">
 					<lightning-button label="Cancel" onclick={handleCloseCloneModal}></lightning-button>
-					<lightning-button variant="brand" label="Clone Survey" onclick={handleCloneSurvey} disabled={isCloning}></lightning-button>
+					<lightning-button variant="brand" label={cloneSurveyButtonLabel} onclick={handleCloneSurvey} disabled={isCloning}></lightning-button>
 				</footer>
 			</div>
 		</section>

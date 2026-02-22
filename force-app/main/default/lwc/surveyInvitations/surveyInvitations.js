@@ -105,6 +105,14 @@ export default class SurveyInvitations extends LightningElement {
 	}
 
 	/**
+	 * Dynamic label for the Generate button showing progress state
+	 * @returns {String} Button label text
+	 */
+	get generateButtonLabel() {
+		return this.isGenerating ? 'Generating...' : 'Generate';
+	}
+
+	/**
 	 * Lifecycle hook called when component is inserted into DOM.
 	 * Auto-opens the generate modal when accessed from a standalone tab without a survey.
 	 * This provides immediate workflow access for users coming from the Survey Link Generator tab.
@@ -145,7 +153,7 @@ export default class SurveyInvitations extends LightningElement {
 			this.isLoading = false;
 			this.error = null;
 		} else if (result.error) {
-			this.error = result.error.body?.message || 'Error loading invitations';
+			this.error = `Unable to load invitations. Please ensure the selected survey exists and you have access to view it. Details: ${result.error.body?.message || 'Unknown error'}`;
 			this.isLoading = false;
 			this.invitations = [];
 		}
@@ -230,12 +238,12 @@ export default class SurveyInvitations extends LightningElement {
 	handleGenerateLinks() {
 		if (!this.effectiveSurveyId) {
 			this.showSurveyRequiredMessage = true;
-			this.showToast('Error', 'Please select a survey first', 'error');
+			this.showToast('Error', 'Please select a survey first. Use the search field above to find and select your survey.', 'error');
 			return;
 		}
 
 		if (!this.linkCount || this.linkCount < 1 || this.linkCount > 200) {
-			this.showToast('Error', 'Please enter a valid number between 1 and 200', 'error');
+			this.showToast('Error', 'Please enter a valid number of links between 1 and 200. Each link is unique and single-use.', 'error');
 			return;
 		}
 
@@ -261,7 +269,7 @@ export default class SurveyInvitations extends LightningElement {
 				this.isGenerating = false;
 			})
 			.catch((err) => {
-				this.showToast('Error', err.body?.message || 'Error generating links', 'error');
+				this.showToast('Error', `Unable to generate survey links. Please verify the survey is active and try again. Details: ${err.body?.message || 'Unknown error'}`, 'error');
 				this.isGenerating = false;
 			});
 	}
