@@ -51,6 +51,12 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 	@track cloneSourceId = null;
 	@track isCloning = false;
 
+	// Delete Confirmation Modal
+	@track showDeleteModal = false;
+	@track deleteSurveyId = null;
+	@track deleteSurveyName = '';
+	@track isDeleting = false;
+
 	get hasSurveys() {
 		return this.surveys && this.surveys.length > 0;
 	}
@@ -70,6 +76,10 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 
 	get cloneSurveyButtonLabel() {
 		return this.isCloning ? 'Cloning...' : 'Clone Survey';
+	}
+
+	get deleteButtonLabel() {
+		return this.isDeleting ? 'Deleting...' : 'Delete Survey';
 	}
 
 	connectedCallback() {
@@ -171,18 +181,35 @@ export default class SurveyTemplateList extends NavigationMixin(LightningElement
 	}
 
 	handleDeleteSurvey(surveyId) {
-		if (confirm('Are you sure you want to delete this survey? This will also delete all questions and responses.')) {
-			this.isLoading = true;
-			deleteSurvey({ surveyId: surveyId })
-				.then(() => {
-					this.showToast('Success', 'Survey deleted successfully', 'success');
-					this.loadSurveys();
-				})
-				.catch((error) => {
-					this.showToast('Error', `Unable to delete survey. It may have active responses or you may lack permissions. Details: ${error.body?.message || 'Unknown error'}`, 'error');
-					this.isLoading = false;
-				});
+		const survey = this.surveys.find((s) => s.Id === surveyId);
+		this.deleteSurveyId = surveyId;
+		this.deleteSurveyName = survey ? survey.Name : 'this survey';
+		this.showDeleteModal = true;
+	}
+
+	handleCloseDeleteModal() {
+		this.showDeleteModal = false;
+		this.deleteSurveyId = null;
+		this.deleteSurveyName = '';
+	}
+
+	handleConfirmDelete() {
+		if (!this.deleteSurveyId) {
+			return;
 		}
+
+		this.isDeleting = true;
+		deleteSurvey({ surveyId: this.deleteSurveyId })
+			.then(() => {
+				this.showToast('Success', 'Survey deleted successfully', 'success');
+				this.showDeleteModal = false;
+				this.isDeleting = false;
+				this.loadSurveys();
+			})
+			.catch((error) => {
+				this.showToast('Error', `Unable to delete survey. It may have active responses or you may lack permissions. Details: ${error.body?.message || 'Unknown error'}`, 'error');
+				this.isDeleting = false;
+			});
 	}
 
 	// Create Modal

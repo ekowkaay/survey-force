@@ -53,6 +53,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 	};
 	@track editingQuestionIndex = null;
 
+	// Delete Question Confirmation Modal
+	@track showDeleteQuestionModal = false;
+	@track deleteQuestionIndex = null;
+	@track deleteQuestionText = '';
+
 	// Results placeholders
 	@track totalResponses = 0;
 	@track completionRate = '0%';
@@ -355,8 +360,26 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 	handleDeleteQuestion(event) {
 		const index = parseInt(event.target.dataset.questionIndex, 10);
-		this.questions = this.questions.filter((_, i) => i !== index);
-		this.showToast('Success', 'Question deleted', 'success');
+		const question = this.questions[index];
+		this.deleteQuestionIndex = index;
+		this.deleteQuestionText = question.question;
+		this.showDeleteQuestionModal = true;
+	}
+
+	handleCloseDeleteQuestionModal() {
+		this.showDeleteQuestionModal = false;
+		this.deleteQuestionIndex = null;
+		this.deleteQuestionText = '';
+	}
+
+	handleConfirmDeleteQuestion() {
+		if (this.deleteQuestionIndex !== null) {
+			this.questions = this.questions.filter((_, i) => i !== this.deleteQuestionIndex);
+			this.showToast('Success', 'Question deleted', 'success');
+			this.showDeleteQuestionModal = false;
+			this.deleteQuestionIndex = null;
+			this.deleteQuestionText = '';
+		}
 	}
 
 	handleQuestionChange(event) {

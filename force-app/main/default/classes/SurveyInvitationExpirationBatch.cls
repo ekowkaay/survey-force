@@ -2,9 +2,9 @@
  * @description Batch class to automatically expire survey invitations that have passed their expiration date.
  * This batch job queries all SurveyInvitation__c records with Status__c = 'Pending' and
  * ExpirationDate__c < NOW, then updates their status to 'Expired'.
- * 
+ *
  * Schedule this to run nightly to ensure expired invitations are properly marked.
- * 
+ *
  * Example scheduling (run daily at 2 AM):
  * System.schedule('Survey Invitation Expiration', '0 0 2 * * ?', new SurveyInvitationExpirationScheduler());
  */
@@ -20,14 +20,14 @@ public with sharing class SurveyInvitationExpirationBatch implements Database.Ba
 	 */
 	public Database.QueryLocator start(Database.BatchableContext bc) {
 		DateTime now = DateTime.now();
-		return Database.getQueryLocator([
-			SELECT Id, Status__c, ExpirationDate__c
-			FROM SurveyInvitation__c
-			WHERE Status__c = :SurveyForceConstants.STATUS_PENDING
-			AND ExpirationDate__c != NULL
-			AND ExpirationDate__c < :now
-			WITH USER_MODE
-		]);
+		return Database.getQueryLocator(
+			[
+				SELECT Id, Status__c, ExpirationDate__c
+				FROM SurveyInvitation__c
+				WHERE Status__c = :SurveyForceConstants.STATUS_PENDING AND ExpirationDate__c != NULL AND ExpirationDate__c < :now
+				WITH USER_MODE
+			]
+		);
 	}
 
 	/**
