@@ -34,7 +34,7 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 			this.totalQuestions = getFieldValue(data, 'Survey__c.Questions__c');
 			this.totalResponses = getFieldValue(data, 'Survey__c.Completed_Surveys__c');
 		} else if (error) {
-			this.error = 'Error loading survey details';
+			this.error = 'Unable to load survey details. Please verify the survey exists and you have access to view it.';
 		}
 	}
 
@@ -59,7 +59,7 @@ export default class SurveyAnalyticsDashboard extends LightningElement {
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = error.body?.message || 'Error loading responses';
+				this.error = 'Unable to load survey responses. Please check your network connection and try refreshing. Details: ' + (error.body?.message || 'Unknown error');
 				this.isLoading = false;
 				this.showToast('Error', this.error, 'error');
 			});

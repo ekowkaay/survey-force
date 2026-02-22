@@ -95,7 +95,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.showToast('Error', 'Error loading page: ' + (error.body?.message || error.message), 'error');
+				const detail = error.body?.message || error.message || 'Unknown error';
+				this.showToast('Error', 'Unable to load the survey builder. Please check your network connection and refresh the page. Details: ' + detail, 'error');
 				this.isLoading = false;
 			});
 	}
@@ -148,7 +149,12 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.showToast('Error', 'Error loading survey details: ' + (error.body?.message || error.message), 'error');
+				const detail = error.body?.message || error.message || 'Unknown error';
+				this.showToast(
+					'Error',
+					'Unable to load survey details. The survey may have been deleted or you may lack access. Please try again or contact your administrator. Details: ' + detail,
+					'error'
+				);
 				this.isLoading = false;
 			});
 	}
@@ -383,7 +389,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 	handleSaveQuestion() {
 		if (!this.currentQuestion.question.trim()) {
-			this.showToast('Error', 'Question text is required', 'error');
+			this.showToast('Error', 'Question text is required. Please enter the question you want to ask respondents.', 'error');
 			return;
 		}
 
@@ -439,7 +445,7 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 
 	handleCreateSurvey() {
 		if (!this.surveyName || this.surveyName.trim().length === 0) {
-			this.showToast('Error', 'Please enter a survey name', 'error');
+			this.showToast('Error', 'Please enter a survey name. A descriptive name helps you identify your survey later.', 'error');
 			return;
 		}
 
@@ -497,8 +503,8 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 								this.loadSurveyDetails(result.surveyId);
 							})
 							.catch((error) => {
-								const errorMessage = isUpdate ? 'Error updating questions' : 'Error creating questions';
-								this.showToast('Error', errorMessage + ': ' + (error.body?.message || error.message), 'error');
+								const errorMessage = isUpdate ? 'Error updating questions' : 'Error saving questions';
+								this.showToast('Error', errorMessage + '. Please check your question data and try again. Details: ' + (error.body?.message || error.message), 'error');
 								this.isCreating = false;
 							});
 					} else {
@@ -514,7 +520,11 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 			})
 			.catch((error) => {
 				const errorMessage = isUpdate ? 'Error updating survey' : 'Error creating survey';
-				this.showToast('Error', errorMessage + ': ' + (error.body?.message || error.message), 'error');
+				this.showToast(
+					'Error',
+					errorMessage + '. Please verify your inputs and try again. If the issue persists, contact your administrator. Details: ' + (error.body?.message || error.message),
+					'error'
+				);
 				this.isCreating = false;
 			});
 	}

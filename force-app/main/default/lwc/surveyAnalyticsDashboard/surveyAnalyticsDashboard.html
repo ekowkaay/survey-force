@@ -3,7 +3,8 @@
 		<!-- Loading State -->
 		<template lwc:if={isLoading}>
 			<div class="slds-is-relative loading-container">
-				<lightning-spinner alternative-text="Loading results..." size="medium"></lightning-spinner>
+				<lightning-spinner alternative-text="Loading analytics data..." size="medium"></lightning-spinner>
+				<p class="slds-text-align_center slds-m-top_medium slds-text-body_small slds-text-color_weak">Loading survey analytics...</p>
 			</div>
 		</template>
 
@@ -225,9 +226,14 @@
 									</template>
 									<template lwc:else>
 										<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+											<div class="slds-m-bottom_medium">
+												<lightning-icon icon-name="utility:comments" size="large" alternative-text="No responses yet"></lightning-icon>
+											</div>
 											<div class="slds-text-longform">
-												<h3 class="slds-text-heading_medium">No Responses Yet</h3>
-												<p class="slds-text-body_regular">Responses will appear here once your survey is completed by participants.</p>
+												<h3 class="slds-text-heading_medium slds-m-bottom_small">No Responses Yet</h3>
+												<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+													Responses will appear here once your survey is completed by participants. Share your survey link to start collecting feedback.
+												</p>
 											</div>
 										</div>
 									</template>
@@ -258,9 +264,14 @@
 							</template>
 							<template lwc:else>
 								<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+									<div class="slds-m-bottom_medium">
+										<lightning-icon icon-name="utility:list" size="large" alternative-text="No responses to display"></lightning-icon>
+									</div>
 									<div class="slds-text-longform">
-										<h3 class="slds-text-heading_medium">No Responses to Display</h3>
-										<p class="slds-text-body_regular">Individual responses will appear here once survey submissions are received.</p>
+										<h3 class="slds-text-heading_medium slds-m-bottom_small">No Responses to Display</h3>
+										<p class="slds-text-body_regular slds-text-color_weak">
+											Individual responses will appear here once survey submissions are received. Try adjusting your search or timeframe filters if you expected results.
+										</p>
 									</div>
 								</div>
 							</template>
@@ -318,9 +329,14 @@
 							</template>
 							<template lwc:else>
 								<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+									<div class="slds-m-bottom_medium">
+										<lightning-icon icon-name="utility:questions_and_answers" size="large" alternative-text="No questions available"></lightning-icon>
+									</div>
 									<div class="slds-text-longform">
-										<h3 class="slds-text-heading_medium">No Questions Available</h3>
-										<p class="slds-text-body_regular">Question analytics will appear once the survey includes questions.</p>
+										<h3 class="slds-text-heading_medium slds-m-bottom_small">No Questions Available</h3>
+										<p class="slds-text-body_regular slds-text-color_weak">
+											Question analytics will appear once the survey includes questions. Navigate to the Survey Builder to add questions.
+										</p>
 									</div>
 								</div>
 							</template>

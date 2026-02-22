@@ -157,7 +157,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 		};
 
 		reader.onerror = () => {
-			this.uploadError = 'Error reading file. Please try again.';
+			this.uploadError = 'Error reading file. Please ensure the file is a valid .txt or .csv file and try again.';
 			this.isProcessing = false;
 			this.isUploading = false;
 			this.uploadProgress = 0;
@@ -206,12 +206,12 @@ export default class SurveyRegenerationWizard extends LightningElement {
 				if (Array.isArray(result)) {
 					this.parsedIds = result || [];
 					if (this.parsedIds.length === 0) {
-						this.uploadError = 'No valid Training Request IDs found in the file.';
+						this.uploadError = 'No valid Training Request IDs found. Please verify the file contains valid IDs separated by commas, spaces, or new lines.';
 					}
 				} else if (result && result.success) {
 					this.parsedIds = result.trainingRequestIds || [];
 					if (this.parsedIds.length === 0) {
-						this.uploadError = 'No valid Training Request IDs found in the file.';
+						this.uploadError = 'No valid Training Request IDs found. Please verify the file contains valid IDs separated by commas, spaces, or new lines.';
 					}
 				} else {
 					this.uploadError = result && result.message ? result.message : 'Error parsing file content.';
@@ -221,7 +221,7 @@ export default class SurveyRegenerationWizard extends LightningElement {
 				this.isUploading = false; // Parsing complete
 			})
 			.catch((error) => {
-				this.uploadError = error.body?.message || 'Error parsing file content.';
+				this.uploadError = 'Unable to parse file content. Please ensure the file format is correct (.txt or .csv). Details: ' + (error.body?.message || 'Unknown error');
 				this.parsedIds = [];
 				this.isProcessing = false;
 				this.isUploading = false; // Parsing failed
@@ -280,7 +280,11 @@ export default class SurveyRegenerationWizard extends LightningElement {
 				this.isLoadingSurveys = false;
 			})
 			.catch((error) => {
-				this.showToast('Error', error.body?.message || 'Error loading surveys', 'error');
+				this.showToast(
+					'Error',
+					'Unable to load surveys for regeneration. Please verify the Training Request IDs are correct and try again. Details: ' + (error.body?.message || 'Unknown error'),
+					'error'
+				);
 				this.surveysToRegenerate = [];
 				this.isLoadingSurveys = false;
 			});
@@ -333,8 +337,8 @@ export default class SurveyRegenerationWizard extends LightningElement {
 			})
 			.catch((error) => {
 				this.regenerationSuccess = false;
-				this.regenerationMessage = error.body?.message || 'Error regenerating invitations';
-				this.errorMessages = [error.body?.message || 'Unknown error occurred'];
+				this.regenerationMessage = 'Unable to regenerate invitations. Please try again or contact your administrator. Details: ' + (error.body?.message || 'Unknown error');
+				this.errorMessages = [error.body?.message || 'An unexpected error occurred during regeneration'];
 				this.currentStep = STEPS.COMPLETE;
 				this.isProcessing = false;
 				this.showToast('Error', this.regenerationMessage, 'error');

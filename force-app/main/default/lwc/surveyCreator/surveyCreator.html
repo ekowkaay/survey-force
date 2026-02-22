@@ -37,7 +37,10 @@
 						<template lwc:else>
 							<lightning-button-group>
 								<lightning-button label="Preview" icon-name="utility:preview" onclick={handlePreview}></lightning-button>
-								<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
+								<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}> </lightning-button>
+								<template lwc:if={isCreating}>
+									<span class="slds-text-body_small slds-text-color_weak slds-m-left_small">Saving survey...</span>
+								</template>
 							</lightning-button-group>
 						</template>
 					</div>
@@ -218,6 +221,7 @@
 													onchange={handleSubheaderChange}
 													disabled={isCreating}
 													placeholder="Enter subheader text"
+													field-level-help="A secondary heading shown below the main header. Use it to provide additional context, instructions, or a brief description of the survey."
 													class="slds-m-bottom_small"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
@@ -446,10 +450,16 @@
 										<lightning-button label="View Detailed Results" icon-name="utility:new_window" onclick={handleViewResults}></lightning-button>
 									</template>
 									<template lwc:else>
-										<div class="slds-illustration slds-illustration_small slds-p-around_large">
+										<div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+											<div class="slds-m-bottom_medium">
+												<lightning-icon icon-name="utility:chart" size="large" alternative-text="No results"></lightning-icon>
+											</div>
 											<div class="slds-text-longform">
-												<h3 class="slds-text-heading_medium">No Results Yet</h3>
-												<p class="slds-text-body_regular">Results will appear here once your survey receives responses.</p>
+												<h3 class="slds-text-heading_medium slds-m-bottom_small">No Results Yet</h3>
+												<p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+													Results will appear here once your survey receives responses.<br />
+													Share your survey link to start collecting feedback.
+												</p>
 											</div>
 										</div>
 									</template>

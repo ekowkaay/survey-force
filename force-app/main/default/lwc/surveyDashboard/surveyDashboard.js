@@ -165,7 +165,7 @@ export default class SurveyDashboard extends NavigationMixin(LightningElement) {
 				this.isLoading = false;
 			})
 			.catch((error) => {
-				this.error = error.body?.message || 'Error loading dashboard data';
+				this.error = 'Unable to load dashboard data. Please check your network connection and try refreshing the page. Details: ' + (error.body?.message || 'Unknown error');
 				this.isLoading = false;
 				this.showToast('Error', this.error, 'error');
 			});
