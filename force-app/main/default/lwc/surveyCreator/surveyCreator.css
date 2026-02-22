@@ -77,8 +77,23 @@
 	transition: opacity 0.2s ease;
 }
 
+.question-drag-handle:active {
+	cursor: grabbing;
+}
+
 .question-item:hover .question-drag-handle {
 	opacity: 1;
+}
+
+.question-item.dragging {
+	opacity: 0.5;
+	cursor: grabbing;
+}
+
+.question-item.drag-over {
+	border-top: 3px solid var(--lwc-brandPrimary, #0176d3);
+	margin-top: 0.25rem;
+	padding-top: 0.25rem;
 }
 
 .question-number {
