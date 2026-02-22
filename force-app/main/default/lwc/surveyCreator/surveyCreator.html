@@ -37,7 +37,7 @@
 						<template lwc:else>
 							<lightning-button-group>
 								<lightning-button label="Preview" icon-name="utility:preview" onclick={handlePreview}></lightning-button>
-								<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}> </lightning-button>
+								<lightning-button variant="brand" label={createButtonLabel} icon-name="utility:save" onclick={handleCreateSurvey} disabled={isCreating}></lightning-button>
 								<template lwc:if={isCreating}>
 									<span class="slds-text-body_small slds-text-color_weak slds-m-left_small">Saving survey...</span>
 								</template>
