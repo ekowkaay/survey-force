@@ -6,6 +6,90 @@
 		Salesforce Sans,
 		Arial,
 		sans-serif;
+	position: relative;
+}
+
+/* Mobile Preview Mode */
+.survey-shell.mobile-preview {
+	max-width: 375px;
+	margin: 0 auto;
+	border-left: 1px solid #cbd5e1;
+	border-right: 1px solid #cbd5e1;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Preview Mode Banner */
+.preview-banner {
+	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+	border-bottom: 2px solid #f59e0b;
+	padding: 1rem;
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.preview-banner-content {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.preview-banner-left {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.preview-banner-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.preview-banner-title {
+	font-weight: 700;
+	font-size: 1rem;
+	color: #92400e;
+}
+
+.preview-banner-subtitle {
+	font-size: 0.875rem;
+	color: #78350f;
+	margin-top: 0.125rem;
+}
+
+.preview-banner-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+/* Preview Mode Watermark */
+.preview-watermark {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) rotate(-45deg);
+	font-size: 8rem;
+	font-weight: 900;
+	color: rgba(251, 191, 36, 0.1);
+	pointer-events: none;
+	z-index: 1;
+	user-select: none;
+	white-space: nowrap;
+}
+
+/* Adjust content to appear above watermark */
+.header,
+.intro,
+.card,
+.actions,
+.footer {
+	position: relative;
+	z-index: 2;
 }
 
 /* Header */
@@ -633,5 +717,27 @@ footer.footer {
 	.scaleButton {
 		padding: 0.5rem 0.25rem;
 		font-size: 0.875rem;
+	}
+}
+
+/* Responsive Design for Preview Banner */
+@media (max-width: 768px) {
+	.preview-banner-content {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.preview-banner-actions {
+		width: 100%;
+	}
+
+	.preview-banner-actions lightning-button-group {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.preview-watermark {
+		font-size: 4rem;
 	}
 }
