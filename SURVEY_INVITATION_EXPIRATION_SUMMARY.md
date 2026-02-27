@@ -8,7 +8,7 @@ This implementation addresses the gap in the Survey Force application where surv
 
 ### What Was Found
 
-1. **Existing Expiration Logic**:
+1. **Existing Expiration Logic**: 
    - `ExpirationDate__c` field exists on `SurveyInvitation__c` object
    - Expiration is calculated based on `InvitationExpirationDays__c` custom setting (default: 30 days)
    - Can calculate expiration from event dates for event-based surveys
@@ -82,8 +82,8 @@ Can be scheduled with any cron expression:
 
 ```apex
 // Daily at 2 AM (recommended)
-System.schedule('Survey Invitation Expiration - Daily 2AM',
-                '0 0 2 * * ?',
+System.schedule('Survey Invitation Expiration - Daily 2AM', 
+                '0 0 2 * * ?', 
                 new SurveyInvitationExpirationScheduler());
 ```
 
@@ -91,10 +91,10 @@ System.schedule('Survey Invitation Expiration - Daily 2AM',
 
 ### Test Coverage
 
-| Class                               | Test Methods | Coverage |
-| ----------------------------------- | ------------ | -------- |
-| SurveyInvitationExpirationBatch     | 6            | 100%     |
-| SurveyInvitationExpirationScheduler | 4            | 100%     |
+| Class | Test Methods | Coverage |
+|-------|-------------|----------|
+| SurveyInvitationExpirationBatch | 6 | 100% |
+| SurveyInvitationExpirationScheduler | 4 | 100% |
 
 ### Test Scenarios Covered
 
@@ -118,22 +118,19 @@ System.schedule('Survey Invitation Expiration - Daily 2AM',
 ### Deployment Steps
 
 1. **Deploy Classes**:
-
    ```bash
    sf project deploy start --source-path force-app/main/default/classes
    ```
 
 2. **Verify Tests Pass**:
-
    ```bash
    sf apex run test --class-names SurveyInvitationExpirationBatch_Test,SurveyInvitationExpirationScheduler_Test
    ```
 
 3. **Schedule Job** (via Anonymous Apex):
-
    ```apex
-   System.schedule('Survey Invitation Expiration - Daily 2AM',
-                   '0 0 2 * * ?',
+   System.schedule('Survey Invitation Expiration - Daily 2AM', 
+                   '0 0 2 * * ?', 
                    new SurveyInvitationExpirationScheduler());
    ```
 
@@ -146,7 +143,6 @@ System.schedule('Survey Invitation Expiration - Daily 2AM',
 ### Check Job Status
 
 Navigate to **Setup > Apex Jobs** to monitor:
-
 - Execution status
 - Records processed
 - Errors (if any)
@@ -154,7 +150,6 @@ Navigate to **Setup > Apex Jobs** to monitor:
 ### Check Logs
 
 Review debug logs for:
-
 - Processed count
 - Expired count
 - Error messages
@@ -181,7 +176,7 @@ LIMIT 10
 - **Update Performance**: Bulk operation, minimal overhead
 - **Governor Limits**: Well within limits
 - **Batch Size**: 200 records per batch (configurable)
-- **Execution Time**:
+- **Execution Time**: 
   - 100 records: ~1 second
   - 1,000 records: ~5 seconds
   - 10,000 records: ~50 seconds
@@ -199,7 +194,6 @@ LIMIT 10
 ## Backward Compatibility
 
 This implementation is **fully backward compatible**:
-
 - No changes to existing logic
 - No changes to existing fields
 - No changes to existing validation
@@ -209,7 +203,6 @@ This implementation is **fully backward compatible**:
 ## Future Enhancements
 
 Potential improvements:
-
 1. Email notifications on batch completion
 2. Archive/delete old expired invitations
 3. Dashboard showing expiration statistics
@@ -249,18 +242,18 @@ The solution is minimal, focused, and ready for deployment.
 
 ## Files Modified/Created
 
-| File                                                  | Status  | Purpose              |
-| ----------------------------------------------------- | ------- | -------------------- |
-| SurveyInvitationExpirationBatch.cls                   | Created | Batch class          |
-| SurveyInvitationExpirationBatch.cls-meta.xml          | Created | Metadata             |
-| SurveyInvitationExpirationScheduler.cls               | Created | Scheduler class      |
-| SurveyInvitationExpirationScheduler.cls-meta.xml      | Created | Metadata             |
-| SurveyInvitationExpirationBatch_Test.cls              | Created | Test class           |
-| SurveyInvitationExpirationBatch_Test.cls-meta.xml     | Created | Metadata             |
-| SurveyInvitationExpirationScheduler_Test.cls          | Created | Test class           |
-| SurveyInvitationExpirationScheduler_Test.cls-meta.xml | Created | Metadata             |
-| SURVEY_INVITATION_EXPIRATION_IMPLEMENTATION.md        | Created | Implementation guide |
-| SURVEY_INVITATION_EXPIRATION_SUMMARY.md               | Created | This summary         |
+| File | Status | Purpose |
+|------|--------|---------|
+| SurveyInvitationExpirationBatch.cls | Created | Batch class |
+| SurveyInvitationExpirationBatch.cls-meta.xml | Created | Metadata |
+| SurveyInvitationExpirationScheduler.cls | Created | Scheduler class |
+| SurveyInvitationExpirationScheduler.cls-meta.xml | Created | Metadata |
+| SurveyInvitationExpirationBatch_Test.cls | Created | Test class |
+| SurveyInvitationExpirationBatch_Test.cls-meta.xml | Created | Metadata |
+| SurveyInvitationExpirationScheduler_Test.cls | Created | Test class |
+| SurveyInvitationExpirationScheduler_Test.cls-meta.xml | Created | Metadata |
+| SURVEY_INVITATION_EXPIRATION_IMPLEMENTATION.md | Created | Implementation guide |
+| SURVEY_INVITATION_EXPIRATION_SUMMARY.md | Created | This summary |
 
 ## Support & Documentation
 

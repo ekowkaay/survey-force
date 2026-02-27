@@ -19,7 +19,6 @@ Implemented a scheduled batch job to automatically expire survey invitations tha
 **Purpose**: Batch class that queries and updates expired invitations.
 
 **Key Features**:
-
 - Queries all `SurveyInvitation__c` records with:
   - `Status__c = 'Pending'`
   - `ExpirationDate__c != NULL`
@@ -36,7 +35,6 @@ Implemented a scheduled batch job to automatically expire survey invitations tha
 **Purpose**: Schedulable class to run the batch job at specified intervals.
 
 **Key Features**:
-
 - Implements `Schedulable` interface
 - Executes batch job with batch size of 200
 - Can be scheduled with any cron expression
@@ -46,7 +44,6 @@ Implemented a scheduled batch job to automatically expire survey invitations tha
 ### 3. Test Classes
 
 **SurveyInvitationExpirationBatch_Test.cls**:
-
 - Tests batch expiration of invitations
 - Tests ignoring null expiration dates
 - Tests ignoring completed invitations
@@ -54,7 +51,6 @@ Implemented a scheduled batch job to automatically expire survey invitations tha
 - Tests with no expired invitations
 
 **SurveyInvitationExpirationScheduler_Test.cls**:
-
 - Tests scheduler execution
 - Tests multiple executions
 - Tests with empty dataset
@@ -133,13 +129,13 @@ Navigate to **Setup > Scheduled Jobs** to verify the job is scheduled correctly.
 
 ## Cron Expression Reference
 
-| Expression       | Meaning                         |
-| ---------------- | ------------------------------- |
-| `0 0 2 * * ?`    | Daily at 2:00 AM                |
-| `0 0 * * * ?`    | Every hour                      |
-| `0 0 14 * * ?`   | Daily at 2:00 PM                |
+| Expression | Meaning |
+|-----------|---------|
+| `0 0 2 * * ?` | Daily at 2:00 AM |
+| `0 0 * * * ?` | Every hour |
+| `0 0 14 * * ?` | Daily at 2:00 PM |
 | `0 0 0,12 * * ?` | Twice daily (midnight and noon) |
-| `0 30 * * * ?`   | Every hour at 30 minutes past   |
+| `0 30 * * * ?` | Every hour at 30 minutes past |
 
 Format: `Seconds Minutes Hours Day_of_Month Month Day_of_Week Year(optional)`
 
@@ -238,7 +234,7 @@ for (CronTrigger job : jobs) {
 
 ## Performance Impact
 
-- **Query Performance**: Indexed query on Status**c and ExpirationDate**c fields
+- **Query Performance**: Indexed query on Status__c and ExpirationDate__c fields
 - **DML Performance**: Bulk updates minimize database round trips
 - **Governor Limits**: Well within limits for typical datasets
 - **Execution Time**: Depends on number of expired invitations
@@ -267,7 +263,6 @@ Potential improvements for future consideration:
 If issues occur:
 
 1. **Abort Scheduled Job**:
-
    ```apex
    List<CronTrigger> jobs = [SELECT Id FROM CronTrigger WHERE CronJobDetail.Name LIKE 'Survey Invitation Expiration%'];
    for (CronTrigger job : jobs) { System.abortJob(job.Id); }
@@ -292,7 +287,6 @@ If issues occur:
 ## Support
 
 For issues or questions:
-
 - Check debug logs in Setup > Debug Logs
 - Review SurveyForceUtil logs
 - Contact Salesforce administrator
