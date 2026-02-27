@@ -316,6 +316,51 @@ export default class SurveyCreator extends NavigationMixin(LightningElement) {
 		this.showQuestionModal = true;
 	}
 
+	// Drag and drop handlers
+	draggedIndex = null;
+
+	handleDragStart(event) {
+		this.draggedIndex = parseInt(event.target.dataset.questionIndex, 10);
+		event.target.classList.add('dragging');
+		event.dataTransfer.effectAllowed = 'move';
+		event.dataTransfer.setData('text/html', event.target.innerHTML);
+	}
+
+	handleDragOver(event) {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = 'move';
+		const targetElement = event.currentTarget;
+		targetElement.classList.add('drag-over');
+	}
+
+	handleDrop(event) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		const targetElement = event.currentTarget;
+		targetElement.classList.remove('drag-over');
+
+		const dropIndex = parseInt(targetElement.dataset.questionIndex, 10);
+
+		if (this.draggedIndex !== null && this.draggedIndex !== dropIndex) {
+			const reorderedQuestions = [...this.questions];
+			const [draggedItem] = reorderedQuestions.splice(this.draggedIndex, 1);
+			reorderedQuestions.splice(dropIndex, 0, draggedItem);
+			this.questions = reorderedQuestions;
+		}
+
+		return false;
+	}
+
+	handleDragEnd(event) {
+		event.target.classList.remove('dragging');
+		const allItems = this.template.querySelectorAll('.question-item');
+		allItems.forEach((item) => {
+			item.classList.remove('drag-over');
+		});
+		this.draggedIndex = null;
+	}
+
 	handleEditQuestion(event) {
 		const index = parseInt(event.target.dataset.questionIndex, 10);
 		const question = this.questions[index];

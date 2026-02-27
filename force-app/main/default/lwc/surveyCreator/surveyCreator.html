@@ -294,7 +294,15 @@
 									<template lwc:if={hasQuestions}>
 										<ul class="slds-has-dividers_bottom-space questions-list">
 											<template for:each={questionsWithIndex} for:item="question">
-												<li key={question.id} class="slds-item question-item">
+												<li
+													key={question.id}
+													class="slds-item question-item"
+													draggable="true"
+													data-question-index={question.index}
+													ondragstart={handleDragStart}
+													ondragover={handleDragOver}
+													ondrop={handleDrop}
+													ondragend={handleDragEnd}>
 													<div class="slds-grid slds-grid_vertical-align-center slds-p-around_small">
 														<div class="slds-col question-drag-handle slds-m-right_small">
 															<lightning-icon icon-name="utility:drag_and_drop" size="x-small" alternative-text="Drag to reorder"></lightning-icon>
