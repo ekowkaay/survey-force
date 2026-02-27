@@ -3,6 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import getInvitationsForSurvey from '@salesforce/apex/SurveyInvitationController.getInvitationsForSurvey';
 import createBulkInvitations from '@salesforce/apex/SurveyInvitationController.createBulkInvitations';
+import deleteInvitation from '@salesforce/apex/SurveyInvitationController.deleteInvitation';
 
 const COLUMNS = [
 	{ label: 'Invitation #', fieldName: 'name', type: 'text', sortable: true },
@@ -22,7 +23,10 @@ const COLUMNS = [
 	{
 		type: 'action',
 		typeAttributes: {
-			rowActions: [{ label: 'Copy Link', name: 'copy' }]
+			rowActions: [
+				{ label: 'Copy Link', name: 'copy' },
+				{ label: 'Delete', name: 'delete' }
+			]
 		}
 	}
 ];
@@ -48,6 +52,12 @@ export default class SurveyInvitations extends LightningElement {
 	// Links modal
 	@track showLinksModal = false;
 	@track generatedLinks = [];
+
+	// Delete Confirmation Modal
+	@track showDeleteModal = false;
+	@track deleteInvitationId = null;
+	@track deleteInvitationName = '';
+	@track isDeleting = false;
 
 	/**
 	 * Returns the survey ID to use for operations.
@@ -110,6 +120,10 @@ export default class SurveyInvitations extends LightningElement {
 	 */
 	get generateButtonLabel() {
 		return this.isGenerating ? 'Generating...' : 'Generate';
+	}
+
+	get deleteButtonLabel() {
+		return this.isDeleting ? 'Deleting...' : 'Delete Invitation';
 	}
 
 	/**
@@ -317,7 +331,41 @@ export default class SurveyInvitations extends LightningElement {
 		if (action.name === 'copy') {
 			this.copyToClipboard(row.surveyUrl);
 			this.showToast('Success', 'Link copied to clipboard', 'success');
+		} else if (action.name === 'delete') {
+			this.deleteInvitationId = row.id;
+			this.deleteInvitationName = row.name;
+			this.showDeleteModal = true;
 		}
+	}
+
+	handleCloseDeleteModal() {
+		this.showDeleteModal = false;
+		this.deleteInvitationId = null;
+		this.deleteInvitationName = '';
+	}
+
+	handleConfirmDelete() {
+		if (!this.deleteInvitationId) {
+			return;
+		}
+
+		this.isDeleting = true;
+		deleteInvitation({ invitationId: this.deleteInvitationId })
+			.then((result) => {
+				if (result) {
+					this.showToast('Success', 'Invitation deleted successfully', 'success');
+					this.showDeleteModal = false;
+					// Refresh the invitations list
+					return refreshApex(this.wiredInvitationsResult);
+				} else {
+					this.showToast('Error', 'Unable to delete invitation. You may lack permissions or the invitation may have already been completed.', 'error');
+				}
+				this.isDeleting = false;
+			})
+			.catch((error) => {
+				this.showToast('Error', `Unable to delete invitation. Details: ${error.body?.message || 'Unknown error'}`, 'error');
+				this.isDeleting = false;
+			});
 	}
 
 	showToast(title, message, variant) {

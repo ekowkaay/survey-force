@@ -461,6 +461,38 @@ public with sharing class SurveyInvitationController {
 	}
 
 	/**
+	 * @description Delete a survey invitation
+	 * @param invitationId The ID of the invitation to delete
+	 * @return Boolean indicating success
+	 */
+	@AuraEnabled
+	public static Boolean deleteInvitation(Id invitationId) {
+		try {
+			if (invitationId == null) {
+				return false;
+			}
+
+			// Check if invitation exists and user has access
+			List<SurveyInvitation__c> invitations = [SELECT Id, Status__c FROM SurveyInvitation__c WHERE Id = :invitationId WITH USER_MODE LIMIT 1];
+
+			if (invitations.isEmpty()) {
+				return false;
+			}
+
+			// Check delete permissions
+			SurveyForceUtil.accessController.assertAuthorizedToDelete(Schema.SurveyInvitation__c.getSObjectType());
+
+			// Delete the invitation
+			Database.delete(invitationId, AccessLevel.USER_MODE);
+
+			return true;
+		} catch (Exception e) {
+			SurveyForceUtil.log('SurveyInvitationController:deleteInvitation():' + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
 	 * @description Build the survey URL with the invitation token
 	 * @param token The invitation token
 	 * @return String The complete survey URL

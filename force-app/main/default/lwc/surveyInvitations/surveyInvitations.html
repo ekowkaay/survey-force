@@ -221,4 +221,35 @@
 		</section>
 		<div class="slds-backdrop slds-backdrop_open"></div>
 	</template>
+
+	<!-- Delete Invitation Confirmation Modal -->
+	<template lwc:if={showDeleteModal}>
+		<section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open" aria-modal="true">
+			<div class="slds-modal__container">
+				<header class="slds-modal__header slds-theme_error">
+					<lightning-button-icon
+						icon-name="utility:close"
+						alternative-text="Close"
+						onclick={handleCloseDeleteModal}
+						class="slds-modal__close"
+						variant="bare-inverse"></lightning-button-icon>
+					<h2 class="slds-text-heading_medium">Delete Survey Invitation</h2>
+				</header>
+				<div class="slds-modal__content slds-p-around_medium">
+					<div class="slds-text-align_center slds-m-bottom_medium">
+						<lightning-icon icon-name="utility:warning" size="large" variant="error" alternative-text="Warning"></lightning-icon>
+					</div>
+					<p class="slds-text-body_regular slds-m-bottom_small">Are you sure you want to delete invitation <strong>{deleteInvitationName}</strong>?</p>
+					<p class="slds-text-body_small slds-text-color_weak">
+						This action cannot be undone. The invitation link will no longer be valid, and participants will not be able to access the survey using this link.
+					</p>
+				</div>
+				<footer class="slds-modal__footer">
+					<lightning-button label="Cancel" onclick={handleCloseDeleteModal}></lightning-button>
+					<lightning-button variant="destructive" label={deleteButtonLabel} onclick={handleConfirmDelete} disabled={isDeleting}></lightning-button>
+				</footer>
+			</div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+	</template>
 </template>
