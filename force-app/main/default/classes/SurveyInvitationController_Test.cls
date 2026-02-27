@@ -350,4 +350,57 @@ private class SurveyInvitationController_Test {
 			System.assert(result.message.contains('expired'), 'Message should indicate survey expired');
 		}
 	}
+
+	@IsTest
+	private static void testDeleteInvitation() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create invitation
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test User', null, null, null, null);
+			System.assertEquals(true, createResult.success, 'Invitation should be created successfully');
+
+			Test.startTest();
+			Boolean deleteResult = SurveyInvitationController.deleteInvitation(createResult.invitationId);
+			Test.stopTest();
+
+			System.assertEquals(true, deleteResult, 'Delete should succeed');
+
+			// Verify invitation is deleted
+			List<SurveyInvitation__c> invitations = [SELECT Id FROM SurveyInvitation__c WHERE Id = :createResult.invitationId];
+			System.assertEquals(0, invitations.size(), 'Invitation should be deleted');
+		}
+	}
+
+	@IsTest
+	private static void testDeleteInvitationWithNullId() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			Test.startTest();
+			Boolean result = SurveyInvitationController.deleteInvitation(null);
+			Test.stopTest();
+
+			System.assertEquals(false, result, 'Should return false for null ID');
+		}
+	}
+
+	@IsTest
+	private static void testDeleteInvitationWithInvalidId() {
+		User u = [SELECT Id FROM User WHERE Username LIKE '%@testorg.com' LIMIT 1];
+		System.runAs(u) {
+			SurveyTestingUtil tu = new SurveyTestingUtil();
+
+			// Create an invitation, then delete it to get a non-existent ID
+			SurveyInvitationController.InvitationResult createResult = SurveyInvitationController.createInvitation(tu.surveyId, 'test@example.com', 'Test User', null, null, null, null);
+			Id invitationId = createResult.invitationId;
+			Database.delete(invitationId, AccessLevel.USER_MODE);
+
+			Test.startTest();
+			Boolean result = SurveyInvitationController.deleteInvitation(invitationId);
+			Test.stopTest();
+
+			System.assertEquals(false, result, 'Should return false for non-existent invitation');
+		}
+	}
 }
